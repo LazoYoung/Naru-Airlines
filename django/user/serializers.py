@@ -19,6 +19,7 @@ class MemberSerializer(HyperlinkedModelSerializer):
         fields = ['url', 'handle', 'display_name', 'email']
 
 
+# todo let's not depend on dj_rest_auth
 class MemberRegisterSerializer(RegisterSerializer):
     def validate_email(self, email):
         email = get_adapter().clean_email(email)

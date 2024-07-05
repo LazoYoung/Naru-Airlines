@@ -46,12 +46,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'rest_framework',
-    'rest_framework.authtoken',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'dj_rest_auth',
-    'dj_rest_auth.registration',
+    # 'rest_framework.authtoken',
+    # 'allauth',
+    # 'allauth.account',
+    # 'allauth.socialaccount',
+    # 'dj_rest_auth',
+    # 'dj_rest_auth.registration',
 ]
 
 MIDDLEWARE = [
@@ -62,10 +62,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
+    # 'allauth.account.middleware.AccountMiddleware',
 ]
 
-ROOT_URLCONF = 'naru_api.urls'
+ROOT_URLCONF = '_naru.urls'
 
 TEMPLATES = [
     {
@@ -83,7 +83,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'naru_api.wsgi.application'
+WSGI_APPLICATION = '_naru.wsgi.application'
 
 
 # Database
@@ -144,12 +144,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # dj-rest-auth configurations
 
-SITE_ID = 1
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-REST_AUTH = {
-    'REGISTER_SERIALIZER': 'user.serializers.MemberRegisterSerializer',
-    'OLD_PASSWORD_FIELD_ENABLED': True,
-}
+# SITE_ID = 1
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# REST_AUTH = {
+#     'REGISTER_SERIALIZER': 'user.serializers.MemberRegisterSerializer',
+#     'OLD_PASSWORD_FIELD_ENABLED': True,
+# }

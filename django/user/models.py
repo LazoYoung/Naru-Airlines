@@ -1,3 +1,4 @@
+from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
@@ -21,7 +22,8 @@ class MemberManager(BaseUserManager):
 
 # noinspection PyMethodMayBeStatic
 class Member(AbstractBaseUser):
-    handle = models.CharField(max_length=32, unique=True)
+    handleValidator = ASCIIUsernameValidator()
+    handle = models.CharField(max_length=32, unique=True, validators=[handleValidator])
     display_name = models.CharField(max_length=32)
     email = models.EmailField(max_length=128, unique=True)
     is_active = models.BooleanField(default=True)
@@ -29,9 +31,9 @@ class Member(AbstractBaseUser):
 
     objects = MemberManager()
 
-    USERNAME_FIELD = 'handle'
+    USERNAME_FIELD = 'email'
     EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['display_name', 'email']
+    REQUIRED_FIELDS = ['display_name']
 
     def __str__(self):
         return self.handle

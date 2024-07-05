@@ -25,19 +25,33 @@ SECRET_KEY = 'django-insecure-g%&=o!3185=xl&$k3ra+2k8xqq&s_u&q932ow8(g$pm5h-ox@q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# FOR DEVELOPMENT: mails are printed to console
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # internal apps
+    'user.apps.UserConfig',
+
+    # 3rd party apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'user.apps.UserConfig',
+    'django.contrib.sites',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'naru_api.urls'
@@ -125,3 +140,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# dj-rest-auth configurations
+
+SITE_ID = 1
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+REST_AUTH = {
+    'REGISTER_SERIALIZER': 'user.serializers.MemberRegisterSerializer',
+    'OLD_PASSWORD_FIELD_ENABLED': True,
+}

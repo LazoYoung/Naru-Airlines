@@ -34,8 +34,8 @@ class LoginSerializer(serializers.Serializer):
         attrs['user'] = user
         return attrs
 
-    def get_user(self, **credentials):
-        return authenticate(self.context['request'], **credentials)
+    def get_user(self, email, password):
+        return authenticate(email=email, password=password)
 
 
 class RegisterSerializer(serializers.Serializer):

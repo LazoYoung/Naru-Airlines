@@ -1,14 +1,12 @@
-from django.contrib.auth import login as django_login, logout as django_logout, get_user_model
+from django.contrib.auth import login as django_login, logout as django_logout
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 from django.utils import timezone
-from django.utils.decorators import method_decorator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
-from django.views.decorators.debug import sensitive_post_parameters
-from django.template.loader import render_to_string
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
@@ -19,27 +17,10 @@ from .serializers import LoginSerializer, RegisterSerializer
 from .tokens import account_activation_token
 
 
-# this view raises ValueError: The view auth.views.view didn't return
-# an HttpResponse object. It returned None instead.
-# class LoginView(GenericAPIView):
-#     serializer_class = LoginSerializer
-#     # todo: apply throttle
-#
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data['user']
-#         login(request, user)
-#         return Response(status=status.HTTP_204_NO_CONTENT)
-#
-#     @sensitive_post_params
-#     def dispatch(self, request, *args, **kwargs):
-#         super().dispatch(request, *args, **kwargs)
-
-
+# todo: apply throttle
 @api_view(['POST'])
 def login(request: Request):
-    serializer = LoginSerializer(data=request.data, context={'request': request})
+    serializer = LoginSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data['user']
     django_login(request, user)

@@ -1,12 +1,12 @@
 # REST API
 ## Authentication
-| URL                              | Name                          | Method | Form                                       |
-|----------------------------------|-------------------------------|--------|--------------------------------------------|
-| `auth/login`                     | `rest_login`                  | POST   | email, password                            |
-| `auth/logout`                    | `rest_logout`                 | POST   |                                            |
-| `auth/password/reset`            | `rest_password_reset`         | POST   | email                                      |
-| `auth/password/reset/confirm`    | `rest_password_reset/confirm` | POST   | uid, token, new_password1, new_password2   |
-| `auth/password/change`           | `rest_password_change`        | POST   | new_password1, new_password2, old_password |
-| `auth/registration`              | `rest_register`               | POST   | email, password1, password2                |
-| `auth/registration/verify-email` | `rest_verify_email`           | POST   | key                                        |
-| `auth/registration/resend-email` | `rest_resend_email`           | POST   | email                                      |
+| URL                           | Name                     | Method | Form                       |
+|-------------------------------|--------------------------|--------|----------------------------|
+| `auth/login`                  | `login`                  | POST   | email, password            |
+| `auth/logout`                 | `logout`                 | POST   |                            |
+| `auth/reset-password`         | `reset_password`         | POST   | email                      |
+| `auth/reset-password/confirm` | `reset_password_confirm` | POST   | uid, token, new_password   |
+| `auth/change-password`        | `change_password`        | POST   | old_password, new_password |
+| `auth/register`               | `register`               | POST   | email, password            |
+| `auth/register/send-email`    | `send_register_email`    | POST   | email                      |
+| `auth/register/verify-email`  | `verify_register_email`  | POST   | key                        |

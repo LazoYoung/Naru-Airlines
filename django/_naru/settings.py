@@ -35,7 +35,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     # internal apps
-    'user.apps.UserConfig',
+    'member.apps.MemberConfig',
 
     # 3rd party apps
     'django.contrib.admin',
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'rest_framework',
+    'six',
     # 'rest_framework.authtoken',
     # 'allauth',
     # 'allauth.account',
@@ -70,7 +71,7 @@ ROOT_URLCONF = '_naru.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -115,8 +116,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'member.Member'
 
-AUTH_USER_MODEL = 'user.Member'
+AUTHENTICATION_BACKENDS = [
+    'member.backends.MemberBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+REST_FRAMEWORK = {
+    'NON_FIELD_ERRORS_KEY': 'errors'
+}
 
 
 # Internationalization

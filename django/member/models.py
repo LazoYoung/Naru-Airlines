@@ -1,5 +1,6 @@
-from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.db import models
+from django.utils import timezone
+from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
@@ -27,11 +28,12 @@ class Member(AbstractBaseUser):
     display_name = models.CharField(max_length=32)
     email = models.EmailField(max_length=128, unique=True)
     is_active = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
     objects = MemberManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'handle'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['display_name']
 
@@ -47,3 +49,17 @@ class Member(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+
+
+class RegisterEmailToken(models.Model):
+    member = models.ForeignKey(Member, on_delete=models.CASCADE)
+    token = models.CharField(max_length=64)
+    valid_until = models.DateTimeField()
+
+    objects = models.Manager()
+
+    def __str__(self):
+        return self.token
+
+    def is_expired(self) -> bool:
+        return timezone.now() >= self.valid_until

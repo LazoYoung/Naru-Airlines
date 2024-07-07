@@ -13,11 +13,11 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import Member, RegisterEmailToken
-from .serializers import LoginSerializer, RegisterSerializer
+from .serializers import LoginSerializer, RegisterSerializer, PasswordChangeSerializer
 from .tokens import account_activation_token
+from .utils import get_random_password
 
 
-# todo: apply throttle
 @api_view(['POST'])
 def login(request: Request):
     serializer = LoginSerializer(data=request.data)
@@ -118,5 +118,36 @@ def verify_register_email(uid: str, token: str):
     user.save()
     return Response(status=status.HTTP_200_OK)
 
-# todo: create password change view
-# todo: create password reset view
+
+@api_view(['POST'])
+def change_password(request: Request):
+    serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+    serializer.is_valid(raise_exception=True)
+    serializer.save(request)
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def reset_password(request: Request):
+    mail_address = request.data['email']
+    try:
+        member = Member.objects.get(email__iexact=mail_address)
+        new_password = get_random_password()
+        if member.is_active and member.is_verified:
+            content = render_to_string(
+                'auth/password_reset.html',
+                context={
+                    'name': member.display_name,
+                    'new_password': new_password,
+                }
+            )
+            email = EmailMessage(
+                subject="[Naru Airlines] Your password reset",
+                body=content,
+                to=[mail_address],
+            )
+            email.content_subtype = 'html'
+            email.send()
+    except ObjectDoesNotExist:
+        pass
+    return Response(status=status.HTTP_200_OK)

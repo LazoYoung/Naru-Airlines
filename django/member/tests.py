@@ -1,5 +1,4 @@
 import random
-import string
 
 from django.test import TestCase
 from django.urls import reverse
@@ -7,12 +6,43 @@ from rest_framework import status
 from rest_framework.settings import api_settings
 
 from .models import Member
+from .utils import get_random_email, get_random_password
+
+
+class RegisterTest(TestCase):
+    def test_register_with_incomplete_form(self):
+        response1 = post_register(
+            self.client, display_name='', email=get_random_email(), password=get_random_password()
+        )
+        response2 = post_register(
+            self.client, email='', password=get_random_password()
+        )
+        response3 = post_register(
+            self.client, email=get_random_email(), password=''
+        )
+        self.assertTrue(status.is_client_error(response1.status_code))
+        self.assertTrue(status.is_client_error(response2.status_code))
+        self.assertTrue(status.is_client_error(response3.status_code))
+        self.assertTrue('display_name' in response1.json())
+        self.assertTrue('email' in response2.json())
+        self.assertTrue('password' in response3.json())
+
+    def test_register_with_duplicate_email(self):
+        duplicate_email = get_random_email()
+        response1 = post_register(self.client, email=duplicate_email, password=get_random_password())
+        response2 = post_register(self.client, email=duplicate_email, password=get_random_password())
+        self.assertTrue(status.is_success(response1.status_code))
+        self.assertTrue(status.is_client_error(response2.status_code))
+
+    def test_register_with_complete_form(self):
+        response = post_register(self.client, email=get_random_email(), password=get_random_password())
+        self.assertTrue(status.is_success(response.status_code))
 
 
 class LoginTest(TestCase):
     def test_login_with_incomplete_form(self):
         payload1 = {}
-        payload2 = {'password': get_random_string(8)}
+        payload2 = {'password': get_random_password()}
         payload3 = {'email': get_random_email()}
         response1 = self.client.post(reverse('login'), data=payload1)
         response2 = self.client.post(reverse('login'), data=payload2)
@@ -27,11 +57,11 @@ class LoginTest(TestCase):
     def test_login_with_invalid_credentials(self):
         correct_email = get_random_email()
         correct_pwd = get_random_password()
-        reg_response = post_registration(self.client, email=correct_email, password=correct_pwd)
+        reg_response = post_register(self.client, email=correct_email, password=correct_pwd)
         self.assertTrue(status.is_success(reg_response.status_code))
 
         invalid_email_cred = {'email': get_random_email(), 'password': correct_pwd}
-        invalid_password_cred = {'email': correct_email, 'password': get_random_string(8)}
+        invalid_password_cred = {'email': correct_email, 'password': get_random_password()}
         response1 = self.client.post(reverse('login'), data=invalid_email_cred)
         response2 = self.client.post(reverse('login'), data=invalid_password_cred)
         self.assertTrue(api_settings.NON_FIELD_ERRORS_KEY in response1.json())
@@ -40,7 +70,7 @@ class LoginTest(TestCase):
     def test_login_with_valid_credentials(self):
         email = get_random_email()
         pwd = get_random_password()
-        register = post_registration(self.client, email=email, password=pwd)
+        register = post_register(self.client, email=email, password=pwd)
         self.assertTrue(status.is_success(register.status_code))
 
         login = self.client.post(reverse('login'), data={'email': email, 'password': pwd})
@@ -54,115 +84,64 @@ class LogoutTest(TestCase):
         self.assertTrue(status.is_success(response.status_code))
 
 
-# class PasswordChangeTest(TestCase):
-#     def test_password_change_with_old_password_mismatch(self):
-#         register = post_registration(self.client, email=get_random_email(), password=get_random_string(8))
-#         self.assertTrue(status.is_success(register.status_code))
-#
-#         new_password = get_random_string(8)
-#         change = self.client.post(reverse('rest_password_change'), data={
-#             'new_password1': new_password,
-#             'new_password2': new_password,
-#             'old_password': get_random_string(8)
-#         })
-#         self.assertTrue(status.is_client_error(change.status_code))
-#
-#     def test_password_change_with_new_password_mismatch(self):
-#         old_password = get_random_string(8)
-#         register = post_registration(self.client, email=get_random_email(), password=old_password)
-#         self.assertTrue(status.is_success(register.status_code))
-#
-#         change = self.client.post(reverse('rest_password_change'), data={
-#             'new_password1': get_random_string(8),
-#             'new_password2': get_random_string(8),
-#             'old_password': old_password
-#         })
-#         self.assertTrue(status.is_client_error(change.status_code))
-#
-#     def test_password_change(self):
-#         old_password = get_random_string(8)
-#         register = post_registration(self.client, email=get_random_email(), password=old_password)
-#         self.assertTrue(status.is_success(register.status_code))
-#
-#         new_password = get_random_string(8)
-#         change = self.client.post(reverse('rest_password_change'), data={
-#             'new_password1': new_password,
-#             'new_password2': new_password,
-#             'old_password': old_password
-#         })
-#         self.assertTrue(status.is_success(change.status_code))
-#
-#
-# class PasswordResetTest(TestCase):
-#     def test_password_reset(self):
-#         email = get_random_email()
-#         password = get_random_string(8)
-#         register = post_registration(self.client, email=email, password=password)
-#         self.assertTrue(status.is_success(register.status_code))
-#
-#         self.client.login(email=email, password=password)
-#         reset = self.client.post(reverse('rest_password_reset'), data={
-#             'email': email
-#         })
-#         self.assertTrue(status.is_success(reset.status_code))
-#
-#
-# class RegisterTest(TestCase):
-#     def test_register_with_handle(self):
-#         email = get_random_email()
-#         pwd = get_random_string(8)
-#         response = self.client.post(reverse('rest_register'), data={
-#             'email': email,
-#             'username': get_random_string(8),
-#             'password1': pwd,
-#             'password2': pwd,
-#         })
-#         self.assertTrue(status.is_client_error(response.status_code))
-#         self.assertTrue('username' in response.json())
-#
-#     def test_register_with_incomplete_form(self):
-#         response1 = post_registration(self.client, email='', password=get_random_string(8))
-#         response2 = post_registration(self.client, email=get_random_email(), password='')
-#         self.assertTrue(status.is_client_error(response1.status_code))
-#         self.assertTrue(status.is_client_error(response2.status_code))
-#         self.assertTrue('email' in response1.json())
-#         self.assertTrue('password1' in response2.json())
-#
-#     def test_register_with_duplicate_email(self):
-#         duplicate_email = get_random_email()
-#         response1 = post_registration(self.client, email=duplicate_email, password=get_random_string(8))
-#         response2 = post_registration(self.client, email=duplicate_email, password=get_random_string(8))
-#         self.assertTrue(status.is_success(response1.status_code))
-#         self.assertTrue(status.is_client_error(response2.status_code))
-#
-#     def test_register_with_complete_form(self):
-#         response = post_registration(self.client, email=get_random_email(), password=get_random_string(8))
-#         self.assertTrue(status.is_success(response.status_code))
-#
-#
-def get_random_string(length, lowercase=False):
-    seq = string.ascii_lowercase + string.digits if lowercase else string.ascii_letters + string.digits
-    return ''.join(random.choice(seq) for _ in range(length))
+class PasswordChangeTest(TestCase):
+    def test_password_change_with_password_mismatch(self):
+        old_password = get_random_password()
+        register_and_login(self, password=old_password)
+
+        new_password = get_random_password()
+        change = self.client.post(reverse('change_password'), data={
+            'old_password': get_random_password(),
+            'new_password': new_password,
+        })
+        self.assertTrue(status.is_client_error(change.status_code))
+        self.assertTrue('old_password' in change.json())
+
+    def test_password_change_with_short_password(self):
+        old_password = get_random_password()
+        register_and_login(self, password=old_password)
+
+        change = self.client.post(reverse('change_password'), data={
+            'old_password': old_password,
+            'new_password': get_random_password(length=5),
+        })
+        self.assertTrue(status.is_client_error(change.status_code))
+        self.assertTrue('new_password' in change.json())
+
+    def test_password_change(self):
+        old_password = get_random_password()
+        register_and_login(self, password=old_password)
+
+        change = self.client.post(reverse('change_password'), data={
+            'old_password': old_password,
+            'new_password': get_random_password(),
+        })
+        self.assertTrue(status.is_success(change.status_code))
 
 
-def get_random_password():
-    pw = get_random_string(8) + str(random.randint(1, 100))
-    return pw
+class PasswordResetTest(TestCase):
+    def test_password_reset(self):
+        email = get_random_email()
+        password = get_random_password()
+        register = post_register(self.client, email=email, password=password)
+        self.assertTrue(status.is_success(register.status_code))
+
+        self.client.login(email=email, password=password)
+        reset = self.client.post(reverse('reset_password'), data={
+            'email': email
+        })
+        self.assertTrue(status.is_success(reset.status_code))
 
 
-def get_random_email():
-    return get_random_string(12, lowercase=True) + "@mailtest.org"
-
-
-def post_registration(client, display_name=None, email=None, password=None, verify_email=True):
+def post_register(client, display_name=None, email=None, password=None, verify_email=True):
     if display_name is None:
-        display_name = f"Dummy user {random.randint(1, 100)}"
+        display_name = f"Dummy user #{random.randint(1, 100)}"
 
     if email is None:
         email = get_random_email()
 
     if password is None:
-        password = get_random_string(10)
+        password = get_random_password()
 
     form = {'display_name': display_name, 'email': email, 'password': password}
     response = client.post(reverse('register'), data=form)
@@ -173,3 +152,24 @@ def post_registration(client, display_name=None, email=None, password=None, veri
         member.save()
 
     return response
+
+
+def register_and_login(test_case: TestCase, display_name=None, email=None, password=None):
+    if display_name is None:
+        display_name = f"Dummy user #{random.randint(1, 100)}"
+
+    if email is None:
+        email = get_random_email()
+
+    if password is None:
+        password = get_random_password()
+
+    register = post_register(
+        test_case.client, display_name=display_name, email=email, password=password, verify_email=True
+    )
+    login = test_case.client.post(reverse('login'), data={
+        'email': email,
+        'password': password,
+    })
+    test_case.assertTrue(status.is_success(register.status_code))
+    test_case.assertTrue(status.is_success(login.status_code))

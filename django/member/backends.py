@@ -21,3 +21,10 @@ class MemberBackend(BaseBackend):
             return None
 
         return member
+
+    def get_user(self, user_id):
+        try:
+            member = Member.objects.get(pk=user_id)
+            return member if member.is_active else None
+        except ObjectDoesNotExist:
+            return None

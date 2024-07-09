@@ -29,11 +29,6 @@ def login(request: Request):
 
 @api_view(['POST'])
 def logout(request: Request):
-    # user = request.user
-    # try:
-    #     user.auth_token.delete()
-    # except (AttributeError, ObjectDoesNotExist):
-    #     pass
     django_logout(request)
     response = Response(
         data={'detail': _("Successfully logged out.")},

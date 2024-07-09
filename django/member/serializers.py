@@ -46,41 +46,34 @@ class LoginSerializer(serializers.Serializer):
         return authenticate(email=email, password=password)
 
 
-class RegisterSerializer(serializers.Serializer):
-    display_name = serializers.CharField(max_length=32)
-    email = serializers.EmailField(max_length=32)
-    password = serializers.CharField(write_only=True)
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Member
+        fields = ['display_name', 'email', 'password']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def create(self, validated_data):
+        user = Member.objects.create_user(
+            handle=self.get_unique_handle(),
+            display_name=validated_data['display_name'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+        )
+        return user
 
     @staticmethod
     def validate_display_name(display_name):
-        if len(display_name) < 2:
-            raise ValidationError("Name is too short.")
-        if len(display_name) > 32:
-            raise ValidationError("Name is too long.")
-        return display_name
+        return validate_display_name(display_name)
 
     @staticmethod
     def validate_email(email):
-        email = email.lower()
-        if not regex_email.match(email):
-            raise ValidationError("E-mail is invalid.")
-        if Member.objects.filter(email=email).exists():
-            raise ValidationError("E-mail is already in use.")
-        return email
+        return validate_email(email)
 
     @staticmethod
     def validate_password(password):
-        validate_password(password)
-        return password
-
-    def save(self, request):
-        user = Member.objects.create_user(
-            handle=self.get_unique_handle(),
-            display_name=self.validated_data['display_name'],
-            email=self.validated_data['email'],
-            password=self.validated_data['password'],
-        )
-        return user
+        return validate_password(password)
 
     def get_unique_handle(self):
         handle = "user-" + ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(10))
@@ -89,15 +82,28 @@ class RegisterSerializer(serializers.Serializer):
         return handle
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Member
+        fields = ['display_name', 'email', 'handle', 'is_verified']
+        extra_kwargs = {
+            'handle': {'read_only': True},
+            'is_verified': {'read_only': True},
+        }
+
+    def update(self, instance, validated_data):
+        instance.display_name = validated_data.get('display_name', instance.display_name)
+        instance.email = validated_data.get('email', instance.email)
+        instance.save()
+        return instance
+
+
 class PasswordChangeSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
 
     def validate_old_password(self, old_password):
         request: Request = self.context['request']
-
-        if request.user is AnonymousUser:
-            raise ValidationError("You must log in first.")
 
         if not request.user.check_password(old_password):
             raise ValidationError("Incorrect password.")
@@ -114,6 +120,23 @@ class PasswordChangeSerializer(serializers.Serializer):
         member.set_password(self.validated_data['new_password'])
 
 
+def validate_display_name(display_name):
+    if len(display_name) < 2:
+        raise ValidationError("Name is too short.")
+    if len(display_name) > 32:
+        raise ValidationError("Name is too long.")
+    return display_name
+
+
+def validate_email(email):
+    email = email.lower()
+    if not regex_email.match(email):
+        raise ValidationError("E-mail is invalid.")
+    if Member.objects.filter(email=email).exists():
+        raise ValidationError("E-mail is already in use.")
+    return email
+
+
 def validate_password(password):
     if len(password) < 6:
         raise ValidationError("Password is too short.")
@@ -125,3 +148,4 @@ def validate_password(password):
         raise ValidationError("At least 1 alphabet is required.")
     if not regex_password_special.search(password):
         raise ValidationError("At least 1 digit or special character is required.")
+    return password

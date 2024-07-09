@@ -32,11 +32,13 @@ onMounted(_ => {
 </script>
 
 <template>
-    <form>
-        <input type="email" v-model="email" placeholder="E-mail" />
-        <input type="password" v-model="password" placeholder="Password" />
-        <button ref="button">Login</button>
-    </form>
+    <main>
+        <form>
+            <input type="email" v-model="email" placeholder="E-mail" />
+            <input type="password" v-model="password" placeholder="Password" />
+            <button ref="button">Login</button>
+        </form>
+    </main>
 </template>
 
 <style scoped>

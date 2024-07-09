@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.settings import api_settings
 
 from .models import Member
-from .utils import get_random_email, get_random_password
+from .utils import get_random_email, get_random_password, get_random_string
 
 
 class RegisterTest(TestCase):
@@ -131,6 +131,38 @@ class PasswordResetTest(TestCase):
             'email': email
         })
         self.assertTrue(status.is_success(reset.status_code))
+
+
+class ProfileTest(TestCase):
+    def test_unauthorized(self):
+        get = self.client.get(reverse('profile'))
+        put = self.client.put(reverse('profile'), data={})
+        self.assertEqual(get.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(put.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_profile_get(self):
+        register_and_login(self)
+        get = self.client.get(reverse('profile'))
+        data = get.json()
+        self.assertEqual(get.status_code, status.HTTP_200_OK)
+        self.assertTrue('handle' in data)
+        self.assertTrue('display_name' in data)
+        self.assertTrue('email' in data)
+        self.assertTrue('is_verified' in data)
+
+    def test_profile_put(self):
+        register_and_login(self)
+        display_name = "user-" + get_random_string(length=8)
+        email = get_random_email()
+        put = self.client.put(
+            path=reverse('profile'),
+            data={
+                'display_name': display_name,
+                'email': email,
+            },
+            content_type='application/json'
+        )
+        self.assertTrue(status.is_success(put.status_code))
 
 
 def post_register(client, display_name=None, email=None, password=None, verify_email=True):

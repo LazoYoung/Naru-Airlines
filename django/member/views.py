@@ -13,7 +13,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from .models import Member, RegisterEmailToken
-from .serializers import LoginSerializer, RegisterSerializer, PasswordChangeSerializer
+from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer, PasswordChangeSerializer
 from .tokens import account_activation_token
 from .utils import get_random_password
 
@@ -41,8 +41,22 @@ def logout(request: Request):
 def register(request: Request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    serializer.save(request)
+    serializer.save()
     return Response(status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'PUT'])
+def profile(request: Request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    if request.method == 'GET':
+        serializer = ProfileSerializer(instance=request.user)
+        return Response(serializer.data)
+    elif request.method == 'PUT':
+        serializer = ProfileSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -116,6 +130,8 @@ def verify_register_email(uid: str, token: str):
 
 @api_view(['POST'])
 def change_password(request: Request):
+    if not request.user.is_authenticated:
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
     serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
     serializer.is_valid(raise_exception=True)
     serializer.save(request)

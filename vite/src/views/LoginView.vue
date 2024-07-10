@@ -35,7 +35,7 @@ function onSubmit() {
                 ></TextInput>
                 <InputError :message="form.errors['password']"></InputError>
             </div>
-            <button type="submit">Login</button>
+            <button filled type="submit" :disabled="form.processing.value">Login</button>
         </form>
     </AuthLayout>
 </template>

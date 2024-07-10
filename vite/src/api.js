@@ -35,9 +35,7 @@ export function getGravatarHash(email) {
 }
 
 export class Form {
-    "use strict"
-
-    processing = false;
+    processing = ref(false);
     errors = {};
     _inputs = [];
 
@@ -57,8 +55,6 @@ export class Form {
             this.errors[input] = ref('');
             this[input] = _data[input];
         }
-
-        this.processing = false;
     }
 
     data() {
@@ -68,6 +64,12 @@ export class Form {
             data[input] = this[input];
         }
         return data;
+    }
+
+    clearErrors() {
+        for (const input of this._inputs) {
+            this.errors[input].value = '';
+        }
     }
 
     setError(input, error) {
@@ -86,9 +88,11 @@ export class Form {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(this.data()),
         };
+        this.processing.value = true;
 
         fetch(url, options).then(r => this._process(r))
-        console.log(this.data());
+        this.clearErrors();
+        // console.log(this.data());
     };
 
     post(url) {
@@ -110,16 +114,28 @@ export class Form {
     _process(response) {
         console.assert(response);
 
-        if (!response.ok) {
-            console.error(response);
-            response.json().then(json => this._processError(json));
+        if (response.ok) {
+            this._complete();
+            return;
         }
+
+        // console.error(response);
+        response.json().then(json => {
+            this._processError(json);
+            this._complete();
+        });
     }
 
     _processError(json) {
         for (const input in json) {
             this.setError(input, json[input][0]);
         }
+    }
+
+    _complete() {
+        setTimeout(_ => {
+            this.processing.value = false;
+        }, 1000);
     }
 }
 

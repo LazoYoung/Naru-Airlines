@@ -1,44 +1,43 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import AuthLayout from "@/components/layout/AuthLayout.vue";
+import TextInput from "@/components/TextInput.vue";
+import {useForm} from "@/api.js";
+import InputError from "@/components/InputError.vue";
 
-const email = ref();
-const password = ref();
-const button = ref();
+const form = useForm(['email', 'password']);
 
-async function onClick(event) {
-    event.preventDefault();
-
-    let response = await fetch("http://localhost:8000/auth/login/", {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            'email': email.value,
-            'password': password.value,
-        })
-    });
-
-    if (response.ok) {
-        alert("Login success");
-    } else {
-        alert("Login failed");
-    }
+function onSubmit() {
+    form.post("/api/auth/login/");
+    setTimeout(() => {
+        console.log(form);
+    }, 1000);
 }
-
-onMounted(_ => {
-    button.value.addEventListener('click', onClick);
-});
 </script>
 
 <template>
-    <main>
-        <form>
-            <input type="email" v-model="email" placeholder="E-mail" />
-            <input type="password" v-model="password" placeholder="Password" />
-            <button ref="button">Login</button>
+    <AuthLayout>
+        <form @submit.prevent="onSubmit">
+            <div>
+                <TextInput
+                        type="email"
+                        v-model="form['email']"
+                        hint="E-mail"
+                        label="inner"
+                ></TextInput>
+                <InputError :message="form.errors['email']"></InputError>
+            </div>
+            <div>
+                <TextInput
+                        type="password"
+                        v-model="form['password']"
+                        hint="Password"
+                        label="inner"
+                ></TextInput>
+                <InputError :message="form.errors['password']"></InputError>
+            </div>
+            <button type="submit">Login</button>
         </form>
-    </main>
+    </AuthLayout>
 </template>
 
 <style scoped>

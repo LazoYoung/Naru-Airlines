@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.auth import login as django_login, logout as django_logout
+from django.contrib.sites.models import Site
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage
@@ -104,8 +106,8 @@ def send_register_email(request: Request):
     return Response(status=status.HTTP_200_OK)
 
 
-@api_view(['POST'])
-def verify_register_email(uid: str, token: str):
+@api_view(['GET'])
+def verify_register_email(_: Request, uid: str, token: str):
     pk = urlsafe_base64_decode(uid)
     try:
         user: Member = Member.objects.get(pk=pk)
@@ -125,7 +127,14 @@ def verify_register_email(uid: str, token: str):
 
     user.is_verified = True
     user.save()
-    return Response(status=status.HTTP_200_OK)
+
+    scheme = 'https' if settings.HTTPS else 'http'
+    location = f'{scheme}://{Site.objects.get_current().domain}/login/'
+
+    return Response(
+        status=status.HTTP_301_MOVED_PERMANENTLY,
+        headers={'Location': location}
+    )
 
 
 @api_view(['POST'])

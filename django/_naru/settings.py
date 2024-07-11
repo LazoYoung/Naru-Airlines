@@ -15,7 +15,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -27,6 +26,8 @@ DEBUG = True
 
 # FOR DEVELOPMENT: mails are printed to console
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+HTTPS = False
 
 ALLOWED_HOSTS = []
 
@@ -70,7 +71,7 @@ ROOT_URLCONF = '_naru.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -84,6 +85,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = '_naru.wsgi.application'
+
+SITE_ID = 1
 
 
 # Database

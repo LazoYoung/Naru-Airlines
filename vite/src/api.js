@@ -1,24 +1,26 @@
 import MD5 from "crypto-js/md5.js";
 import {ref} from "vue";
+import router from "@/router/index.js";
 
-export function fetchJSON(url, token) {
-    return fetch(url, {
-        method: 'GET',
-        headers: {'X-CSRF-Token': token}
-    }).then(r => r.json());
-}
-
-export function fetchResponse(url, token) {
-    return fetch(url, {
-        method: 'GET',
-        headers: {'X-CSRF-Token': token}
-    });
-}
+// export function fetchJSON(url, token) {
+//     return fetch(url, {
+//         method: 'GET',
+//         headers: {'X-CSRF-Token': token}
+//     }).then(r => r.json());
+// }
+//
+// export function fetchResponse(url, token) {
+//     return fetch(url, {
+//         method: 'GET',
+//         headers: {'X-CSRF-Token': token}
+//     });
+// }
 
 /**
  * @param ref Reference to json
  * @returns {Promise<void>}
  */
+// todo: elevate security measure
 export async function fetchProfile(ref) {
     let response = await fetch("/api/auth/profile/");
 
@@ -32,6 +34,20 @@ export async function fetchProfile(ref) {
 
 export function getGravatarHash(email) {
     return MD5(email.trim().toLowerCase());
+}
+
+export function getCookie(name) {
+    const regex = new RegExp(`(^| )${name}=([^;]+)`);
+    const match = document.cookie.match(regex);
+
+    if (!match) {
+        throw new Error(`Cookie '${name}' not found`);
+    }
+    return match[2];
+}
+
+export function home(refresh = true) {
+    router.push({name: 'home'}).then(_ => router.go(0));
 }
 
 export class Form {
@@ -85,30 +101,33 @@ export class Form {
     submit(method, url) {
         let options = {
             method: method,
-            headers: {"Content-Type": "application/json"},
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie('csrftoken'),
+            },
+            mode: 'same-origin',
             body: JSON.stringify(this.data()),
         };
         this.processing.value = true;
-
-        fetch(url, options).then(r => this._process(r))
         this.clearErrors();
-        // console.log(this.data());
+
+        return fetch(url, options).then(r => this._process(r))
     };
 
     post(url) {
-        this.submit('POST', url);
+        return this.submit('POST', url);
     }
 
     put(url) {
-        this.submit('PUT', url);
+        return this.submit('PUT', url);
     }
 
     patch(url) {
-        this.submit('PATCH', url);
+        return this.submit('PATCH', url);
     }
 
     delete(url) {
-        this.submit('DELETE', url);
+        return this.submit('DELETE', url);
     }
 
     _process(response) {
@@ -116,7 +135,7 @@ export class Form {
 
         if (response.ok) {
             this._complete();
-            return;
+            return true;
         }
 
         // console.error(response);
@@ -124,11 +143,18 @@ export class Form {
             this._processError(json);
             this._complete();
         });
+        return false;
     }
 
     _processError(json) {
         for (const input in json) {
-            this.setError(input, json[input][0]);
+            let error = json[input];
+
+            if (Array.isArray(error)) {
+                error = error[0];
+            }
+
+            this.setError(input, error);
         }
     }
 

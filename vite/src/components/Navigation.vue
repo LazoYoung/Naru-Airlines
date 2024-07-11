@@ -1,13 +1,14 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import {RouterLink} from "vue-router";
-import {fetchProfile, getGravatarHash} from "@/api.js";
+import {fetchProfile, getGravatarHash, home, useForm} from "@/api.js";
 // import StandardMenu from "@/Components/StandardMenu.vue";
 // import PilotMenu from "@/Components/PilotMenu.vue";
 import IconBanner from "@/components/icons/IconBanner.vue";
 import IconLogo from "@/components/icons/IconLogo.vue";
+import router from "@/router/index.js";
 
-const profile = ref();
+const profile = ref(null);
 let lastWidth = window.innerWidth;
 let lastWidthChange = null;
 let nav = null;
@@ -77,11 +78,6 @@ onMounted(() => {
         });
     }
 
-    let account = document.querySelector("#account");
-    if (account) {
-        account.addEventListener("click", () => expandProfile(account));
-    }
-
     document
         .querySelector("#nav-background")
         .addEventListener("click", closeAll);
@@ -134,25 +130,24 @@ function closeWideDropdown(element) {
     element.removeAttribute("opened");
 }
 
-function expandProfile(element) {
-    if (element) {
-        closeAll();
-        showBackground();
-        element.setAttribute("expand", "");
-        document
-            .querySelector("#button-nav-narrow")
-            .classList.add("hidden");
-    }
+function expandProfile() {
+    let element = document.getElementById('account');
+
+    if (element.hasAttribute("expand"))
+        return;
+
+    closeAll();
+    showBackground();
+    element.setAttribute("expand", "");
+    document.querySelector("#button-nav-narrow").classList.add("hidden");
 }
 
 function foldProfile() {
-    let elem = document.querySelector("#account");
-    if (elem) {
-        elem.removeAttribute("expand");
-        document
-            .querySelector("#button-nav-narrow")
-            .classList.remove("hidden");
-    }
+    document.querySelector("#account")
+        .removeAttribute("expand");
+    document
+        .querySelector("#button-nav-narrow")
+        .classList.remove("hidden");
 }
 
 function openNarrowMenu() {
@@ -186,6 +181,16 @@ function closeNarrowDropdowns() {
 function closeNarrowDropdown(element) {
     element.removeAttribute("opened");
 }
+
+function logout() {
+    useForm().post("/api/auth/logout/")
+        .then(success => {
+            if (success) {
+                closeAll();
+                home();
+            }
+        });
+}
 </script>
 
 <template>
@@ -198,34 +203,37 @@ function closeNarrowDropdown(element) {
                         <IconLogo :color="pilot ? 'blue' : 'white'"></IconLogo>
                     </div>
                     <div class="text">
-                        <IconBanner />
+                        <IconBanner/>
                     </div>
                 </RouterLink>
             </div>
             <div class="center">
                 <div class="menu menu-wide">
                     <!-- todo fix -->
-<!--                    <PilotMenu v-if="pilot"></PilotMenu>-->
-<!--                    <StandardMenu v-else></StandardMenu>-->
+                    <!--                    <PilotMenu v-if="pilot"></PilotMenu>-->
+                    <!--                    <StandardMenu v-else></StandardMenu>-->
                 </div>
             </div>
             <div class="right">
-                <div v-if="profile" id="account">
+                <div v-if="profile" id="account" @click="expandProfile">
                     <div class="profile">
                         <img class="image" :src="getProfileSource()" alt="image">
-                        <div class="name">{{profile['display_name']}}</div>
+                        <div class="name">{{ profile['display_name'] }}</div>
                     </div>
-                    <RouterLink :to="{name: 'profile'}" class="element">
-                        <i class="fa-solid fa-user w-4 me-2"></i>
+                    <RouterLink :to="{name: 'profile'}" @click.stop="closeAll" class="element">
+                        <div class="pillar"></div>
+                        <img class="icon" src="../assets/user.svg" alt="profile">
                         <span>Profile</span>
+                        <div class="pillar"></div>
                     </RouterLink>
-                    <a :href="'/api/auth/logout/'" method="post" class="element">
-                        <i class="fa-solid fa-arrow-right-from-bracket w-4 me-2"></i>
-                        <span>Sign out</span>
+                    <a @click.stop="logout" class="element">
+                        <div class="pillar"></div>
+                        <img class="icon" src="../assets/exit.svg" alt="exit">
+                        <span>Log out</span>
+                        <div class="pillar"></div>
                     </a>
                 </div>
-
-                <div id="guest">
+                <div v-else id="guest">
                     <RouterLink :to="{name: 'login'}">
                         <button small>Login</button>
                     </RouterLink>
@@ -243,9 +251,9 @@ function closeNarrowDropdown(element) {
         </div>
         <div id="nav-bottom">
             <div class="narrow-nav menu menu-narrow">
-                    <!-- todo fix -->
-<!--                <PilotMenu v-if="pilot"></PilotMenu>-->
-<!--                <StandardMenu v-else></StandardMenu>-->
+                <!-- todo fix -->
+                <!--                <PilotMenu v-if="pilot"></PilotMenu>-->
+                <!--                <StandardMenu v-else></StandardMenu>-->
             </div>
         </div>
     </nav>
@@ -291,6 +299,7 @@ function closeNarrowDropdown(element) {
     justify-content: flex-start;
     align-items: center;
 }
+
 #nav .menu .element > label > .name {
     font-size: 1.25rem;
     font-weight: 500;
@@ -298,9 +307,11 @@ function closeNarrowDropdown(element) {
     word-break: keep-all;
     cursor: pointer;
 }
+
 #nav .menu .element > label:hover > .name {
     text-decoration: underline;
 }
+
 #nav .menu .element > label > .arrow {
     display: inline-block;
     font-size: 0.8rem;
@@ -330,6 +341,7 @@ function closeNarrowDropdown(element) {
     pointer-events: all;
     z-index: 20000000;
 }
+
 #nav-top > * {
     flex-wrap: nowrap;
 }
@@ -340,22 +352,27 @@ function closeNarrowDropdown(element) {
     display: flex;
     align-items: center;
 }
+
 #nav-top > .left > .logo {
     height: 2.6rem;
 }
+
 #nav-top .logo {
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: flex-start;
 }
+
 #nav-top .logo .icon {
     height: 100%;
 }
+
 #nav-top .logo .text {
     height: 70%;
     margin-left: 0.35rem;
 }
+
 #nav-top .logo .icon > img,
 #nav-top .logo .text > img {
     height: 100%;
@@ -372,12 +389,14 @@ function closeNarrowDropdown(element) {
     width: calc(100% - 40rem);
     max-width: 75vw;
 }
+
 #nav-top .menu-wide {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     flex-wrap: wrap;
 }
+
 #nav-top .menu-wide .element {
     display: flex;
     position: relative;
@@ -386,15 +405,19 @@ function closeNarrowDropdown(element) {
     justify-content: flex-start;
     align-items: center;
 }
+
 #nav-top .menu-wide .element:first-child {
     margin-left: 0;
 }
+
 #nav-top .menu-wide .element.dropdown[opened] > label > .arrow {
     transform: rotate(180deg);
 }
+
 #nav-top .menu-wide .element.dropdown > .content {
     display: none;
 }
+
 #nav-top .menu-wide .element.dropdown[opened] > .content {
     display: block;
     position: absolute;
@@ -403,6 +426,7 @@ function closeNarrowDropdown(element) {
     top: 2rem;
     left: -0.75rem;
 }
+
 #nav-top .menu-wide .element.dropdown > .content > a {
     display: flex;
     width: max-content;
@@ -415,9 +439,11 @@ function closeNarrowDropdown(element) {
     justify-content: flex-start;
     align-items: center;
 }
+
 #nav-top .menu-wide .element.dropdown > .content > a span {
     margin-left: 0.35rem;
 }
+
 #nav-top .menu-wide .element.dropdown > .content > a:hover label {
     text-decoration: underline;
     cursor: pointer;
@@ -429,6 +455,7 @@ function closeNarrowDropdown(element) {
     display: flex;
     justify-content: flex-end;
 }
+
 #button-nav-narrow {
     width: 2.5rem;
     height: 2.5rem;
@@ -437,6 +464,7 @@ function closeNarrowDropdown(element) {
     margin-left: 1rem;
     display: none;
 }
+
 #button-nav-narrow > .line {
     position: absolute;
     width: 100%;
@@ -444,16 +472,20 @@ function closeNarrowDropdown(element) {
     border-bottom: solid 2px var(--nav-fg);
     transition: top 0.1s ease-out, bottom 0.1s ease-out, transform 0.1s ease-out;
 }
+
 #button-nav-narrow > .top {
     top: 0.75rem;
 }
+
 #button-nav-narrow > .bottom {
     bottom: 0.75rem;
 }
+
 #button-nav-narrow.cross > .top {
     top: calc(1.25rem - 1px);
     transform: rotate(45deg);
 }
+
 #button-nav-narrow.cross > .bottom {
     bottom: calc(1.25rem - 1px);
     transform: rotate(-45deg);
@@ -464,78 +496,104 @@ function closeNarrowDropdown(element) {
     align-items: center;
     column-gap: 1rem;
 }
+
 #account {
     border-radius: 5rem;
-    height: 2.4rem;
     max-height: 2.4rem;
     padding: 0.35rem 0.65rem 0.35rem 0.35rem;
     background: var(--nav-button-bg);
     cursor: pointer;
     transition: max-height 0.5s ease-in-out;
 }
+
 #account[expand] {
     position: fixed;
     top: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    row-gap: 1.25rem;
     border-radius: 1rem;
     height: fit-content;
     max-height: 30rem;
     cursor: default;
-    padding: 0.5rem 1rem 0.5rem 1rem;
+    padding: 1rem;
     background: var(--nav-button-bg);
 }
+
 #account > .profile {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
-#account[expand] > .profile {
-    margin-bottom: 1.5rem;
-}
+
 #account .image {
     width: 1.8rem;
     height: 1.8rem;
     border-radius: 100%;
     border: solid 1px var(--nav-fg);
 }
+
 #account[expand] .image {
     width: 3.2rem;
     height: 3.2rem;
     border-radius: 100%;
     border: solid 1px var(--nav-fg);
 }
+
+#account > .element {
+    display: none;
+}
+
+#account[expand] > .element {
+    display: flex;
+    flex-direction: row;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#account[expand] > .element > .pillar {
+    visibility: hidden;
+    flex-grow: 1;
+}
+
+#account[expand] > .element > span {
+    font-size: 1rem;
+    font-weight: 500;
+    align-content: center;
+    width: 4rem;
+}
+
+#account[expand] .icon {
+    width: 1.75rem;
+    margin-inline-end: 0.5rem;
+}
+
 #account .name {
     font-size: 1.0rem;
     font-weight: 500;
     margin-left: 0.5rem;
     cursor: pointer;
 }
+
 #account[expand] .name {
     font-weight: normal;
     margin-left: 1rem;
     cursor: default;
 }
-#account > .element {
-    display: none;
-}
-#account[expand] > .element {
-    display: flex;
-    padding: 0 0 1rem 1rem;
-    margin: 0.5rem 0 0.5rem 0;
-    font-weight: bold;
-    cursor: pointer;
-}
+
 #account:hover {
     background: var(--nav-button-bg-hover);
 }
+
 #account:hover .name {
     text-decoration: underline;
 }
+
 #account[expand]:hover .name {
     text-decoration: none;
 }
+
 #account[expand] .element:hover {
     text-decoration: underline;
 }
@@ -560,6 +618,7 @@ function closeNarrowDropdown(element) {
     opacity: 0;
     transition: top 0.2s ease-out, opacity 0.1s ease-out;
 }
+
 #nav-bottom .menu-narrow.show {
     top: 0;
     max-height: 100%;
@@ -567,27 +626,33 @@ function closeNarrowDropdown(element) {
     opacity: 1;
     transition: top 0.2s ease-out, opacity 0.2s ease-out;
 }
+
 #nav-bottom .menu-narrow .element {
     display: block;
     width: calc(100% - 4rem);
     padding: 1rem 2rem;
     border-bottom: solid 1px var(--nav-fg);
 }
+
 #nav-bottom .menu-narrow .element:first-child {
     border-top: solid 1px var(--nav-fg);
 }
+
 #nav-bottom .menu-narrow .element.dropdown > .content {
     display: none;
 }
+
 #nav-bottom .menu-narrow .element.dropdown[opened] > .content {
     display: block;
     padding: 1rem 1rem 0 1rem;
     top: 2rem;
     left: -0.75rem;
 }
+
 #nav-bottom .menu-narrow .element.dropdown[opened] > label > .arrow {
     transform: rotate(180deg);
 }
+
 #nav-bottom .menu-narrow .element.dropdown > .content > a {
     display: flex;
     font-size: 1.25rem;
@@ -598,12 +663,15 @@ function closeNarrowDropdown(element) {
     justify-content: flex-start;
     align-items: center;
 }
+
 #nav-bottom .menu-narrow .element.dropdown > .content > a:first-child {
     margin-top: 0;
 }
+
 #nav-bottom .menu-narrow .element.dropdown > .content > a span {
     margin-left: 0.35rem;
 }
+
 #nav-bottom .menu-narrow .element.dropdown > .content > a:hover label {
     text-decoration: underline;
     cursor: pointer;
@@ -613,40 +681,50 @@ function closeNarrowDropdown(element) {
     #nav-top > .center {
         display: none;
     }
+
     #button-nav-narrow {
         display: block;
     }
+
     #button-nav-narrow.hidden {
         display: none;
     }
 }
+
 @media (max-width: 900px) {
     #nav-top > .left {
         padding-left: 1rem;
     }
+
     #nav-top > .right {
         padding-right: 1rem;
     }
+
     #nav-bottom .menu-narrow .element {
         width: calc(100% - 2rem);
         padding: 1rem 1rem;
     }
 }
+
 @media (max-width: 600px) {
     #nav-top {
         height: 4rem;
     }
+
     #nav-top > .left > .logo > .text {
         display: none;
     }
+
     #nav-bottom {
         top: 4rem;
         height: calc(100% - 4rem);
     }
+
     #nav-bottom .menu-narrow.show {
         height: 100%;
     }
 }
+
 @media print {
     #nav-top {
         display: none;

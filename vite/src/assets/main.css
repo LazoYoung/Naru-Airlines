@@ -1,35 +1,161 @@
-@import './base.css';
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/variable/pretendardvariable-dynamic-subset.css");
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+:root {
+    --bg: rgb(35, 35, 35);
+    --fg: white;
+    --red: red;
+    --yellow: yellow;
+    --green: green;
+    --t245: rgb(245, 245, 245);
+
+    --sans-serif: "Pretendard Variable", "Malgun Gothic", sans-serif;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+html {
+    font-size: calc(15px + (100vw - 1500px) / 400);
+}
+body {
+    font-family: var(--sans-serif);
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+    min-height: 100vh;
+    min-height: calc((var(--vh, 1vh) * 100));
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+* {
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    border-spacing: 0;
+    color: var(--fg);
+    line-height: 100%;
+}
+@media print {
+    @page {
+        margin: 15mm 15mm 20mm 15mm;
+    }
+    :root {
+        --bg: white;
+        --fg: black;
+    }
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+/* Text object */
+a {
+    text-decoration: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 500;
+}
+h1 {
+    font-size: 3rem;
+}
+h2 {
+    font-size: 2.5rem;
+}
+h3 {
+    font-size: 2rem;
+}
+h4 {
+    font-size: 1.75rem;
+}
+h5 {
+    font-size: 1.5rem;
+}
+h6 {
+    font-size: 1.25rem;
+}
+hr {
+    width: 100%;
+    height: 1px;
+    background: var(--t210);
+    border: none;
+}
+/* SVG */
+svg {
+    fill: var(--fg);
+    stroke: transparent;
+    stroke-width: 0.1rem;
+    overflow: visible;
+}
+svg * {
+    fill: var(--fg);
+    stroke: transparent;
+}
+text {
+    font-family: var(--sans-serif);
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
+layer,
+[layer],
+.layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+[noselect] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+[none],
+.none {
+    display: none !important;
+}
+[opa0],
+.opa0 {
+    opacity: 0 !important;
+}
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
+outwrapper {
+    display: block;
+    position: relative;
+    width: calc(100% - 40rem);
+    max-width: 75vw;
+    padding: 0 2rem 0 2rem;
+    margin: 0 auto;
+}
+outwrapper[wide] {
+    width: calc(100% - 4rem);
+    max-width: unset;
+    padding: 0 2rem 0 2rem;
+}
+inwrapper {
+    display: block;
+    position: relative;
+    width: 100%;
+}
+@media (max-width: 1500px) {
+    outwrapper,
+    outwrapper[wide] {
+        width: calc(100% - 4rem);
+        max-width: unset;
+        padding: 0 2rem 0 2rem;
+    }
+}
+@media (max-width: 900px) {
+    outwrapper,
+    outwrapper[wide] {
+        width: calc(100% - 2rem);
+        max-width: unset;
+        padding: 0 1rem 0 1rem;
+    }
 }

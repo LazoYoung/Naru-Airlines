@@ -1,24 +1,14 @@
 <script setup>
-import {computed} from "vue";
-
 const props = defineProps({
     color: {
         type: String,
         default: 'white'
     }
 });
-const getImageSource = computed(() => {
-    switch (props.color) {
-        case 'white':
-            return '/static/icon.svg'
-        case 'blue':
-            return '/static/icon_blue.svg'
-        default:
-            return '';
-    }
-})
 </script>
 
 <template>
-    <img :src="getImageSource" alt="Logo"/>
+    <img v-if="props.color === 'white'" src="../../assets/icon.svg" alt="Logo"/>
+    <img v-else-if="props.color === 'blue'" src="../../assets/icon.svg" alt="Logo"/>
+    <img v-else src="" alt="Logo"/>
 </template>

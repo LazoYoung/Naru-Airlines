@@ -1,16 +1,18 @@
 <script setup>
 import AuthLayout from "@/components/layout/AuthLayout.vue";
 import TextInput from "@/components/TextInput.vue";
-import {useForm} from "@/api.js";
+import {home, useForm} from "@/api.js";
 import InputError from "@/components/InputError.vue";
 
 const form = useForm(['email', 'password']);
 
 function onSubmit() {
-    form.post("/api/auth/login/");
-    setTimeout(() => {
-        console.log(form);
-    }, 1000);
+    form.post("/api/auth/login/")
+        .then(success => {
+            if (success) {
+                home();
+            }
+        });
 }
 </script>
 
@@ -23,6 +25,7 @@ function onSubmit() {
                         v-model="form['email']"
                         hint="E-mail"
                         label="inner"
+                        :required="true"
                 ></TextInput>
                 <InputError :message="form.errors['email']"></InputError>
             </div>
@@ -32,6 +35,7 @@ function onSubmit() {
                         v-model="form['password']"
                         hint="Password"
                         label="inner"
+                        :required="true"
                 ></TextInput>
                 <InputError :message="form.errors['password']"></InputError>
             </div>

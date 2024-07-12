@@ -5,6 +5,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
+from passenger.models import Passenger
 from .models import Member
 
 
@@ -44,7 +45,15 @@ class MemberChangeForm(forms.ModelForm):
         fields = ["handle", "password", "display_name", "email", "is_active", "is_admin"]
 
 
+class PassengerInline(admin.StackedInline):
+    model = Passenger
+    can_delete = False
+    verbose_name_plural = 'Passengers'
+
+
 class MemberAdmin(BaseUserAdmin):
+    inlines = (PassengerInline,)
+
     # The forms to add and change user instances
     form = MemberChangeForm
     add_form = MemberCreationForm

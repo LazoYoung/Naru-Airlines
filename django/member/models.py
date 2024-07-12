@@ -30,6 +30,7 @@ class Member(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    receive_emails = models.BooleanField(default=True)
 
     objects = MemberManager()
 
@@ -51,9 +52,15 @@ class Member(AbstractBaseUser):
         return self.is_admin
 
 
-class RegisterEmailToken(models.Model):
+class AuthRequest(models.Model):
+    class Reason(models.IntegerChoices):
+        REGISTER = 1
+        CHANGE_EMAIL = 2
+
+    reason = models.CharField(choices=Reason.choices, max_length=32)
     member = models.ForeignKey(Member, on_delete=models.CASCADE)
     token = models.CharField(max_length=64)
+    target = models.CharField(max_length=64)
     valid_until = models.DateTimeField()
 
     objects = models.Manager()

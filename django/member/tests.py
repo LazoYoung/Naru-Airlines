@@ -5,8 +5,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.settings import api_settings
 
-from .models import Member
+from .models import Member, AuthRequest
 from .utils import get_random_email, get_random_password, get_random_string
+from .views import get_uid
 
 
 class RegisterTest(TestCase):
@@ -165,6 +166,51 @@ class ProfileTest(TestCase):
         self.assertTrue(status.is_success(put.status_code))
 
 
+class VerificationTest(TestCase):
+    def test_new_account_verification(self):
+        reason = AuthRequest.Reason.REGISTER
+        email = get_random_email()
+        register_and_login(self, email=email, verify_email=False)
+
+        send_email = self.client.post(
+            path=reverse('send_verify_email'),
+            data={'email': email, 'reason': reason.name}
+        )
+        self.assertTrue(status.is_success(send_email.status_code))
+
+        verify = self.verify_email(email, reason)
+        self.assertTrue(status.is_redirect(verify.status_code))
+
+    def test_change_email_verification(self):
+        reason = AuthRequest.Reason.CHANGE_EMAIL
+        old_email = get_random_email()
+        new_email = get_random_email()
+        register_and_login(self, email=old_email)
+
+        send_email = self.client.post(
+            path=reverse('send_verify_email'),
+            data={'email': old_email, 'reason': reason.name, 'new_email': new_email}
+        )
+        self.assertTrue(status.is_success(send_email.status_code))
+
+        verify = self.verify_email(old_email, reason)
+        self.assertTrue(status.is_redirect(verify.status_code))
+
+    def verify_email(self, email, reason):
+        member = Member.objects.get(email=email)
+        request = AuthRequest.objects.get(reason=reason, member=member)
+
+        if reason == AuthRequest.Reason.REGISTER:
+            api = "verify-register"
+        elif reason == AuthRequest.Reason.CHANGE_EMAIL:
+            api = "verify-change-email"
+        else:
+            self.assertTrue(False, f"Bad reason: {reason}")
+
+        url = f"/api/auth/{api}/{get_uid(member)}/{request.token}"
+        return self.client.get(path=url)
+
+
 def post_register(client, display_name=None, email=None, password=None, verify_email=True):
     if display_name is None:
         display_name = f"Dummy user #{random.randint(1, 100)}"
@@ -186,7 +232,7 @@ def post_register(client, display_name=None, email=None, password=None, verify_e
     return response
 
 
-def register_and_login(test_case: TestCase, display_name=None, email=None, password=None):
+def register_and_login(test_case: TestCase, display_name=None, email=None, password=None, verify_email=True):
     if display_name is None:
         display_name = f"Dummy user #{random.randint(1, 100)}"
 
@@ -197,11 +243,11 @@ def register_and_login(test_case: TestCase, display_name=None, email=None, passw
         password = get_random_password()
 
     register = post_register(
-        test_case.client, display_name=display_name, email=email, password=password, verify_email=True
+        test_case.client,
+        display_name=display_name, email=email,
+        password=password, verify_email=verify_email
     )
-    login = test_case.client.post(reverse('login'), data={
-        'email': email,
-        'password': password,
-    })
     test_case.assertTrue(status.is_success(register.status_code))
-    test_case.assertTrue(status.is_success(login.status_code))
+
+    member = Member.objects.get(email__iexact=email)
+    test_case.client.force_login(user=member)

@@ -1,31 +1,65 @@
 <script setup>
-import {ref} from 'vue';
-import {usePage} from '@inertiajs/vue3';
-import Navigation from "@/Layouts/Navigation.vue";
-
-const auth = usePage().props.auth;
-const content = ref();
-
 defineProps({
-    pilot: {
-        type: Boolean,
-        default: false
+    title: {
+        type: String,
     }
 });
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen">
-            <div class="fixed w-full top-0 z-20">
-                <Navigation :pilot="pilot"></Navigation>
+    <main>
+        <header v-if="title">
+            <div class="box">
+                <h2 class="title">{{title}}</h2>
             </div>
-            <main>
-                <header class="pt-24" v-if="$slots.header">
-                    <slot name="header"/>
-                </header>
-                <slot/>
-            </main>
+        </header>
+        <div class="content">
+            <slot/>
         </div>
-    </div>
+    </main>
 </template>
+
+<style scoped>
+div.content {
+    max-width: 64rem;
+    margin: 1.5rem auto;
+}
+
+header {
+    padding-top: 6rem;
+}
+
+header > .box {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+}
+
+header > .box > .title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 600;
+}
+
+@media (min-width: 640px) {
+    div.content {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    header > .box {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    div.content {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+    header > .box {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+}
+</style>

@@ -7,6 +7,8 @@ import {fetchProfile, getGravatarHash, home, useForm} from "@/api.js";
 import IconBanner from "@/components/icons/IconBanner.vue";
 import IconLogo from "@/components/icons/IconLogo.vue";
 import router from "@/router/index.js";
+import BasicMenu from "@/components/menu/BasicMenu.vue";
+import PilotMenu from "@/components/menu/PilotMenu.vue";
 
 const profile = ref(null);
 let lastWidth = window.innerWidth;
@@ -209,9 +211,8 @@ function logout() {
             </div>
             <div class="center">
                 <div class="menu menu-wide">
-                    <!-- todo fix -->
-                    <!--                    <PilotMenu v-if="pilot"></PilotMenu>-->
-                    <!--                    <StandardMenu v-else></StandardMenu>-->
+                    <PilotMenu v-if="pilot"></PilotMenu>
+                    <BasicMenu v-else></BasicMenu>
                 </div>
             </div>
             <div class="right">
@@ -251,9 +252,8 @@ function logout() {
         </div>
         <div id="nav-bottom">
             <div class="narrow-nav menu menu-narrow">
-                <!-- todo fix -->
-                <!--                <PilotMenu v-if="pilot"></PilotMenu>-->
-                <!--                <StandardMenu v-else></StandardMenu>-->
+                <PilotMenu v-if="pilot"></PilotMenu>
+                <BasicMenu v-else></BasicMenu>
             </div>
         </div>
     </nav>

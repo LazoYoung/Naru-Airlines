@@ -33,9 +33,6 @@ function getQuote() {
 </script>
 
 <template>
-<!--    <Head title="Home" />-->
-<!--    <Navigation></Navigation>-->
-
     <main>
         <section id="root-header">
             <layer class="bg">
@@ -96,15 +93,6 @@ function getQuote() {
 </template>
 
 <style scoped>
-/* Hides ugly scrollbars */
-div {
-    scrollbar-width: none;
-}
-
-div::-webkit-scrollbar {
-    display: none;
-}
-
 #root-header {
     width: 100%;
     height: 100vh;
@@ -130,7 +118,7 @@ div::-webkit-scrollbar {
 #root-header > .fg h1 {
     max-width: 60rem;
     font-weight: 900;
-    font-size: max(5rem, 8vw);
+    font-size: max(5rem, 6vw);
     color: white;
 }
 #root-header .buttons {

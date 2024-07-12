@@ -3,10 +3,9 @@ import re
 import string
 
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import AnonymousUser
 from rest_framework import serializers
-from rest_framework.request import Request
 from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 
 from .models import Member
 
@@ -89,11 +88,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'handle': {'read_only': True},
             'is_verified': {'read_only': True},
+            'email': {'read_only': True},
         }
 
     def update(self, instance, validated_data):
         instance.display_name = validated_data.get('display_name', instance.display_name)
-        instance.email = validated_data.get('email', instance.email)
         instance.save()
         return instance
 

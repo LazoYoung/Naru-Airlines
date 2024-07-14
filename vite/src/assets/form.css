@@ -1,0 +1,324 @@
+/*
+Button
+
+<button>버튼</button>
+<button filled>버튼</button>
+<button filled large>버튼</button>
+*/
+:root {
+    --button-bg: black;
+    --button-fg: white;
+    --button-fg-hover: rgb(240, 240, 240);
+}
+button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: 4rem;
+    padding: 0 3rem;
+    min-width: 12rem;
+    border-radius: 0;
+    font-family: var(--sans-serif);
+    font-weight: 500;
+    font-size: 1.25rem;
+    background: transparent;
+    color: var(--button-fg);
+    outline: none;
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--button-fg);
+    cursor: pointer;
+}
+button i, button span {
+    color: var(--button-fg);
+}
+button:hover, button:hover i, button:hover span {
+    background: var(--button-fg);
+    color: var(--button-bg);
+}
+button[filled] {
+    background: var(--button-fg);
+    color: var(--button-bg);
+}
+button[filled]:hover {
+    background: var(--button-fg-hover);
+    color: var(--button-bg);
+    box-shadow: inset 0 0 0 1px var(--button-fg-hover);
+}
+button[large] {
+    height: 5rem;
+    padding: 0 3rem;
+    min-width: 15rem;
+    font-size: 1.5rem;
+}
+button[small] {
+    height: 2.5rem;
+    padding: 0 1rem;
+    min-width: 6rem;
+    font-size: 1rem;
+}
+button[tiny] {
+    height: 1.5rem;
+    padding: 0 0.5rem;
+    min-width: 4rem;
+    font-size: 0.75rem;
+}
+
+/*
+  Text input
+  */
+:root {
+    --form-input-bg: #3d3d3d;
+    --form-input-fg: white;
+    --form-input-placeholder: #c4c4c4;
+    --form-input-label: white;
+    --form-input-label-bg: #777777;
+    --form-input-outline: white;
+    --form-bg: dimgray;
+}
+input,
+textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+}
+input:focus,
+textarea:focus {
+    outline: none;
+}
+input:disabled,
+textarea:disabled {
+    cursor: not-allowed !important;
+}
+input:disabled[color],
+textarea:disabled[color] {
+    pointer-events: none;
+    --input-bg: var(--bg-h);
+    --input-bg-230: var(--bg);
+    --input-fg: var(--fg);
+    --input-ph: var(--fg-l);
+    --input-ol: var(--fg);
+
+    --button-bg: var(--bg-h);
+    --button-bg-hover: var(--bg);
+    --button-fg: var(--fg);
+    --button-ph: var(--fg-l);
+    --button-ol: var(--fg);
+}
+input:autofill,
+input:autofill:hover,
+input:autofill:focus,
+textarea:autofill,
+textarea:autofill:hover,
+textarea:autofill:focus,
+select:autofill,
+select:autofill:hover,
+select:autofill:focus,
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+    box-shadow: 0 0 0 1000px var(--form-input-bg) inset;
+    font-family: var(--sans-serif);
+    -webkit-text-fill-color: var(--form-input-bg);
+}
+form-input-text {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 3.5rem;
+}
+form-input-text[label="inner"] {
+    height: 4.5rem;
+}
+form-textarea {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+form-datetime {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 3.5rem;
+}
+form-input-text > input,
+form-input-text > input:-webkit-autofill,
+form-input-text > input:-webkit-autofill:hover,
+form-input-text > input:-webkit-autofill:focus,
+form-textarea > textarea,
+form-textarea > textarea:-webkit-autofill,
+form-textarea > textarea:-webkit-autofill:hover,
+form-textarea > textarea:-webkit-autofill:focus,
+form-datetime > input {
+    width: 100%;
+    height: 100%;
+    padding: 0 1rem 0 1rem;
+    margin: 0;
+    cursor: text;
+    font-family: var(--sans-serif);
+    font-size: 1.25rem !important;
+    font-weight: 500 !important;
+    background: var(--form-input-bg) !important;
+    box-shadow: 0 0 0 100rem var(--form-input-bg) inset !important;
+    -webkit-text-fill-color: var(--form-input-fg) !important;
+    word-break: break-all;
+    border-radius: 0.25rem !important;
+}
+form-textarea > textarea {
+    vertical-align: bottom;
+    max-width: 100%;
+    min-width: 100%;
+    height: 100%;
+    min-height: 6rem;
+    padding: 1rem 1rem 1rem 1rem;
+}
+form-input-text[label="inner"] > input,
+form-input-text[label="inner"] > input:hover,
+form-input-text[label="inner"] > input:focus {
+    height: calc(100% - 1rem);
+    padding: 0.875rem 1rem 0 1rem;
+}
+form-textarea[label="inner"] > textarea,
+form-textarea[label="inner"] > textarea:hover,
+form-textarea[label="inner"] > textarea:focus {
+    min-height: 5rem;
+    padding: 2rem 1rem 1rem 1rem;
+}
+form-input-text > input:placeholder-shown,
+form-textarea > textarea:placeholder-shown {
+    -webkit-text-fill-color: var(--form-input-placeholder) !important;
+}
+form-input-text[label="inner"] > input:placeholder-shown {
+    height: 100%;
+    padding: 0 1rem 0 1rem;
+}
+form-textarea[label="inner"] > textarea:placeholder-shown {
+    min-height: 6rem;
+    padding: 1rem 1rem 1rem 1rem;
+}
+form-input-text > input::placeholder,
+form-input-text > input::-webkit-input-placeholder,
+form-textarea > textarea::placeholder,
+form-textarea > textarea::-webkit-input-placeholder {
+    color: var(--form-input-ph);
+}
+form-input-text > label,
+form-textarea > label {
+    display: none;
+    z-index: 30000;
+}
+form-input-text[label="inner"] > label,
+form-textarea[label="inner"] > label {
+    display: block;
+    position: absolute;
+    top: 0.875rem;
+    left: 1rem;
+    font-family: var(--sans-serif);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: opacity 0.2s ease-out, top 0.2s ease-out;
+    pointer-events: none;
+    color: var(--form-input-fg);
+}
+form-input-text[label="inner"] > input:placeholder-shown ~ label,
+form-textarea[label="inner"] > textarea:placeholder-shown ~ label {
+    opacity: 0;
+    top: 1rem;
+}
+form-input-text[label="top"] > label,
+form-textarea[label="top"] > label {
+    display: block;
+    position: absolute;
+    top: -0.675rem;
+    left: 0.5rem;
+    font-family: var(--sans-serif);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: opacity 0.2s ease-out, top 0.2s ease-out;
+    pointer-events: none;
+    color: var(--form-input-fg);
+    background: var(--form-input-label-bg);
+    padding: 0.3rem 0.5rem;
+}
+form-input-text[label="top"] > input:placeholder-shown ~ label,
+form-textarea[label="top"] > textarea:placeholder-shown ~ label {
+    opacity: 0;
+    top: 0;
+}
+form-input-text > form-input-border,
+form-textarea > form-input-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: box-shadow 0.1s ease-out, padding-bottom 0.1s ease-out,
+    top 0.1s ease-out;
+    pointer-events: none;
+    z-index: 20000;
+    padding-bottom: 0;
+    padding-top: 0;
+}
+form-input-text > input:focus ~ form-input-border,
+form-textarea > textarea:focus ~ form-input-border {
+    transition: box-shadow 0.2s ease-out, padding-bottom 0.1s ease-out,
+    top 0.1s ease-out;
+    box-shadow: inset 0 0 0 1px var(--form-input-outline) !important;
+}
+form-input-text > input[type="search"] {
+    width: 100%;
+    height: 100%;
+}
+form-input-text > button,
+form-input-text > a {
+    position: absolute;
+    right: 0.5rem;
+}
+form-input-text > form-input-buttons {
+    position: absolute;
+    top: 0;
+    width: calc(100% - 1rem);
+    height: 100%;
+    padding-right: 1rem;
+    pointer-events: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+form-input-text > form-input-buttons > button,
+form-input-text > form-input-buttons > a {
+    margin-left: 0.5rem;
+    pointer-events: all;
+}
+form-textarea[small] > textarea,
+form-textarea[small] > textarea:-webkit-autofill,
+form-textarea[small] > textarea:-webkit-autofill:hover,
+form-textarea[small] > textarea:-webkit-autofill:focus {
+    border-radius: 0.75rem;
+}
+form-input-text[small] {
+    height: 3rem;
+}
+form-input-text[small] > input {
+    height: 100%;
+    padding: 0 1rem 0 1rem;
+}
+form-input-text[tiny] {
+    height: 2rem;
+}
+form-input-text[tiny] > input {
+    font-size: 1rem !important;
+    height: 100%;
+    padding: 0 1rem 0 1rem;
+}

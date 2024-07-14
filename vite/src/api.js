@@ -1,5 +1,5 @@
 import MD5 from "crypto-js/md5.js";
-import {ref} from "vue";
+import {reactive, ref} from "vue";
 import router from "@/router/index.js";
 
 // export function fetchJSON(url, token) {
@@ -22,7 +22,7 @@ import router from "@/router/index.js";
  */
 // todo: elevate security measure
 export async function fetchProfile(ref) {
-    let response = await fetch("/api/auth/profile/");
+    let response = await fetch("/api/profile/");
 
     if (!response.ok) {
         ref.value = null;
@@ -51,7 +51,7 @@ export function home(refresh = true) {
 }
 
 export class Form {
-    processing = ref(false);
+    processing = false;
     errors = {};
     _inputs = [];
 
@@ -68,7 +68,7 @@ export class Form {
 
         for (const input in _data) {
             this._inputs.push(input);
-            this.errors[input] = ref('');
+            this.errors[input] = '';
             this[input] = _data[input];
         }
     }
@@ -82,17 +82,26 @@ export class Form {
         return data;
     }
 
+    clear() {
+        this.clearValues();
+        this.clearErrors();
+    }
+
+    clearValues() {
+        for (let input of this._inputs) {
+            this[input] = '';
+        }
+    }
+
     clearErrors() {
         for (const input of this._inputs) {
-            this.errors[input].value = '';
+            this.errors[input] = '';
         }
     }
 
     setError(input, error) {
-        let ref = this.errors[input];
-
-        if (ref) {
-            ref.value = error;
+        if (this.errors.hasOwnProperty(input)) {
+            this.errors[input] = error;
         } else {
             alert(error);
         }
@@ -108,45 +117,36 @@ export class Form {
             mode: 'same-origin',
             body: JSON.stringify(this.data()),
         };
-        this.processing.value = true;
+        this.processing = true;
         this.clearErrors();
 
         return fetch(url, options).then(r => this._process(r))
     };
 
-    post(url) {
+    submitPost(url) {
         return this.submit('POST', url);
     }
 
-    put(url) {
-        return this.submit('PUT', url);
-    }
-
-    patch(url) {
-        return this.submit('PATCH', url);
-    }
-
-    delete(url) {
-        return this.submit('DELETE', url);
-    }
-
     _process(response) {
-        console.assert(response);
-
         if (response.ok) {
             this._complete();
-            return true;
+            return response;
         }
 
         // console.error(response);
-        response.json().then(json => {
+        return response.json().then(json => {
             this._processError(json);
             this._complete();
+            return response;
         });
-        return false;
     }
 
     _processError(json) {
+        if (typeof json === 'string') {
+            this.setError('errors', json);
+            return;
+        }
+
         for (const input in json) {
             let error = json[input];
 
@@ -160,11 +160,16 @@ export class Form {
 
     _complete() {
         setTimeout(_ => {
-            this.processing.value = false;
+            this.processing = false;
         }, 1000);
     }
 }
 
 export function useForm(data) {
-    return new Form(data);
+    let form = new Form(data);
+    return reactive(form);
 }
+
+// export function useForm(data) {
+//     return new Form(data);
+// }

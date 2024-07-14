@@ -1,13 +1,16 @@
 # REST API
 ## Authentication
-| URL                                       | Name                    | Method | Form                       |
-|-------------------------------------------|-------------------------|--------|----------------------------|
-| `api/auth/login/`                         | `login`                 | POST   | email, password            |
-| `api/auth/logout/`                        | `logout`                | POST   |                            |
-| `api/auth/reset-password/`                | `reset_password`        | POST   | email                      |
-| `api/auth/change-password/`               | `change_password`       | POST   | old_password, new_password |
-| `api/auth/register/`                      | `register`              | POST   | email, password            |
-| `api/auth/send-register-email/`           | `send_register_email`   | POST   | email                      |
-| `api/auth/verify-register/<uid>/<token>/` | `verify_register_email` | GET    |                            |
-| `api/auth/profile/`                       | `profile`               | GET    |                            |
-| `api/auth/profile/`                       | `profile`               | PUT    | display_name, email        |
+| URL                                 | Name                    | Method | Form                                                           |
+|-------------------------------------|-------------------------|--------|----------------------------------------------------------------|
+| `api/login/`                        | `login`                 | POST   | email, password                                                |
+| `api/logout/`                       | `logout`                | POST   |                                                                |
+| `api/register/`                     | `register`              | POST   | email, password                                                |
+| `api/send-verify-email/`            | `send_verify_email`     | POST   | email, reason=`register`                                       |
+| `api/send-verify-email/`            | `send_verify_email`     | POST   | email, new_email, reason=`change_email`                        |
+| `api/send-verify-email/`            | `send_verify_email`     | POST   | email, new_password, confirm_password, reason=`reset_password` |
+| `api/verify-account/<uid>/<token>/` | `verify_register_email` | GET    |                                                                |
+| `api/reset-password/<uid>/<token>/` | `verify_reset_password` | GET    |                                                                |
+| `api/change-email/<uid>/<token>/`   | `verify_change_email`   | GET    |                                                                |
+| `api/change-password/`              | `change_password`       | POST   | old_password, new_password, confirm_password                   |
+| `api/profile/`                      | `profile`               | GET    |                                                                |
+| `api/profile/`                      | `profile`               | PUT    | bio, display_name, email, receive_emails                       |

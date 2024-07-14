@@ -73,7 +73,7 @@ button[tiny] {
     --form-input-label: white;
     --form-input-label-bg: #777777;
     --form-input-outline: white;
-    --form-bg: #969b9b;
+    --form-bg: dimgray;
 }
 input,
 textarea {

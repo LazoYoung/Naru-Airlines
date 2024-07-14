@@ -23,19 +23,22 @@ class LoginSerializer(serializers.Serializer):
         email = attrs.get('email')
         password = attrs.get('password')
 
-        if email and password:
-            user = self.get_user(email=email, password=password)
-        else:
-            raise ValidationError("Email or password is empty.")
+        if email is None:
+            raise ValidationError({"email": "Email is required"})
 
-        if not user:
-            raise ValidationError("Email or password is wrong.")
+        if password is None:
+            raise ValidationError({"password": "Password is required"})
+
+        user = self.get_user(email=email, password=password)
+
+        if user is None:
+            raise ValidationError("Wrong email or password.")
 
         if not user.is_active:
-            raise ValidationError("Your account is suspended.")
+            raise ValidationError("Account is suspended.")
 
         if not user.is_verified:
-            raise ValidationError("E-mail is not verified.")
+            raise ValidationError("E-mail not verified.")
 
         attrs['user'] = user
         return attrs
@@ -84,39 +87,60 @@ class RegisterSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = ['display_name', 'email', 'handle', 'is_verified']
+        fields = ['receive_emails', 'display_name', 'bio', 'email', 'handle']
         extra_kwargs = {
             'handle': {'read_only': True},
-            'is_verified': {'read_only': True},
             'email': {'read_only': True},
+            'display_name': {'required': False},
         }
 
     def update(self, instance, validated_data):
+        instance.receive_emails = validated_data.get('receive_emails', instance.receive_emails)
         instance.display_name = validated_data.get('display_name', instance.display_name)
+        instance.bio = validated_data.get('bio', instance.bio)
         instance.save()
         return instance
 
 
-class PasswordChangeSerializer(serializers.Serializer):
-    old_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(write_only=True)
+class PasswordResetSerializer(serializers.Serializer):
+    new_password = serializers.CharField(style={'input_type': 'password'}, required=True)
+    confirm_password = serializers.CharField(style={'input_type': 'password'}, required=True)
 
-    def validate_old_password(self, old_password):
+    def validate(self, attrs):
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+
+        if new_password != confirm_password:
+            raise ValidationError({"confirm_password": "Password does not match."})
+
+        validate_password(new_password, "new_password")
+        return attrs
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    new_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
+    def validate(self, attrs):
         request: Request = self.context['request']
+        old_password = attrs.get('old_password')
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
 
         if not request.user.check_password(old_password):
-            raise ValidationError("Incorrect password.")
+            raise ValidationError({"old_password": "Incorrect password."})
 
-        return old_password
+        if new_password != confirm_password:
+            raise ValidationError({"confirm_password": "Password does not match."})
 
-    @staticmethod
-    def validate_new_password(new_password):
-        validate_password(new_password)
-        return new_password
+        validate_password(new_password, "new_password")
+        return attrs
 
     def save(self, request: Request):
         member = request.user
         member.set_password(self.validated_data['new_password'])
+        member.save()
 
 
 def validate_display_name(display_name):
@@ -127,24 +151,33 @@ def validate_display_name(display_name):
     return display_name
 
 
-def validate_email(email):
+def validate_email(email, key=None):
+    if email is None:
+        raise_validation_error("E-mail is required.", key)
     email = email.lower()
     if not regex_email.match(email):
-        raise ValidationError("E-mail is invalid.")
+        raise_validation_error("E-mail is invalid.", key)
     if Member.objects.filter(email=email).exists():
-        raise ValidationError("E-mail is already in use.")
+        raise_validation_error("E-mail is already in use.", key)
     return email
 
 
-def validate_password(password):
+def validate_password(password, key=None):
     if len(password) < 6:
-        raise ValidationError("Password is too short.")
+        raise_validation_error("Password is too short.", key)
     if len(password) > 32:
-        raise ValidationError("Password is too long.")
+        raise_validation_error("Password is too long.", key)
     if regex_password_whitespace.search(password):
-        raise ValidationError("No whitespace allowed.")
+        raise_validation_error("No whitespace allowed.", key)
     if not regex_password_alphabet.search(password):
-        raise ValidationError("At least 1 alphabet is required.")
+        raise_validation_error("At least 1 alphabet is required.", key)
     if not regex_password_special.search(password):
-        raise ValidationError("At least 1 digit or special character is required.")
+        raise_validation_error("At least 1 digit or special character is required.", key)
     return password
+
+
+def raise_validation_error(error, key=None):
+    if key is None:
+        raise ValidationError(error)
+    else:
+        raise ValidationError({key: error})

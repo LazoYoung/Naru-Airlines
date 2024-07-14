@@ -8,7 +8,7 @@ defineProps({
 
 <template>
     <main>
-        <header v-if="title">
+        <header>
             <div class="box">
                 <h2 class="title">{{title}}</h2>
             </div>
@@ -21,8 +21,8 @@ defineProps({
 
 <style scoped>
 div.content {
-    max-width: 64rem;
-    margin: 1.5rem auto;
+    max-width: 60rem;
+    margin: 0 auto;
 }
 
 header {
@@ -30,7 +30,7 @@ header {
 }
 
 header > .box {
-    max-width: 64rem;
+    max-width: 60rem;
     margin: 0 auto;
     padding: 1.5rem 1rem;
 }
@@ -39,6 +39,7 @@ header > .box > .title {
     font-size: 1.5rem;
     line-height: 2rem;
     font-weight: 600;
+    text-shadow: rgb(0, 0, 0, 50%) 0.2rem 0.2rem 0.1rem;
 }
 
 @media (min-width: 640px) {
@@ -52,7 +53,7 @@ header > .box > .title {
     }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
     div.content {
         padding-left: 2rem;
         padding-right: 2rem;

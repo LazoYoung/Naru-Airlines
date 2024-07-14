@@ -20,11 +20,21 @@ const router = createRouter({
             component: () => import('../views/RegisterView.vue')
         },
         {
-            path: '/profile',
-            name: 'profile',
-            component: () => import('../views/ProfileView.vue')
+            path: '/settings',
+            name: 'settings',
+            component: () => import('../views/SettingsView.vue')
+        },
+        {
+            path: '/reset-password',
+            name: 'reset-password',
+            component: () => import('../views/ResetPasswordView.vue')
+        },
+        {
+            path: '/check-email',
+            name: 'check-email',
+            component: () => import('../views/CheckEmailView.vue')
         },
     ]
-})
+});
 
 export default router

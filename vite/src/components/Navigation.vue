@@ -2,11 +2,8 @@
 import {onMounted, ref} from 'vue';
 import {RouterLink} from "vue-router";
 import {fetchProfile, getGravatarHash, home, useForm} from "@/api.js";
-// import StandardMenu from "@/Components/StandardMenu.vue";
-// import PilotMenu from "@/Components/PilotMenu.vue";
 import IconBanner from "@/components/icons/IconBanner.vue";
 import IconLogo from "@/components/icons/IconLogo.vue";
-import router from "@/router/index.js";
 import BasicMenu from "@/components/menu/BasicMenu.vue";
 import PilotMenu from "@/components/menu/PilotMenu.vue";
 
@@ -24,7 +21,9 @@ defineProps({
 
 onMounted(() => {
     fetchProfile(profile);
+
     nav = document.querySelector("#nav");
+
     window.addEventListener("resize", () => {
         if (
             window.innerWidth > lastWidth &&
@@ -43,6 +42,7 @@ onMounted(() => {
         }
         lastWidth = window.innerWidth;
     });
+
     for (const dropdown of nav.querySelectorAll(
         ".menu-wide .element.dropdown"
     )) {
@@ -63,6 +63,7 @@ onMounted(() => {
                 : showBackground();
         });
     }
+
     for (const dropdown of nav.querySelectorAll(
         ".menu-narrow .element.dropdown"
     )) {
@@ -92,7 +93,7 @@ onMounted(() => {
         });
 });
 
-function getProfileSource() {
+function getProfileImageSource() {
     let hash = getGravatarHash(profile.value['email']);
     return `https://www.gravatar.com/avatar/${hash}?s=512`;
 }
@@ -145,11 +146,16 @@ function expandProfile() {
 }
 
 function foldProfile() {
-    document.querySelector("#account")
-        .removeAttribute("expand");
-    document
-        .querySelector("#button-nav-narrow")
-        .classList.remove("hidden");
+    let account = document.getElementById("account");
+    let narrowBtn = document.getElementById("button-nav-narrow");
+
+    if (account) {
+        account.removeAttribute("expand");
+    }
+
+    if (narrowBtn) {
+        narrowBtn.classList.remove("hidden");
+    }
 }
 
 function openNarrowMenu() {
@@ -185,9 +191,9 @@ function closeNarrowDropdown(element) {
 }
 
 function logout() {
-    useForm().post("/api/auth/logout/")
-        .then(success => {
-            if (success) {
+    useForm().submitPost("/api/logout/")
+        .then(response => {
+            if (response.ok) {
                 closeAll();
                 home();
             }
@@ -217,14 +223,14 @@ function logout() {
             </div>
             <div class="right">
                 <div v-if="profile" id="account" @click="expandProfile">
-                    <div class="profile">
-                        <img class="image" :src="getProfileSource()" alt="image">
+                    <div class="profile-badge">
+                        <img class="image" :src="getProfileImageSource()" alt="image">
                         <div class="name">{{ profile['display_name'] }}</div>
                     </div>
-                    <RouterLink :to="{name: 'profile'}" @click.stop="closeAll" class="element">
+                    <RouterLink :to="{name: 'settings'}" @click.stop="closeAll" class="element">
                         <div class="pillar"></div>
-                        <img class="icon" src="../assets/user.svg" alt="profile">
-                        <span>Profile</span>
+                        <img class="icon" src="../assets/gear.svg" alt="settings">
+                        <span>Settings</span>
                         <div class="pillar"></div>
                     </RouterLink>
                     <a @click.stop="logout" class="element">
@@ -521,7 +527,7 @@ function logout() {
     background: var(--nav-button-bg);
 }
 
-#account > .profile {
+#account > .profile-badge {
     display: flex;
     flex-direction: row;
     align-items: center;

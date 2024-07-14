@@ -1,36 +1,49 @@
 <script setup>
 import AuthLayout from "@/components/layout/AuthLayout.vue";
 import {useForm} from "@/api.js";
-import TextInput from "@/components/TextInput.vue";
+import TextInput from "@/components/input/TextInput.vue";
 import InputError from "@/components/InputError.vue";
 import {ref} from "vue";
+import router from "@/router/index.js";
 
-let form = useForm(['display_name', 'email', 'password']);
+let form = useForm(['display_name', 'email', 'password', 'confirm_password']);
 let success = ref(false);
 
 function onSubmit() {
-    form.post("/api/auth/register/")
-        .then(success => {
-            if (success) {
+    let password = form['password'];
+    let confirm_password = form['confirm_password'];
+
+    if (password !== confirm_password) {
+        form.setError("confirm_password", "Password does not match.");
+        return;
+    }
+
+    form.submitPost("/api/register/")
+        .then(response => {
+            if (response.ok) {
                 sendEmail();
             }
         });
 }
 
 function sendEmail() {
-    fetch("api/auth/send-register-email/", {
+    let formData = {
+        'email': form['email'],
+        'reason': 'register'
+    };
+
+    fetch("/api/send-verify-email/", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({'email': form['email']}),
+        body: JSON.stringify(formData),
     }).then(response => {
-        if (!response.ok) {
+        if (response.ok) {
+            router.push({name: 'check-email'});
+        } else {
             // todo: animate using alert.js
             alert("Internal server error!");
             console.error(response);
-            return;
         }
-
-        success.value = true;
     })
 }
 </script>
@@ -38,54 +51,56 @@ function sendEmail() {
 <template>
     <AuthLayout>
         <div v-if="success" class="inbox">
-            <img src="../assets/envelope.svg" alt="Envelope" width="50px" />
+            <img src="../assets/envelope.svg" alt="Envelope" width="50px"/>
             <p class="title">Check your e-mail inbox.</p>
         </div>
         <form v-else @submit.prevent="onSubmit">
-            <div>
+            <section class="input">
                 <TextInput
                         v-model="form['display_name']"
                         hint="Name"
                         label="inner"
-                        :required="true"
+                        :error_message="form.errors['display_name']"
                 ></TextInput>
-                <InputError :message="form.errors['display_name']"></InputError>
-            </div>
-            <div>
                 <TextInput
                         v-model="form['email']"
                         type="email"
                         hint="E-mail"
-                        label="inner"
-                        :required="true"
+                        :error_message="form.errors['email']"
                 ></TextInput>
-                <InputError :message="form.errors['email']"></InputError>
-            </div>
-            <div>
                 <TextInput
                         v-model="form['password']"
                         type="password"
                         hint="Password"
-                        label="inner"
-                        :required="true"
+                        :error_message="form.errors['password']"
                 ></TextInput>
-                <InputError :message="form.errors['password']"></InputError>
-            </div>
-            <button filled type="submit" :disabled="form.processing.value">Sign up</button>
+                <TextInput
+                        v-model="form['confirm_password']"
+                        type="password"
+                        hint="Confirm Password"
+                        :error_message="form.errors['confirm_password']"
+                ></TextInput>
+            </section>
+            <button filled type="submit" :disabled="form.processing">Sign up</button>
         </form>
     </AuthLayout>
 </template>
 
 <style scoped>
-div.inbox {
+form {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 2rem 0;
-    row-gap: 1rem;
+    row-gap: 1.5rem;
+    padding: 1rem;
 }
-p.title {
-    font-size: 1.5rem;
-    font-weight: bold;
+
+button {
+    box-shadow: black 0.3rem 0.3rem 0.3rem;
+}
+
+section.input {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
 }
 </style>

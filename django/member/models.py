@@ -27,6 +27,7 @@ class Member(AbstractBaseUser):
     handle = models.CharField(max_length=32, unique=True, validators=[handleValidator])
     display_name = models.CharField(max_length=32)
     email = models.EmailField(max_length=128, unique=True)
+    bio = models.TextField(max_length=256, blank=True)
     is_active = models.BooleanField(default=True)
     is_verified = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
@@ -56,6 +57,7 @@ class AuthRequest(models.Model):
     class Reason(models.IntegerChoices):
         REGISTER = 1
         CHANGE_EMAIL = 2
+        RESET_PASSWORD = 3
 
     reason = models.CharField(choices=Reason.choices, max_length=32)
     member = models.ForeignKey(Member, on_delete=models.CASCADE)

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from django.conf import settings
 from django.contrib.auth import login as django_login, logout as django_logout
 from django.contrib.sites.models import Site
@@ -10,18 +8,20 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Member, AuthRequest
-from .serializers import LoginSerializer, RegisterSerializer, ProfileSerializer, PasswordChangeSerializer
 from .tokens import AuthTokenGenerator
 from .utils import get_random_password
+from .models import Member, AuthRequest
+from .serializers import (
+    LoginSerializer, RegisterSerializer, ProfileSerializer,
+    PasswordChangeSerializer, PasswordResetSerializer, validate_email
+)
 
 
 @api_view(['POST'])
@@ -56,14 +56,14 @@ def profile(request: Request):
         serializer = ProfileSerializer(instance=request.user)
         return Response(serializer.data)
     elif request.method == 'PUT':
-        serializer = ProfileSerializer(data=request.data)
+        serializer = ProfileSerializer(instance=request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_200_OK)
 
 
 class SendVerificationEmail(APIView):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [AllowAny]
     member = None
     mail = None
     reason = None
@@ -85,10 +85,7 @@ class SendVerificationEmail(APIView):
         try:
             reason = request.data['reason']
             if reason is None:
-                return Response(
-                    data=f"Missing form data: reason",
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return self.error("Missing form data: reason")
             self.reason = AuthRequest.Reason[reason.upper()]
         except KeyError:
             return Response(data="Bad form data: reason", status=status.HTTP_400_BAD_REQUEST)
@@ -97,6 +94,8 @@ class SendVerificationEmail(APIView):
             return self.register(request)
         elif self.reason == AuthRequest.Reason.CHANGE_EMAIL:
             return self.change_email(request)
+        elif self.reason == AuthRequest.Reason.RESET_PASSWORD:
+            return self.reset_password(request)
 
     def create_token(self):
         return AuthTokenGenerator().make_token(self.member)
@@ -114,12 +113,13 @@ class SendVerificationEmail(APIView):
         )
         return content
 
+    @staticmethod
+    def error(message):
+        return Response(data=message, status=status.HTTP_400_BAD_REQUEST)
+
     def register(self, request):
         if self.member.is_verified:
-            return Response(
-                data="Account is already verified.",
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return self.error("Account is already verified.")
 
         token = self.create_token()
         expiry_date = timezone.now() + timezone.timedelta(hours=1)
@@ -138,19 +138,9 @@ class SendVerificationEmail(APIView):
 
     def change_email(self, request):
         if not self.member.is_verified:
-            return Response(
-                data="Account is not verified yet.",
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return self.error("Account is not verified yet.")
 
-        new_email = request.data['new_email']
-
-        if new_email is None:
-            return Response(
-                data="Missing form data: new_email",
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
+        new_email = validate_email(request.data['new_email'], key='new_email')
         token = self.create_token()
         expiry_date = timezone.now() + timezone.timedelta(hours=1)
         mail = EmailMessage(
@@ -161,14 +151,36 @@ class SendVerificationEmail(APIView):
         mail.content_subtype = 'html'
         mail.send()
         AuthRequest.objects.create(
-            reason=self.reason, target=new_email.lower(),
+            reason=self.reason, target=new_email,
+            member=self.member, token=token, valid_until=expiry_date
+        )
+        return Response(status=status.HTTP_200_OK)
+
+    def reset_password(self, request):
+        if not self.member.is_verified:
+            return self.error("Account is not verified yet.")
+
+        serializer = PasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_password = serializer.validated_data['new_password']
+        token = self.create_token()
+        expiry_date = timezone.now() + timezone.timedelta(hours=1)
+        mail = EmailMessage(
+            subject="[Naru Airlines] Confirm your new password.",
+            body=self.get_content(request, token, 'auth/reset_password.html'),
+            to=[self.mail],
+        )
+        mail.content_subtype = 'html'
+        mail.send()
+        AuthRequest.objects.create(
+            reason=self.reason, target=new_password,
             member=self.member, token=token, valid_until=expiry_date
         )
         return Response(status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
-def verify_register_email(_: Request, uid: str, token: str):
+def verify_account(_: Request, uid: str, token: str):
     try:
         user = get_user(uid)
     except ObjectDoesNotExist:
@@ -178,7 +190,7 @@ def verify_register_email(_: Request, uid: str, token: str):
         return Response(data="Account is already verified.", status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        auth_request = get_auth_request(token)
+        auth_request = get_auth_request(token, AuthRequest.Reason.REGISTER)
     except ObjectDoesNotExist:
         return Response(data="Token is invalid.", status=status.HTTP_400_BAD_REQUEST)
 
@@ -187,7 +199,27 @@ def verify_register_email(_: Request, uid: str, token: str):
 
     user.is_verified = True
     user.save()
-    return redirect_login()
+    return redirect(suffix="login/")
+
+
+@api_view(['GET'])
+def verify_reset_password(_: Request, uid: str, token: str):
+    try:
+        user = get_user(uid)
+    except ObjectDoesNotExist:
+        return Response(data="Account not found.", status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        auth_request = get_auth_request(token, reason=AuthRequest.Reason.RESET_PASSWORD)
+    except ObjectDoesNotExist:
+        return Response(data="Token is invalid.", status=status.HTTP_400_BAD_REQUEST)
+
+    if auth_request.is_expired():
+        return Response(data="Token is expired.", status=status.HTTP_400_BAD_REQUEST)
+
+    user.set_password(auth_request.target)
+    user.save()
+    return redirect(suffix="login/")
 
 
 @api_view(['GET'])
@@ -198,16 +230,16 @@ def verify_change_email(_: Request, uid: str, token: str):
         return Response(data="Account not found.", status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        auth_request = get_auth_request(token)
+        auth_request = get_auth_request(token, reason=AuthRequest.Reason.CHANGE_EMAIL)
     except ObjectDoesNotExist:
         return Response(data="Token is invalid.", status=status.HTTP_400_BAD_REQUEST)
 
     if auth_request.is_expired():
         return Response(data="Token is expired.", status=status.HTTP_400_BAD_REQUEST)
 
-    user.set_password(auth_request.target)
+    user.email = auth_request.target
     user.save()
-    return redirect_login()
+    return redirect(suffix="login/")
 
 
 @api_view(['POST'])
@@ -220,7 +252,6 @@ def change_password(request: Request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def reset_password(request: Request):
     mail_address = request.data['email']
     try:
@@ -242,7 +273,7 @@ def reset_password(request: Request):
             email.content_subtype = 'html'
             email.send()
     except ObjectDoesNotExist:
-        pass
+        return Response(status=status.HTTP_200_OK)
     return Response(status=status.HTTP_200_OK)
 
 
@@ -298,13 +329,13 @@ def get_user(uid: str) -> Member:
     return Member.objects.get(pk=pk)
 
 
-def get_auth_request(token: str) -> AuthRequest:
-    return AuthRequest.objects.get(reason=AuthRequest.Reason.REGISTER, token=token)
+def get_auth_request(token: str, reason: AuthRequest.Reason) -> AuthRequest:
+    return AuthRequest.objects.get(reason=reason, token=token)
 
 
-def redirect_login() -> Response:
+def redirect(suffix) -> Response:
     scheme = 'https' if settings.HTTPS else 'http'
-    location = f'{scheme}://{Site.objects.get_current().domain}/login/'
+    location = f'{scheme}://{Site.objects.get_current().domain}/{suffix}'
 
     return Response(
         status=status.HTTP_301_MOVED_PERMANENTLY,

@@ -128,8 +128,8 @@ class Alert {
       position: fixed;
       display: block;
       z-index: 500000000;
-      top: 5rem;
-      right: 1rem;
+      top: 8rem;
+      right: 3rem;
       width: calc(min((100vw - 4rem), 36rem));
       height: calc(100vh - 12rem);
       transition: top 0.2s ease-out, right 0.2s ease-out, max-width 0.2s ease-out;

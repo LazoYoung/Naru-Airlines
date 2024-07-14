@@ -43,7 +43,7 @@ main {
         padding-top: 0;
     }
     #auth_body {
-        max-width: 28rem;
+        max-width: 24rem;
         border-radius: 0.5rem;
     }
 }

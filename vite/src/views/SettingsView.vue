@@ -100,7 +100,7 @@ function reloadForm() {
     notificationForm['receive_emails'] = profile.value['receive_emails'];
 }
 
-function submit(form: Form, method, url) {
+function submit(form: Form, method: string, url: string) {
     form.submit(method, url)
         .then(response => {
             if (response.ok) {
@@ -113,7 +113,7 @@ function submit(form: Form, method, url) {
 </script>
 
 <template>
-    <MainLayout title="My settings">
+    <MainLayout title="Settings">
         <div class="vertical">
             <section class="box">
                 <div class="horizontal">

@@ -206,7 +206,7 @@ function logout() {
         <div id="nav-background"></div>
         <div id="nav-top">
             <div class="left">
-                <RouterLink :to="{name: 'home'}" class="logo">
+                <RouterLink :to="{name: 'home'}" class="logo" @click="closeAll">
                     <div class="icon">
                         <IconLogo :color="pilot ? 'blue' : 'white'"></IconLogo>
                     </div>
@@ -227,17 +227,17 @@ function logout() {
                         <img class="image" :src="getProfileImageSource()" alt="image">
                         <div class="name">{{ profile['display_name'] }}</div>
                     </div>
+                    <RouterLink :to="{name: 'passport'}" @click.stop="closeAll" class="element">
+                        <img class="icon" src="../assets/passport.svg" alt="passport">
+                        <span>My Passport</span>
+                    </RouterLink>
                     <RouterLink :to="{name: 'settings'}" @click.stop="closeAll" class="element">
-                        <div class="pillar"></div>
                         <img class="icon" src="../assets/gear.svg" alt="settings">
                         <span>Settings</span>
-                        <div class="pillar"></div>
                     </RouterLink>
                     <a @click.stop="logout" class="element">
-                        <div class="pillar"></div>
                         <img class="icon" src="../assets/exit.svg" alt="exit">
                         <span>Log out</span>
-                        <div class="pillar"></div>
                     </a>
                 </div>
                 <div v-else id="guest">
@@ -555,6 +555,7 @@ function logout() {
     display: flex;
     flex-direction: row;
     font-weight: bold;
+    justify-content: start;
     cursor: pointer;
 }
 
@@ -567,12 +568,14 @@ function logout() {
     font-size: 1rem;
     font-weight: 500;
     align-content: center;
-    width: 4rem;
+    margin-inline-start: 1rem;
+    margin-inline-end: 1rem;
+    flex-grow: 1;
 }
 
 #account[expand] .icon {
-    width: 1.75rem;
-    margin-inline-end: 0.5rem;
+    width: 1.5rem;
+    margin-left: 1rem;
 }
 
 #account .name {

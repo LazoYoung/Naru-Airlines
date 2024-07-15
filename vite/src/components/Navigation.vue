@@ -1,7 +1,7 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import {RouterLink} from "vue-router";
-import {fetchProfile, getGravatarHash, home, useForm} from "@/api.js";
+import {fetchProfile, getGravatarHash, home, useForm} from "@/api";
 import IconBanner from "@/components/icons/IconBanner.vue";
 import IconLogo from "@/components/icons/IconLogo.vue";
 import BasicMenu from "@/components/menu/BasicMenu.vue";
@@ -557,11 +557,6 @@ function logout() {
     font-weight: bold;
     justify-content: start;
     cursor: pointer;
-}
-
-#account[expand] > .element > .pillar {
-    visibility: hidden;
-    flex-grow: 1;
 }
 
 #account[expand] > .element > span {

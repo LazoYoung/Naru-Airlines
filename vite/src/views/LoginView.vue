@@ -1,8 +1,8 @@
 <script setup>
 import AuthLayout from "@/components/layout/AuthLayout.vue";
 import TextInput from "@/components/input/TextInput.vue";
-import {home, useForm} from "@/api.js";
 import Checkbox from "@/components/input/Checkbox.vue";
+import {home, useForm} from "@/api";
 
 const form = useForm(['email', 'password']);
 

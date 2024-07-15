@@ -1,7 +1,7 @@
 <script setup>
 import AuthLayout from "@/components/layout/AuthLayout.vue";
 import TextInput from "@/components/input/TextInput.vue";
-import {useForm} from "@/api.js";
+import {useForm} from "@/api";
 import router from "@/router/index.js";
 
 const form = useForm({

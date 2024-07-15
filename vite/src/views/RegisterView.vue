@@ -1,8 +1,7 @@
 <script setup>
 import AuthLayout from "@/components/layout/AuthLayout.vue";
-import {useForm} from "@/api.js";
 import TextInput from "@/components/input/TextInput.vue";
-import InputError from "@/components/InputError.vue";
+import {useForm} from "@/api";
 import {ref} from "vue";
 import router from "@/router/index.js";
 

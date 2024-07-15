@@ -10,9 +10,7 @@ export default defineConfig({
         vue({
             template: {
                 compilerOptions: {
-                    isCustomElement: (tag) => {
-                        return tag.startsWith('form-');
-                    }
+                    isCustomElement: isCustomElement
                 }
             }
         }),
@@ -36,3 +34,10 @@ export default defineConfig({
         }
     },
 });
+
+function isCustomElement(tag) {
+    return tag.startsWith('form-') ||
+        tag === 'layer' ||
+        tag === 'inwrapper' ||
+        tag === 'outwrapper';
+}

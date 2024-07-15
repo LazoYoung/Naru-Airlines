@@ -1,42 +1,26 @@
-import MD5 from "crypto-js/md5.js";
-import {reactive, ref} from "vue";
+import {reactive, Ref} from "vue";
 import router from "@/router/index.js";
+import MD5 from "crypto-js/md5.js";
 
-// export function fetchJSON(url, token) {
-//     return fetch(url, {
-//         method: 'GET',
-//         headers: {'X-CSRF-Token': token}
-//     }).then(r => r.json());
-// }
-//
-// export function fetchResponse(url, token) {
-//     return fetch(url, {
-//         method: 'GET',
-//         headers: {'X-CSRF-Token': token}
-//     });
-// }
-
-/**
- * @param ref Reference to json
- * @returns {Promise<void>}
- */
 // todo: elevate security measure
-export async function fetchProfile(ref) {
-    let response = await fetch("/api/profile/");
+export async function fetchProfile(ref: Ref) {
+    return fetch("/api/profile/")
+        .then((response: Response) => {
+            if (!response.ok) {
+                ref.value = null;
+                return response;
+            }
 
-    if (!response.ok) {
-        ref.value = null;
-        return;
-    }
-
-    ref.value = await response.json();
+            return response.json()
+                .then(json => ref.value = json);
+        });
 }
 
-export function getGravatarHash(email) {
+export function getGravatarHash(email: string) {
     return MD5(email.trim().toLowerCase());
 }
 
-export function getCookie(name) {
+export function getCookie(name: string) {
     const regex = new RegExp(`(^| )${name}=([^;]+)`);
     const match = document.cookie.match(regex);
 
@@ -55,7 +39,7 @@ export class Form {
     errors = {};
     _inputs = [];
 
-    constructor(data) {
+    constructor(data: any) {
         let _data = data;
 
         if (Array.isArray(data)) {
@@ -99,7 +83,7 @@ export class Form {
         }
     }
 
-    setError(input, error) {
+    setError(input: string, error: string) {
         if (this.errors.hasOwnProperty(input)) {
             this.errors[input] = error;
         } else {
@@ -107,8 +91,8 @@ export class Form {
         }
     };
 
-    submit(method, url) {
-        let options = {
+    submit(method: string, url: string) {
+        let options: RequestInit = {
             method: method,
             headers: {
                 "Content-Type": "application/json",
@@ -123,25 +107,25 @@ export class Form {
         return fetch(url, options).then(r => this._process(r))
     };
 
-    submitPost(url) {
+    submitPost(url: string) {
         return this.submit('POST', url);
     }
 
-    _process(response) {
+    _process(response: Response) {
         if (response.ok) {
             this._complete();
             return response;
         }
 
         // console.error(response);
-        return response.json().then(json => {
+        return response.json().then((json: any) => {
             this._processError(json);
             this._complete();
             return response;
         });
     }
 
-    _processError(json) {
+    _processError(json: any) {
         if (typeof json === 'string') {
             this.setError('errors', json);
             return;
@@ -159,17 +143,13 @@ export class Form {
     }
 
     _complete() {
-        setTimeout(_ => {
+        setTimeout(() => {
             this.processing = false;
         }, 1000);
     }
 }
 
-export function useForm(data) {
+export function useForm(data: any): Form {
     let form = new Form(data);
     return reactive(form);
 }
-
-// export function useForm(data) {
-//     return new Form(data);
-// }

@@ -1,6 +1,6 @@
 <script setup>
 import {computed} from "vue";
-import {getGravatarHash} from "@/api.js";
+import {getGravatarHash} from "@/api";
 
 // todo: cache image
 

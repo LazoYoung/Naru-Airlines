@@ -2,7 +2,7 @@
 import MainLayout from '@/components/layout/MainLayout.vue';
 import TextInput from "@/components/input/TextInput.vue";
 import Checkbox from "@/components/input/Checkbox.vue";
-import {fetchProfile, Form, useForm} from "@/api.js";
+import {fetchProfile, Form, useForm} from "@/api";
 import {onMounted, ref} from "vue";
 import Gravatar from "@/components/icons/Gravatar.vue";
 import router from "@/router/index.js";
@@ -76,7 +76,7 @@ function saveNotification() {
 }
 
 function onProfileFetch() {
-    if (!profile.value) {
+    if (profile.value === null) {
         router.push({name: 'login'})
             .then(_ => error.pop("Session expired."));
         return;

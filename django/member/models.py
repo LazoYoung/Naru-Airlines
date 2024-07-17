@@ -37,7 +37,7 @@ class Member(AbstractBaseUser):
 
     USERNAME_FIELD = 'handle'
     EMAIL_FIELD = 'email'
-    REQUIRED_FIELDS = ['display_name']
+    REQUIRED_FIELDS = ['display_name', 'email']
 
     def __str__(self):
         return self.handle

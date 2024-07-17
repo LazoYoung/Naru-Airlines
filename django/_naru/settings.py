@@ -37,6 +37,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # internal apps
     'member.apps.MemberConfig',
+    'passenger.apps.PassengerConfig',
 
     # 3rd party apps
     'django.contrib.admin',

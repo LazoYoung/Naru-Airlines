@@ -94,44 +94,35 @@ class PasswordChangeTest(TestCase):
         change = self.client.post(reverse('change_password'), data={
             'old_password': get_random_password(),
             'new_password': new_password,
+            'confirm_password': new_password,
         })
         self.assertTrue(status.is_client_error(change.status_code))
         self.assertTrue('old_password' in change.json())
 
     def test_password_change_with_short_password(self):
         old_password = get_random_password()
+        new_password = get_random_password(length=5)
         register_and_login(self, password=old_password)
 
         change = self.client.post(reverse('change_password'), data={
             'old_password': old_password,
-            'new_password': get_random_password(length=5),
+            'new_password': new_password,
+            'confirm_password': new_password,
         })
         self.assertTrue(status.is_client_error(change.status_code))
         self.assertTrue('new_password' in change.json())
 
     def test_password_change(self):
         old_password = get_random_password()
+        new_password = get_random_password()
         register_and_login(self, password=old_password)
 
         change = self.client.post(reverse('change_password'), data={
             'old_password': old_password,
-            'new_password': get_random_password(),
+            'new_password': new_password,
+            'confirm_password': new_password,
         })
         self.assertTrue(status.is_success(change.status_code))
-
-
-class PasswordResetTest(TestCase):
-    def test_password_reset(self):
-        email = get_random_email()
-        password = get_random_password()
-        register = post_register(self.client, email=email, password=password)
-        self.assertTrue(status.is_success(register.status_code))
-
-        self.client.login(email=email, password=password)
-        reset = self.client.post(reverse('reset_password'), data={
-            'email': email
-        })
-        self.assertTrue(status.is_success(reset.status_code))
 
 
 class ProfileTest(TestCase):
@@ -147,9 +138,8 @@ class ProfileTest(TestCase):
         data = get.json()
         self.assertEqual(get.status_code, status.HTTP_200_OK)
         self.assertTrue('handle' in data)
-        self.assertTrue('display_name' in data)
         self.assertTrue('email' in data)
-        self.assertTrue('is_verified' in data)
+        self.assertTrue('display_name' in data)
 
     def test_profile_put(self):
         register_and_login(self)
@@ -181,6 +171,25 @@ class VerificationTest(TestCase):
         verify = self.verify_email(email, reason)
         self.assertTrue(status.is_redirect(verify.status_code))
 
+    def test_reset_password_verification(self):
+        reason = AuthRequest.Reason.RESET_PASSWORD
+        email = get_random_email()
+        new_password = get_random_password()
+        register_and_login(self, email=email)
+
+        send_email = self.client.post(
+            path=reverse('send_verify_email'),
+            data={
+                'email': email, 'reason': reason.name,
+                'new_password': new_password,
+                'confirm_password': new_password
+            }
+        )
+        self.assertTrue(status.is_success(send_email.status_code))
+
+        verify = self.verify_email(email, reason)
+        self.assertTrue(status.is_redirect(verify.status_code))
+
     def test_change_email_verification(self):
         reason = AuthRequest.Reason.CHANGE_EMAIL
         old_email = get_random_email()
@@ -201,13 +210,15 @@ class VerificationTest(TestCase):
         request = AuthRequest.objects.get(reason=reason, member=member)
 
         if reason == AuthRequest.Reason.REGISTER:
-            api = "verify-register"
+            api = "verify-account"
+        elif reason == AuthRequest.Reason.RESET_PASSWORD:
+            api = "reset-password"
         elif reason == AuthRequest.Reason.CHANGE_EMAIL:
-            api = "verify-change-email"
+            api = "change-email"
         else:
             self.assertTrue(False, f"Bad reason: {reason}")
 
-        url = f"/api/auth/{api}/{get_uid(member)}/{request.token}"
+        url = f"/api/{api}/{get_uid(member)}/{request.token}"
         return self.client.get(path=url)
 
 

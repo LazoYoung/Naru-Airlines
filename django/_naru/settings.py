@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     # internal apps
     'member.apps.MemberConfig',
     'passenger.apps.PassengerConfig',
+    'flight.apps.FlightConfig',
+    'pilot.apps.PilotConfig',
 
     # 3rd party apps
     'django.contrib.admin',
@@ -48,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'corsheaders',
+    'django_extensions',
     'rest_framework',
     'six',
 ]

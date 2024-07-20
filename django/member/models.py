@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 class MemberManager(BaseUserManager):
     def create_user(self, handle, display_name, email, password=None):
         if not handle:
-            raise ValueError("Users must have a handle")
+            raise ValueError("A user must have a handle")
 
         user = Member(handle=handle, display_name=display_name, email=email)
         user.set_password(password)

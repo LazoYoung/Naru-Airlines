@@ -262,3 +262,4 @@ def register_and_login(test_case: TestCase, display_name=None, email=None, passw
 
     member = Member.objects.get(email__iexact=email)
     test_case.client.force_login(user=member)
+    return member

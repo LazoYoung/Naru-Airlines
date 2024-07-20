@@ -15,19 +15,14 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Passenger',
+            name='Pilot',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('mileage', models.IntegerField(default=0)),
-                ('is_vip', models.BooleanField(default=False)),
+                ('simbrief_id', models.CharField(max_length=32)),
+                ('acars_api', models.CharField(max_length=255, unique=True)),
+                ('greetings', models.CharField(max_length=128)),
+                ('livestream_url', models.CharField(max_length=255)),
                 ('member', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-        ),
-        migrations.CreateModel(
-            name='Booking',
-            fields=[
-                ('ticket_number', models.PositiveBigIntegerField(primary_key=True, serialize=False)),
-                ('member', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='passenger.passenger')),
             ],
         ),
     ]

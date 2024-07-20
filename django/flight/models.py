@@ -15,9 +15,9 @@ class Airport(models.Model):
 
 
 class Flight(models.Model):
+    flt_number = models.CharField(max_length=8, primary_key=True)
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
     passengers = models.ManyToManyField(Passenger, blank=True)
-    flt_number = models.CharField(max_length=8)
     callsign = models.CharField(max_length=8)
     acf_type = models.CharField(max_length=8)
     departure_time = models.DateTimeField()

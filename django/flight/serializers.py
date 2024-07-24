@@ -4,16 +4,16 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from flight.models import FlightSchedule
+from flight.models import Flight
 from pilot.models import Pilot
 
 regex_flt_number = re.compile(r'NR\d+')
 regex_callsign = re.compile(r'[A-Z]{3}\d+')
 
 
-class FlightScheduleSerializer(serializers.ModelSerializer):
+class FlightSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FlightSchedule
+        model = Flight
         # fields = '__all__'
         exclude = ['pilot']
 
@@ -37,7 +37,7 @@ class FlightScheduleSerializer(serializers.ModelSerializer):
         except ObjectDoesNotExist:
             raise ValidationError("Pilot record missing.")
 
-        return FlightSchedule.objects.create(
+        return Flight.objects.create(
             pilot=pilot,
             flt_number=validated_data['flt_number'],
             callsign=validated_data['callsign'],

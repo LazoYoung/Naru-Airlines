@@ -14,8 +14,17 @@ class Airport(models.Model):
     longitude = models.FloatField()
 
 
-class FlightSchedule(models.Model):
+class Flight(models.Model):
+    class Phase(models.IntegerChoices):
+        PREFLIGHT = 0
+        BOARDING = 1
+        DEPARTING = 2
+        CRUISING = 3
+        LANDED = 4
+        ARRIVED = 5
+
     flt_number = models.CharField(max_length=8, primary_key=True)
+    phase = models.IntegerField(choices=Phase, default=Phase.PREFLIGHT)
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
     passengers = models.ManyToManyField(Passenger, blank=True)
     callsign = models.CharField(max_length=8)

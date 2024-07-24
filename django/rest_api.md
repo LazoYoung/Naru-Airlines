@@ -14,3 +14,12 @@
 | `api/change-password/`              | `change_password`       | POST   | old_password, new_password, confirm_password                   |
 | `api/profile/`                      | `profile`               | GET    |                                                                |
 | `api/profile/`                      | `profile`               | PUT    | bio, display_name, email, receive_emails                       |
+
+## Flight dispatcher
+| URL                          | Method | Description                 | Form                                                                               |
+|------------------------------|--------|-----------------------------|------------------------------------------------------------------------------------|
+| `api/dispatch/`              | POST   | Schedule a new flight plan. | flt_number, callsign, acf_type, departure_time, departure_airport, arrival_airport |
+| `api/schedules/`             | GET    | Get your flight plans.      |                                                                                    |
+| `api/schedule/<flt_number>/` | GET    | Get one specific plan.      |                                                                                    |
+| `api/schedule/<flt_number>/` | PUT    | Revise the flight plan.     | callsign, acf_type, departure_time, departure_airport, arrival_airport             |
+| `api/schedule/<flt_number>/` | DELETE | Cancel the flight plan.     |                                                                                    |

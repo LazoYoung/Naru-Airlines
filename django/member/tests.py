@@ -261,5 +261,6 @@ def register_and_login(test_case: TestCase, display_name=None, email=None, passw
     test_case.assertTrue(status.is_success(register.status_code))
 
     member = Member.objects.get(email__iexact=email)
+    test_case.client.logout()
     test_case.client.force_login(user=member)
     return member

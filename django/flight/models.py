@@ -14,7 +14,7 @@ class Airport(models.Model):
     longitude = models.FloatField()
 
 
-class Flight(models.Model):
+class FlightSchedule(models.Model):
     flt_number = models.CharField(max_length=8, primary_key=True)
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
     passengers = models.ManyToManyField(Passenger, blank=True)

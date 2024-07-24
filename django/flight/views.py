@@ -25,7 +25,12 @@ def dispatch(request):
 @api_view(['GET'])
 @permission_classes([IsPilotOrReadOnly])
 def schedules(request: Request):
-    queryset = FlightSchedule.objects.filter(pilot=request.user.pilot)
+    queryset = (
+        FlightSchedule
+        .objects
+        .filter(pilot=request.user.pilot)
+        .order_by('departure_time')
+    )
     serializer = FlightScheduleSerializer(queryset, many=True)
     return Response(serializer.data)
 

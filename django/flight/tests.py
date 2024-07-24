@@ -68,27 +68,42 @@ class FlightScheduleTest(TestCase):
     def test_schedules(self):
         self._create_pilot()
 
-        empty_schedule = self.client.get(reverse('schedules'))
-        self.assertEqual(empty_schedule.data, [])
-        self.assertTrue(status.is_success(empty_schedule.status_code))
+        response = self.client.get(reverse('schedules'))
+        self.assertEqual(response.data, [])
+        self.assertTrue(status.is_success(response.status_code))
 
         flt_number1 = "NR001"
         flt_number2 = "NR002"
-        dispatch1 = self._dispatch(flt_number=flt_number1)
-        dispatch2 = self._dispatch(flt_number=flt_number2)
+        flt_number3 = "NR003"
+        dispatch1 = self._dispatch(
+            flt_number=flt_number1,
+            departure_time=timezone.now() + timezone.timedelta(hours=1)
+        )
+        dispatch2 = self._dispatch(
+            flt_number=flt_number2,
+            departure_time=timezone.now() + timezone.timedelta(hours=2)
+        )
+        dispatch3 = self._dispatch(
+            flt_number=flt_number3,
+            departure_time=timezone.now() + timezone.timedelta(hours=3)
+        )
         self.assertTrue(status.is_success(dispatch1.status_code))
         self.assertTrue(status.is_success(dispatch2.status_code))
+        self.assertTrue(status.is_success(dispatch3.status_code))
 
-        schedules = self.client.get(reverse('schedules'))
-        self.assertTrue(status.is_success(schedules.status_code))
-        self.assertContains(schedules, text=flt_number1, count=1)
-        self.assertContains(schedules, text=flt_number2, count=1)
+        # Schedules ordered by departure time (asc)
+        response = self.client.get(reverse('schedules'))
+        self.assertTrue(status.is_success(response.status_code))
+        schedules = response.data
+        self.assertEqual(flt_number1, schedules[0]['flt_number'])
+        self.assertEqual(flt_number2, schedules[1]['flt_number'])
+        self.assertEqual(flt_number3, schedules[2]['flt_number'])
 
         # New pilot has empty schedule
         self._create_pilot()
-        empty_schedule = self.client.get(reverse('schedules'))
-        self.assertEqual(empty_schedule.data, [])
-        self.assertTrue(status.is_success(empty_schedule.status_code))
+        response = self.client.get(reverse('schedules'))
+        self.assertEqual(response.data, [])
+        self.assertTrue(status.is_success(response.status_code))
 
     def test_get_flight(self):
         flt_number = "NR003"
@@ -183,14 +198,16 @@ class FlightScheduleTest(TestCase):
         pilot = Pilot.objects.create(member=member)
         return pilot
 
-    def _dispatch(self, flt_number):
+    def _dispatch(self, flt_number, departure_time=None):
+        if departure_time is None:
+            departure_time = timezone.now() + timezone.timedelta(hours=1)
         departure = create_airport("Departure airport")
         arrival = create_airport("Arrival airport")
         result = self.client.post(reverse('dispatch'), data={
             "flt_number": flt_number,
             "callsign": "NAR234",
             "acf_type": "A320",
-            "departure_time": timezone.now() + timezone.timedelta(hours=1),
+            "departure_time": departure_time,
             "departure_airport": departure.icao_code,
             "arrival_airport": arrival.icao_code,
         })

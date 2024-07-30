@@ -28,10 +28,13 @@ button {
     box-shadow: inset 0 0 0 1px var(--button-fg);
     cursor: pointer;
 }
-button i, button span {
+button i,
+button span {
     color: var(--button-fg);
 }
-button:hover, button:hover i, button:hover span {
+button:hover,
+button:hover i,
+button:hover span {
     background: var(--button-fg);
     color: var(--button-bg);
 }
@@ -134,7 +137,7 @@ form-input-text {
     width: 100%;
     height: 3.5rem;
 }
-form-input-text[label="inner"] {
+form-input-text[label='inner'] {
     height: 4.5rem;
 }
 form-textarea {
@@ -175,6 +178,7 @@ form-datetime > input {
     word-break: break-all;
     border-radius: 0.25rem !important;
 }
+/* wafawfwa waf wa f w*/
 form-textarea > textarea {
     vertical-align: bottom;
     max-width: 100%;
@@ -183,15 +187,15 @@ form-textarea > textarea {
     min-height: 6rem;
     padding: 1rem 1rem 1rem 1rem;
 }
-form-input-text[label="inner"] > input,
-form-input-text[label="inner"] > input:hover,
-form-input-text[label="inner"] > input:focus {
+form-input-text[label='inner'] > input,
+form-input-text[label='inner'] > input:hover,
+form-input-text[label='inner'] > input:focus {
     height: calc(100% - 1rem);
     padding: 0.875rem 1rem 0 1rem;
 }
-form-textarea[label="inner"] > textarea,
-form-textarea[label="inner"] > textarea:hover,
-form-textarea[label="inner"] > textarea:focus {
+form-textarea[label='inner'] > textarea,
+form-textarea[label='inner'] > textarea:hover,
+form-textarea[label='inner'] > textarea:focus {
     min-height: 5rem;
     padding: 2rem 1rem 1rem 1rem;
 }
@@ -199,11 +203,11 @@ form-input-text > input:placeholder-shown,
 form-textarea > textarea:placeholder-shown {
     -webkit-text-fill-color: var(--form-input-placeholder) !important;
 }
-form-input-text[label="inner"] > input:placeholder-shown {
+form-input-text[label='inner'] > input:placeholder-shown {
     height: 100%;
     padding: 0 1rem 0 1rem;
 }
-form-textarea[label="inner"] > textarea:placeholder-shown {
+form-textarea[label='inner'] > textarea:placeholder-shown {
     min-height: 6rem;
     padding: 1rem 1rem 1rem 1rem;
 }
@@ -218,8 +222,8 @@ form-textarea > label {
     display: none;
     z-index: 30000;
 }
-form-input-text[label="inner"] > label,
-form-textarea[label="inner"] > label {
+form-input-text[label='inner'] > label,
+form-textarea[label='inner'] > label {
     display: block;
     position: absolute;
     top: 0.875rem;
@@ -231,13 +235,13 @@ form-textarea[label="inner"] > label {
     pointer-events: none;
     color: var(--form-input-fg);
 }
-form-input-text[label="inner"] > input:placeholder-shown ~ label,
-form-textarea[label="inner"] > textarea:placeholder-shown ~ label {
+form-input-text[label='inner'] > input:placeholder-shown ~ label,
+form-textarea[label='inner'] > textarea:placeholder-shown ~ label {
     opacity: 0;
     top: 1rem;
 }
-form-input-text[label="top"] > label,
-form-textarea[label="top"] > label {
+form-input-text[label='top'] > label,
+form-textarea[label='top'] > label {
     display: block;
     position: absolute;
     top: -0.675rem;
@@ -251,8 +255,8 @@ form-textarea[label="top"] > label {
     background: var(--form-input-label-bg);
     padding: 0.3rem 0.5rem;
 }
-form-input-text[label="top"] > input:placeholder-shown ~ label,
-form-textarea[label="top"] > textarea:placeholder-shown ~ label {
+form-input-text[label='top'] > input:placeholder-shown ~ label,
+form-textarea[label='top'] > textarea:placeholder-shown ~ label {
     opacity: 0;
     top: 0;
 }
@@ -264,7 +268,7 @@ form-textarea > form-input-border {
     width: 100%;
     height: 100%;
     transition: box-shadow 0.1s ease-out, padding-bottom 0.1s ease-out,
-    top 0.1s ease-out;
+        top 0.1s ease-out;
     pointer-events: none;
     z-index: 20000;
     padding-bottom: 0;
@@ -273,10 +277,10 @@ form-textarea > form-input-border {
 form-input-text > input:focus ~ form-input-border,
 form-textarea > textarea:focus ~ form-input-border {
     transition: box-shadow 0.2s ease-out, padding-bottom 0.1s ease-out,
-    top 0.1s ease-out;
+        top 0.1s ease-out;
     box-shadow: inset 0 0 0 1px var(--form-input-outline) !important;
 }
-form-input-text > input[type="search"] {
+form-input-text > input[type='search'] {
     width: 100%;
     height: 100%;
 }

@@ -1,21 +1,23 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/variable/pretendardvariable-dynamic-subset.css");
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/variable/pretendardvariable-dynamic-subset.css');
 
 :root {
-    --bg: rgb(35, 35, 35);
-    --fg: white;
+    --bg: white;
+    --fg: black;
+    --th: #003468;
     --red: red;
     --yellow: yellow;
     --green: green;
     --t245: rgb(245, 245, 245);
 
-    --sans-serif: "Pretendard Variable", "Malgun Gothic", sans-serif;
+    --sans-serif: 'Pretendard Variable', 'Malgun Gothic', sans-serif;
+    --font-family: var(--sans-serif);
 }
 
 html {
     font-size: calc(15px + (100vw - 1500px) / 400);
 }
 body {
-    font-family: var(--sans-serif);
+    font-family: var(--font-family);
     font-weight: normal;
     margin: 0;
     padding: 0;
@@ -41,6 +43,7 @@ body::-webkit-scrollbar {
     border-spacing: 0;
     color: var(--fg);
     line-height: 100%;
+    box-sizing: border-box;
 }
 @media print {
     @page {
@@ -88,6 +91,11 @@ hr {
     background: var(--t210);
     border: none;
 }
+input,
+textarea,
+button {
+    font-family: var(--font-family);
+}
 /* SVG */
 svg {
     fill: var(--fg);
@@ -131,13 +139,12 @@ layer,
 outwrapper {
     display: block;
     position: relative;
-    width: calc(100% - 40rem);
-    max-width: 75vw;
+    max-width: 70rem;
     padding: 0 2rem 0 2rem;
     margin: 0 auto;
 }
 outwrapper[wide] {
-    width: calc(100% - 4rem);
+    width: 100%;
     max-width: unset;
     padding: 0 2rem 0 2rem;
 }
@@ -146,19 +153,9 @@ inwrapper {
     position: relative;
     width: 100%;
 }
-@media (max-width: 1500px) {
-    outwrapper,
-    outwrapper[wide] {
-        width: calc(100% - 4rem);
-        max-width: unset;
-        padding: 0 2rem 0 2rem;
-    }
-}
 @media (max-width: 900px) {
     outwrapper,
     outwrapper[wide] {
-        width: calc(100% - 2rem);
-        max-width: unset;
         padding: 0 1rem 0 1rem;
     }
 }

@@ -1,7 +1,7 @@
-import {fileURLToPath, URL} from 'node:url'
+import { fileURLToPath, URL } from 'node:url';
 
-import {defineConfig} from 'vite'
-import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
 
 // https://vitejs.dev/config/
 // noinspection JSUnusedGlobalSymbols
@@ -10,15 +10,15 @@ export default defineConfig({
         vue({
             template: {
                 compilerOptions: {
-                    isCustomElement: isCustomElement
-                }
-            }
+                    isCustomElement: isCustomElement,
+                },
+            },
         }),
     ],
     resolve: {
         alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url))
-        }
+            '@': fileURLToPath(new URL('./src', import.meta.url)),
+        },
     },
     server: {
         port: 8080,
@@ -30,14 +30,17 @@ export default defineConfig({
             '/static': {
                 target: 'http://localhost:8000',
                 changeOrigin: true,
-            }
-        }
+            },
+        },
     },
 });
 
 function isCustomElement(tag) {
-    return tag.startsWith('form-') ||
+    return (
+        tag.startsWith('form-') ||
         tag === 'layer' ||
         tag === 'inwrapper' ||
-        tag === 'outwrapper';
+        tag === 'outwrapper' ||
+        tag === 'na-splitflapdisplay'
+    );
 }

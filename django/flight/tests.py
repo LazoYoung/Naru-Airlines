@@ -35,9 +35,10 @@ class DispatchTest(TestCase):
 
         departure = create_airport("Departure airport")
         dispatch = self.client.post(reverse('dispatch'), data={
-            "flt_number": "NR234",
+            "flight_number": "NR234",
+            "flight_time": "1:20",
             "callsign": "NAR234",
-            "acf_type": "A320",
+            "aircraft": "A320",
             "departure_time": timezone.now() + timezone.timedelta(hours=1),
             "departure_airport": departure.icao_code,
             "arrival_airport": 'AAAA',
@@ -50,9 +51,10 @@ class DispatchTest(TestCase):
         departure = create_airport("Departure airport")
         arrival = create_airport("Arrival airport")
         result = self.client.post(reverse('dispatch'), data={
-            "flt_number": "NR234",
+            "flight_number": "NR234",
+            "flight_time": "1:20",
             "callsign": "NAR234",
-            "acf_type": "A320",
+            "aircraft": "A320",
             "departure_time": timezone.now() + timezone.timedelta(hours=1),
             "departure_airport": departure.icao_code,
             "arrival_airport": arrival.icao_code,
@@ -95,9 +97,9 @@ class FlightScheduleTest(TestCase):
         response = self.client.get(reverse('schedules'))
         self.assertTrue(status.is_success(response.status_code))
         schedules = response.data
-        self.assertEqual(flt_number1, schedules[0]['flt_number'])
-        self.assertEqual(flt_number2, schedules[1]['flt_number'])
-        self.assertEqual(flt_number3, schedules[2]['flt_number'])
+        self.assertEqual(flt_number1, schedules[0]['flight_number'])
+        self.assertEqual(flt_number2, schedules[1]['flight_number'])
+        self.assertEqual(flt_number3, schedules[2]['flight_number'])
 
         # New pilot has empty schedule
         self._create_pilot()
@@ -114,7 +116,7 @@ class FlightScheduleTest(TestCase):
 
         get_success = self.client.get(reverse('schedule', args=[flt_number]))
         self.assertTrue(status.is_success(get_success.status_code))
-        self.assertEqual(get_success.data['flt_number'], flt_number)
+        self.assertEqual(get_success.data['flight_number'], flt_number)
 
         # Unknown flight number
         get_fail = self.client.get(reverse('schedule', args=["NR999"]))
@@ -146,7 +148,7 @@ class FlightScheduleTest(TestCase):
             content_type='application/json',
             data={
                 "callsign": "NAR345",
-                "acf_type": "A320",
+                "aircraft": "A320",
                 "departure_time": timezone.now() + timezone.timedelta(hours=2),
                 "departure_airport": departure.icao_code,
                 "arrival_airport": arrival.icao_code,
@@ -169,20 +171,20 @@ class FlightScheduleTest(TestCase):
             path=reverse('schedule', args=[flt_number2]),
             content_type='application/json',
             data={
-                "flt_number": "NR567"
+                "flight_number": "NR567"
             }
         )
         self.assertTrue(status.is_client_error(put_fail2.status_code))
-        self.assertTrue('flt_number' in put_fail2.data)
+        self.assertTrue('flight_number' in put_fail2.data)
 
     def test_delete_flight(self):
-        flt_number = "NR007"
+        flight_number = "NR007"
 
         self._create_pilot()
-        dispatch = self._dispatch(flt_number=flt_number)
+        dispatch = self._dispatch(flt_number=flight_number)
         self.assertTrue(status.is_success(dispatch.status_code))
 
-        delete = self.client.delete(reverse('schedule', args=[flt_number]))
+        delete = self.client.delete(reverse('schedule', args=[flight_number]))
         self.assertTrue(status.is_success(delete.status_code))
 
         delete_fail1 = self.client.delete(reverse('schedule', args=["NR999"]))
@@ -190,7 +192,7 @@ class FlightScheduleTest(TestCase):
 
         # The flight does not belong to pilot #2
         self._create_pilot()
-        delete_fail2 = self.client.delete(reverse('schedule', args=[flt_number]))
+        delete_fail2 = self.client.delete(reverse('schedule', args=[flight_number]))
         self.assertTrue(status.is_client_error(delete_fail2.status_code))
 
     def _create_pilot(self):
@@ -204,9 +206,10 @@ class FlightScheduleTest(TestCase):
         departure = create_airport("Departure airport")
         arrival = create_airport("Arrival airport")
         result = self.client.post(reverse('dispatch'), data={
-            "flt_number": flt_number,
+            "flight_number": flt_number,
+            "flight_time": "1:20",
             "callsign": "NAR234",
-            "acf_type": "A320",
+            "aircraft": "A320",
             "departure_time": departure_time,
             "departure_airport": departure.icao_code,
             "arrival_airport": arrival.icao_code,

@@ -38,18 +38,18 @@ def schedules(request: Request):
 class ScheduleAPI(APIView):
     permission_classes = [IsPilotOrReadOnly]
 
-    def get_object(self, flt_number):
-        obj = get_object_or_404(Flight, flt_number=flt_number)
+    def get_object(self, flight_number):
+        obj = get_object_or_404(Flight, flight_number=flight_number)
         self.check_object_permissions(self.request, obj)
         return obj
 
-    def get(self, request, flt_number):
-        serializer = FlightSerializer(instance=self.get_object(flt_number))
+    def get(self, request, flight_number):
+        serializer = FlightSerializer(instance=self.get_object(flight_number))
         return Response(serializer.data)
 
-    def put(self, request, flt_number):
+    def put(self, request, flight_number):
         serializer = FlightSerializer(
-            instance=self.get_object(flt_number),
+            instance=self.get_object(flight_number),
             data=request.data,
             partial=True
         )
@@ -57,6 +57,6 @@ class ScheduleAPI(APIView):
         serializer.save()
         return Response(status=status.HTTP_200_OK)
 
-    def delete(self, request, flt_number):
-        self.get_object(flt_number).delete()
+    def delete(self, request, flight_number):
+        self.get_object(flight_number).delete()
         return Response(status=status.HTTP_200_OK)

@@ -16,10 +16,16 @@
 | `api/profile/`                      | `profile`               | PUT    | bio, display_name, email, receive_emails                       |
 
 ## Flight dispatcher
-| URL                          | Method | Description                 | Form                                                                               |
-|------------------------------|--------|-----------------------------|------------------------------------------------------------------------------------|
-| `api/dispatch/`              | POST   | Schedule a new flight plan. | flt_number, callsign, acf_type, departure_time, departure_airport, arrival_airport |
-| `api/schedules/`             | GET    | Get your flight plans.      |                                                                                    |
-| `api/schedule/<flt_number>/` | GET    | Get one specific plan.      |                                                                                    |
-| `api/schedule/<flt_number>/` | PUT    | Revise the flight plan.     | callsign, acf_type, departure_time, departure_airport, arrival_airport             |
-| `api/schedule/<flt_number>/` | DELETE | Cancel the flight plan.     |                                                                                    |
+| URL                             | Method | Description                 | Form                                                                                  |
+|---------------------------------|--------|-----------------------------|---------------------------------------------------------------------------------------|
+| `api/dispatch/`                 | POST   | Schedule a new flight plan. | flight_number, callsign, aircraft, departure_time, departure_airport, arrival_airport |
+| `api/schedules/`                | GET    | Get your flight plans.      |                                                                                       |
+| `api/schedule/<flight_number>/` | GET    | Get one specific plan.      |                                                                                       |
+| `api/schedule/<flight_number>/` | PUT    | Revise the flight plan.     | callsign, aircraft, departure_time, departure_airport, arrival_airport                |
+| `api/schedule/<flight_number>/` | DELETE | Cancel the flight plan.     |                                                                                       |
+
+
+## Booking
+| URL              | Method | Description                      | Form |
+|------------------|--------|----------------------------------|------|
+| `api/timetable/` | GET    | Get timetable of future flights. |      |

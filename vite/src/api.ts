@@ -1,19 +1,17 @@
-import {reactive, Ref} from "vue";
-import router from "@/router/index.js";
-import MD5 from "crypto-js/md5.js";
+import { reactive, Ref } from 'vue';
+import router from '@/router/index.js';
+import MD5 from 'crypto-js/md5.js';
 
 // todo: elevate security measure
 export async function fetchProfile(ref: Ref) {
-    return fetch("/api/profile/")
-        .then((response: Response) => {
-            if (!response.ok) {
-                ref.value = null;
-                return response;
-            }
+    return fetch('/api/profile/').then((response: Response) => {
+        if (!response.ok) {
+            ref.value = null;
+            return response;
+        }
 
-            return response.json()
-                .then(json => ref.value = json);
-        });
+        return response.json().then((json) => (ref.value = json));
+    });
 }
 
 export function getGravatarHash(email: string) {
@@ -25,13 +23,13 @@ export function getCookie(name: string) {
     const match = document.cookie.match(regex);
 
     if (!match) {
-        throw new Error(`Cookie '${name}' not found`);
+        return null;
     }
     return match[2];
 }
 
 export function home(refresh = true) {
-    router.push({name: 'home'}).then(_ => router.go(0));
+    router.push({ name: 'home' }).then((_) => router.go(0));
 }
 
 export class Form {
@@ -89,14 +87,14 @@ export class Form {
         } else {
             alert(error);
         }
-    };
+    }
 
     submit(method: string, url: string) {
         let options: RequestInit = {
             method: method,
             headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
             },
             mode: 'same-origin',
             body: JSON.stringify(this.data()),
@@ -104,8 +102,8 @@ export class Form {
         this.processing = true;
         this.clearErrors();
 
-        return fetch(url, options).then(r => this._process(r))
-    };
+        return fetch(url, options).then((r) => this._process(r));
+    }
 
     submitPost(url: string) {
         return this.submit('POST', url);

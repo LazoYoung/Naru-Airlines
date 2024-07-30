@@ -49,25 +49,25 @@ const props = defineProps({
     },
 });
 const model = defineModel();
-const input = ref();
+const textarea = ref();
 const target = ref();
 
 watch(props, (_) => reloadElements());
 onMounted(() => reloadElements());
 defineExpose({
-    focus: () => input.value.focus(),
-    blur: () => input.value.blur(),
+    focus: () => textarea.value.focus(),
+    blur: () => textarea.value.blur(),
 });
 
 function reloadElements() {
-    if (input.value.hasAttribute('autofocus')) {
-        input.value.focus();
+    if (textarea.value.hasAttribute('autofocus')) {
+        textarea.value.focus();
     }
 
     if (props.uppercase) {
-        input.value.style['text-transform'] = 'uppercase';
+        textarea.value.style['text-transform'] = 'uppercase';
     } else {
-        input.value.style['text-transform'] = 'none';
+        textarea.value.style['text-transform'] = 'none';
     }
 }
 </script>
@@ -76,9 +76,9 @@ function reloadElements() {
     <!--  todo: support form-textarea, form-datetime  -->
     <div class="form">
         <label v-html="label"></label>
-        <div class="input" ref="target">
-            <input
-                ref="input"
+        <div class="textarea" ref="target">
+            <textarea
+                ref="textarea"
                 v-model="model"
                 :type="type"
                 :required="required"
@@ -110,29 +110,29 @@ function reloadElements() {
     line-height: 1rem;
     min-height: 1.25rem;
 }
-.form > .input {
+.form > .textarea {
     display: flex;
     width: 100%;
-    height: 2.5rem;
+    height: 5rem;
     justify-content: center;
     align-items: center;
     border-radius: 0.75rem;
     overflow: hidden;
     position: relative;
 }
-.form > .input > input,
-.form > .input > input:-webkit-autofill,
-.form > .input > input:-webkit-autofill:hover,
-.form > .input > input:-webkit-autofill:focus {
+.form > .textarea > textarea,
+.form > .textarea > textarea:-webkit-autofill,
+.form > .textarea > textarea:-webkit-autofill:hover,
+.form > .textarea > textarea:-webkit-autofill:focus {
     width: 100%;
     height: 100%;
     font-size: 1rem;
     font-weight: 400;
-    padding: 0 0.75rem;
+    padding: 0.75rem 0.75rem;
     color: black;
     -webkit-text-fill-color: black !important;
 }
-.form > .input > .border {
+.form > .textarea > .border {
     position: absolute;
     top: 0;
     left: 0;
@@ -142,16 +142,16 @@ function reloadElements() {
     pointer-events: none;
     box-shadow: inset 0 0 0 0.1rem rgb(210, 210, 210);
 }
-.form > .input > input:focus ~ .border,
-.form > .input > input:active ~ .border {
+.form > .textarea > textarea:focus ~ .border,
+.form > .textarea > textarea:active ~ .border {
     box-shadow: inset 0 0 0 0.1rem rgb(0, 0, 0);
 }
-.form > .input > input:disabled {
+.form > .textarea > textarea:disabled {
     background: rgb(230, 230, 230);
     cursor: not-allowed;
 }
-.form > .input > input::placeholder,
-.form > .input > input::-webkit-input-placeholderr {
+.form > .textarea > textarea::placeholder,
+.form > .textarea > textarea::-webkit-textarea-placeholderr {
     color: rgb(180, 180, 180);
     -webkit-text-fill-color: rgb(180, 180, 180) !important;
 }

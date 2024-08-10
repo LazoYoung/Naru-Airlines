@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from flight.models import Flight
+from flight.models import Flight, Aircraft
 from pilot.models import Pilot
 
 regex_flt_number = re.compile(r'NR\d+')
@@ -68,3 +68,9 @@ class FlightSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class AircraftSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Aircraft
+        fields = '__all__'

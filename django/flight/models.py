@@ -14,6 +14,13 @@ class Airport(models.Model):
     longitude = models.FloatField()
 
 
+class Aircraft(models.Model):
+    icao_code = models.CharField(max_length=4, primary_key=True)
+    registration = models.CharField(max_length=8)
+    name = models.CharField(max_length=32)
+    image = models.ImageField(upload_to="images/aircraft/", blank=True)
+
+
 class Flight(models.Model):
     class Phase(models.IntegerChoices):
         PREFLIGHT = 0
@@ -29,7 +36,14 @@ class Flight(models.Model):
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
     passengers = models.ManyToManyField(Passenger, blank=True)
     callsign = models.CharField(max_length=8)
-    aircraft = models.CharField(max_length=8)
+    aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_time = models.DateTimeField()
+    departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
+    arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
+
+
+class StandardRoute(models.Model):
+    flight_number = models.CharField(max_length=8, primary_key=True)
+    aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
     arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')

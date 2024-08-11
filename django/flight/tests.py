@@ -1,12 +1,16 @@
+import os
 import random
+import shutil
 import string
 
+from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.test import APITestCase, APIRequestFactory, APIClient
+from rest_framework.test import APITestCase, APIClient
 
 from member.models import Member
 from member.tests import register_and_login
@@ -14,22 +18,28 @@ from pilot.models import Pilot
 from .models import Airport, Aircraft
 
 
-class FleetTest(APITestCase):
-    admin = None
+# temporary media folder
+TEST_DIR = settings.BASE_DIR / 'test_media'
 
+
+@override_settings(MEDIA_ROOT=TEST_DIR)
+class FleetTest(APITestCase):
     def setUp(self):
-        self.admin = Member.objects.create_superuser(handle="admin", display_name="admin", email="<EMAIL>", password="<PASSWORD>")
+        os.mkdir(TEST_DIR)
+        superuser = Member.objects.create_superuser(handle="admin", display_name="admin", email="<EMAIL>", password="<PASSWORD>")
+        self.admin = APIClient()
+        self.admin.force_login(superuser)
 
     def test_fleet_all(self):
-        self._create_aircraft("A320")
-        self._create_aircraft("B738")
+        self._aircraft("A320")
+        self._aircraft("B738")
         response = self.client.get(reverse("fleet_all"))
         self.assertContains(response, "A320")
         self.assertContains(response, "B738")
 
     def test_fleet_get(self):
-        aircraft1 = self._create_aircraft("A320")
-        aircraft2 = self._create_aircraft("B738")
+        aircraft1 = self._aircraft("A320")
+        aircraft2 = self._aircraft("B738")
         icao_code1 = aircraft1.icao_code
         icao_code2 = aircraft2.icao_code
         response1 = self.client.get(self._reverse(icao_code1))
@@ -46,69 +56,84 @@ class FleetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_fleet_crud(self):
-        icao_code = "B748"
-        client = APIClient()
-        client.force_login(self.admin)
+        icao_code = "A320"
 
-        post = client.post(
+        post = self.admin.post(
             path=reverse("fleet_aircraft"),
             data={
                 "icao_code": icao_code,
                 "registration": "HL5678",
-                "name": "Boeing 747-8i"
+                "name": "Boeing 747-8i",
+                "image": self._image(),
             }
         )
         self.assertEqual(post.status_code, status.HTTP_201_CREATED)
-        post = client.get(self._reverse(icao_code))
+        post = self.admin.get(self._reverse(icao_code))
         self.assertContains(post, icao_code)
 
         new_reg = "HL9999"
-        new_name = "Queen of the Sky"
+        new_name = "Airbus A320 CFM"
         bad_file = SimpleUploadedFile(
             name="wav_file.wav",
             content=b'RIFF$\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x00\x04\x00\x00\x00\x04\x00\x00\x01\x00\x08\x00data\x00\x00\x00\x00',
             content_type='audio/wav',
         )
-        bad_put = client.put(
+        bad_put = self.admin.put(
             path=self._reverse(icao_code),
             data={
                 "registration": new_reg,
                 "name": new_name,
-                "image": bad_file
+                "image": bad_file,
             },
         )
         self.assertEqual(bad_put.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertTrue("image" in bad_put.json())
 
-        put = client.put(
+        put = self.admin.put(
             path=self._reverse(icao_code),
             data={
                 "registration": new_reg,
                 "name": new_name,
-                # todo: embed real image
+                "image": self._image(),
             }
         )
         self.assertEqual(put.status_code, status.HTTP_204_NO_CONTENT)
-        put = client.get(self._reverse(icao_code))
+        put = self.admin.get(self._reverse(icao_code))
         self.assertContains(put, new_reg)
         self.assertContains(put, new_name)
 
-        delete = client.delete(self._reverse(icao_code))
+        delete = self.admin.delete(self._reverse(icao_code))
         self.assertEqual(delete.status_code, status.HTTP_204_NO_CONTENT)
 
-        client.logout()
+    def tearDown(self):
+        try:
+            shutil.rmtree(TEST_DIR)
+        except OSError as e:
+            print("Failed to delete temporary files:", e)
 
     @staticmethod
     def _reverse(icao_code):
         return reverse("fleet_aircraft", kwargs={"icao_code": icao_code})
 
     @staticmethod
-    def _create_aircraft(icao_code):
+    def _aircraft(icao_code):
         return Aircraft.objects.create(
             icao_code=icao_code,
             registration="HL1111",
             name="Random aircraft",
         )
+
+    @staticmethod
+    def _image():
+        file_name = "a320.png"
+        with open(finders.find(file_name), 'rb') as file:
+            bytes = file.read()
+            image_file = SimpleUploadedFile(
+                name=file_name,
+                content=bytes,
+                content_type="image/png"
+            )
+            return image_file
 
 
 class DispatchCharterTest(TestCase):

@@ -53,7 +53,8 @@ class AircraftAPI(APIView):
         serializer = AircraftSerializer(instance=self._instance(icao_code))
         return Response(serializer.data)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = AircraftSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

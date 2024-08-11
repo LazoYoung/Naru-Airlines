@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.request import Request
@@ -8,40 +9,52 @@ from rest_framework.views import APIView
 
 from member.permission import IsAdminOrReadOnly
 from pilot.permissions import IsPilotOrReadOnly
-from .models import Flight, Aircraft
-from .serializers import FlightSerializer, AircraftSerializer
+from .models import Flight, Aircraft, StandardRoute
+from .serializers import FlightSerializer, AircraftSerializer, StandardRouteSerializer
 
 
-# todo: complete views
 @api_view(['GET'])
-def standard_routes(request):
-    pass
+def routes(request):
+    data = StandardRoute.objects.all().values()
+    return Response(data=data, status=status.HTTP_200_OK)
 
 
-class ManageRouteAPI(APIView):
+class RouteAPI(APIView):
     permission_classes = (IsAdminOrReadOnly,)
 
-    def get(self, request):
-        pass
+    def get(self, request, flight_number):
+        serializer = StandardRouteSerializer(instance=self._route(flight_number))
+        return Response(serializer.data)
 
-    def post(self, request):
-        pass
+    @staticmethod
+    def post(request):
+        serializer = StandardRouteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def put(self, request):
-        pass
+    def put(self, request, flight_number):
+        serializer = StandardRouteSerializer(
+            instance=self._route(flight_number),
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def delete(self, request):
-        pass
+    def delete(self, request, flight_number):
+        instance = self._route(flight_number)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-@api_view(['POST'])
-@permission_classes([IsPilotOrReadOnly])
-def dispatch_standard(request):
-    pass
+    @staticmethod
+    def _route(flight_number):
+        return get_object_or_404(StandardRoute, flight_number=flight_number)
 
 
 @api_view(['GET'])
-def fleet_all(request):
+def fleet_profiles(request):
     return Response(data=Aircraft.objects.all().values(), status=status.HTTP_200_OK)
 
 
@@ -58,7 +71,7 @@ class AircraftAPI(APIView):
         serializer = AircraftSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def put(self, request, icao_code):
         serializer = AircraftSerializer(
@@ -82,6 +95,35 @@ class AircraftAPI(APIView):
 
 @api_view(['POST'])
 @permission_classes([IsPilotOrReadOnly])
+def dispatch_standard(request):
+    flight_number = request.data['flight_number']
+    query = StandardRoute.objects.filter(flight_number=flight_number)
+
+    if not query.exists():
+        raise ValidationError({'flight_number': 'No standard route found.'})
+
+    # todo: reject the request if there's a flight with the same number
+
+    route = query.get()
+    serializer = FlightSerializer(
+        data={
+            'flight_number': flight_number,
+            'flight_time': request.data['flight_time'],
+            'callsign': request.data['callsign'],
+            'aircraft': route.aircraft.icao_code,
+            'departure_time': request.data['departure_time'],
+            'departure_airport': route.departure_airport.icao_code,
+            'arrival_airport': route.arrival_airport.icao_code,
+        },
+        context={'request': request}
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([IsPilotOrReadOnly])
 def dispatch_charter(request):
     flight = FlightSerializer(
         data=request.data,
@@ -89,7 +131,7 @@ def dispatch_charter(request):
     )
     flight.is_valid(raise_exception=True)
     flight.save()
-    return Response(status=status.HTTP_201_CREATED)
+    return Response(flight.data, status=status.HTTP_201_CREATED)
 
 
 @api_view(['GET'])

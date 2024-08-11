@@ -1,10 +1,11 @@
 import re
 
+from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from flight.models import Flight, Aircraft
+from flight.models import Flight, Aircraft, StandardRoute, Airport
 from pilot.models import Pilot
 
 regex_flt_number = re.compile(r'NR\d+')
@@ -13,9 +14,21 @@ regex_callsign = re.compile(r'[A-Z]{3}\d+')
 
 
 class FlightSerializer(serializers.ModelSerializer):
+    aircraft = serializers.PrimaryKeyRelatedField(
+        queryset=Aircraft.objects.all(),
+        error_messages={'does_not_exist': _('Aircraft not in our fleet.')}
+    )
+    departure_airport = serializers.PrimaryKeyRelatedField(
+        queryset=Airport.objects.all(),
+        error_messages={'does_not_exist': _('Airport not in database.')}
+    )
+    arrival_airport = serializers.PrimaryKeyRelatedField(
+        queryset=Airport.objects.all(),
+        error_messages={'does_not_exist': _('Airport not in database.')}
+    )
+
     class Meta:
         model = Flight
-        # fields = '__all__'
         exclude = ['pilot']
 
     @staticmethod
@@ -74,3 +87,15 @@ class AircraftSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aircraft
         fields = '__all__'
+
+
+class StandardRouteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StandardRoute
+        fields = '__all__'
+
+    @staticmethod
+    def validate_flight_number(value):
+        if not regex_flt_number.fullmatch(value):
+            raise ValidationError("Prefix 'NR' must precede the number.")
+        return value

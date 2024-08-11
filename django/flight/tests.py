@@ -15,8 +15,7 @@ from rest_framework.test import APITestCase, APIClient
 from member.models import Member
 from member.tests import register_and_login
 from pilot.models import Pilot
-from .models import Airport, Aircraft
-
+from .models import Airport, Aircraft, StandardRoute
 
 # temporary media folder
 TEST_DIR = settings.BASE_DIR / 'test_media'
@@ -26,20 +25,25 @@ TEST_DIR = settings.BASE_DIR / 'test_media'
 class FleetTest(APITestCase):
     def setUp(self):
         os.mkdir(TEST_DIR)
-        superuser = Member.objects.create_superuser(handle="admin", display_name="admin", email="<EMAIL>", password="<PASSWORD>")
+        superuser = Member.objects.create_superuser(
+            handle="admin",
+            display_name="admin",
+            email="<EMAIL>",
+            password="<PASSWORD>"
+        )
         self.admin = APIClient()
         self.admin.force_login(superuser)
 
     def test_fleet_all(self):
-        self._aircraft("A320")
-        self._aircraft("B738")
-        response = self.client.get(reverse("fleet_all"))
+        create_aircraft("A320")
+        create_aircraft("B738")
+        response = self.client.get(reverse("fleet_profiles"))
         self.assertContains(response, "A320")
         self.assertContains(response, "B738")
 
     def test_fleet_get(self):
-        aircraft1 = self._aircraft("A320")
-        aircraft2 = self._aircraft("B738")
+        aircraft1 = create_aircraft("A320")
+        aircraft2 = create_aircraft("B738")
         icao_code1 = aircraft1.icao_code
         icao_code2 = aircraft2.icao_code
         response1 = self.client.get(self._reverse(icao_code1))
@@ -116,14 +120,6 @@ class FleetTest(APITestCase):
         return reverse("fleet_aircraft", kwargs={"icao_code": icao_code})
 
     @staticmethod
-    def _aircraft(icao_code):
-        return Aircraft.objects.create(
-            icao_code=icao_code,
-            registration="HL1111",
-            name="Random aircraft",
-        )
-
-    @staticmethod
     def _image():
         file_name = "a320.png"
         with open(finders.find(file_name), 'rb') as file:
@@ -136,48 +132,182 @@ class FleetTest(APITestCase):
             return image_file
 
 
-class DispatchCharterTest(TestCase):
-    def test_as_guest(self):
-        dispatch = self._dispatch()
-        self.assertTrue(status.is_client_error(dispatch.status_code))
+class StandardRouteTests(APITestCase):
+    def setUp(self):
+        self.superuser = Member.objects.create_superuser(
+            handle="admin",
+            display_name="admin",
+            email="<EMAIL>",
+            password="<PASSWORD>",
+        )
+        self.admin = APIClient()
+        self.admin.force_login(self.superuser)
+        self.flight_id = 100
+        self.aircraft = create_aircraft("A320")
+        self.route1 = self._create_route()
+        self.route2 = self._create_route()
+        self.route3 = self._create_route()
 
-    def test_as_member(self):
-        register_and_login(self)
+    def test_routes(self):
+        response = self.client.get(reverse("routes"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, self.route1.flight_number)
+        self.assertContains(response, self.route2.flight_number)
+        self.assertContains(response, self.route3.flight_number)
 
-        dispatch = self._dispatch()
-        self.assertTrue(status.is_client_error(dispatch.status_code))
+    def test_get(self):
+        flt_num = self.route1.flight_number
+        acf = self.route1.aircraft.icao_code
+        dep = self.route1.departure_airport.icao_code
+        arr = self.route1.arrival_airport.icao_code
+        get = self.client.get(reverse("route", kwargs={"flight_number": flt_num}))
+        self.assertEqual(get.status_code, status.HTTP_200_OK)
+        self.assertContains(get, flt_num)
+        self.assertContains(get, acf)
+        self.assertContains(get, dep)
+        self.assertContains(get, arr)
 
-    def test_as_pilot(self):
-        member = register_and_login(self)
+    def test_post(self):
+        dep = create_airport(random_airport_code())
+        arr = create_airport(random_airport_code())
+        flt_num = self._flight_number()
+        post = self.admin.post(
+            path=reverse("route"),
+            data={
+                "flight_number": flt_num,
+                "aircraft": self.aircraft.icao_code,
+                "departure_airport": dep.icao_code,
+                "arrival_airport": arr.icao_code,
+            }
+        )
+        self.assertEqual(post.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(post.data["flight_number"], flt_num)
+        self.assertEqual(post.data["aircraft"], self.aircraft.icao_code)
+        self.assertEqual(post.data["departure_airport"], dep.icao_code)
+        self.assertEqual(post.data["arrival_airport"], arr.icao_code)
+
+    def test_put(self):
+        flt_num = self.route1.flight_number
+        aircraft = create_aircraft("B748")
+        dep = create_airport(random_airport_code())
+        arr = create_airport(random_airport_code())
+        put = self.admin.put(
+            path=self._reverse(flight_number=flt_num),
+            data={
+                "aircraft": aircraft.icao_code,
+                "departure_airport": dep.icao_code,
+                "arrival_airport": arr.icao_code,
+            }
+        )
+        self.assertEqual(put.status_code, status.HTTP_204_NO_CONTENT)
+        get = self.client.get(self._reverse(flt_num))
+        self.assertContains(get, aircraft.icao_code)
+        self.assertContains(get, dep.icao_code)
+        self.assertContains(get, arr.icao_code)
+
+    def test_delete(self):
+        flt_num = self.route2.flight_number
+        delete = self.admin.delete(self._reverse(flt_num))
+        self.assertEqual(delete.status_code, status.HTTP_204_NO_CONTENT)
+        get = self.client.get(self._reverse(flt_num))
+        self.assertEqual(get.status_code, status.HTTP_404_NOT_FOUND)
+
+    @staticmethod
+    def _reverse(flight_number):
+        return reverse("route", kwargs={"flight_number": flight_number})
+
+    def _create_route(self):
+        route = StandardRoute.objects.create(
+            flight_number=self._flight_number(),
+            aircraft=self.aircraft,
+            departure_airport=create_airport(random_airport_code()),
+            arrival_airport=create_airport(random_airport_code()),
+        )
+        return route
+
+    def _flight_number(self):
+        flt_num = f"NR{self.flight_id}"
+        self.flight_id += 1
+        return flt_num
+
+
+class DispatchTest(APITestCase):
+    def setUp(self):
+        member = Member.objects.create_user(
+            handle="pilot",
+            display_name="pilot",
+            email="<EMAIL>",
+            password="<PASSWORD>",
+        )
         Pilot.objects.create(member=member)
+        self.pilot = APIClient()
+        self.pilot.force_login(member)
+        self.aircraft = create_aircraft("B744")
+        self.route = StandardRoute.objects.create(
+            flight_number="NR200",
+            aircraft=self.aircraft,
+            departure_airport=create_airport(random_airport_code()),
+            arrival_airport=create_airport(random_airport_code()),
+        )
 
-        dispatch = self._dispatch()
+    def test_without_permission(self):
+        # try as guest
+        charter = self._dispatch_charter(self.client)
+        standard = self._dispatch_standard(self.client)
+        self.assertTrue(status.is_client_error(charter.status_code))
+        self.assertTrue(status.is_client_error(standard.status_code))
+
+        # try as member (non-pilot)
+        register_and_login(self)
+        charter = self._dispatch_charter(self.client)
+        standard = self._dispatch_standard(self.client)
+        self.assertTrue(status.is_client_error(charter.status_code))
+        self.assertTrue(status.is_client_error(standard.status_code))
+
+    def test_charter(self):
+        dispatch = self._dispatch_charter(self.pilot)
         self.assertTrue(status.is_success(dispatch.status_code))
 
-    def test_with_invalid_airport(self):
-        member = register_and_login(self)
-        Pilot.objects.create(member=member)
+    def test_standard(self):
+        dispatch = self._dispatch_standard(self.pilot)
+        self.assertTrue(status.is_success(dispatch.status_code))
 
+    def test_with_invalid_aircraft(self):
+        dispatch = self._dispatch_charter(self.pilot, data={
+            "aircraft": "@@@@"
+        })
+        self.assertTrue(status.is_client_error(dispatch.status_code))
+        self.assertTrue("aircraft" in dispatch.data)
+
+    def test_with_invalid_airport(self):
         departure = create_airport("Departure airport")
-        aircraft = get_dummy_aircraft()
-        dispatch = self.client.post(reverse('dispatch_charter'), data={
-            "flight_number": "NR234",
-            "flight_time": "1:20",
-            "callsign": "NAR234",
-            "aircraft": aircraft.icao_code,
-            "departure_time": timezone.now() + timezone.timedelta(hours=1),
+        dispatch = self._dispatch_charter(self.pilot, data={
             "departure_airport": departure.icao_code,
-            "arrival_airport": 'AAAA',
+            "arrival_airport": "@@@@"
         })
         self.assertTrue(status.is_client_error(dispatch.status_code))
         self.assertTrue("departure_airport" not in dispatch.data)
         self.assertTrue("arrival_airport" in dispatch.data)
 
-    def _dispatch(self):
+    def test_with_invalid_flight_number(self):
+        StandardRoute.objects.create(
+            flight_number="NR999",
+            aircraft=self.aircraft,
+            departure_airport=create_airport(random_airport_code()),
+            arrival_airport=create_airport(random_airport_code()),
+        )
+        dispatch = self._dispatch_standard(self.pilot, flight_number="NR111")
+        self.assertTrue(status.is_client_error(dispatch.status_code))
+        self.assertTrue("flight_number" in dispatch.data)
+
+    @staticmethod
+    def _dispatch_charter(client, data=None):
+        if data is None:
+            data = {}
         departure = create_airport("Departure airport")
         arrival = create_airport("Arrival airport")
         aircraft = get_dummy_aircraft()
-        result = self.client.post(reverse('dispatch_charter'), data={
+        payload = {
             "flight_number": "NR234",
             "flight_time": "1:20",
             "callsign": "NAR234",
@@ -185,7 +315,28 @@ class DispatchCharterTest(TestCase):
             "departure_time": timezone.now() + timezone.timedelta(hours=1),
             "departure_airport": departure.icao_code,
             "arrival_airport": arrival.icao_code,
-        })
+        }
+        result = client.post(
+            path=reverse('dispatch_charter'),
+            data=payload | data
+        )
+        return result
+
+    def _dispatch_standard(self, client, flight_number=None, data=None):
+        if flight_number is None:
+            flight_number = self.route.flight_number
+        if data is None:
+            data = {}
+        payload = {
+            "flight_number": flight_number,
+            "callsign": "NAR560",
+            "flight_time": "1:30",
+            "departure_time": timezone.now() + timezone.timedelta(hours=1),
+        }
+        result = client.post(
+            path=reverse('dispatch_standard'),
+            data=payload | data,
+        )
         return result
 
 
@@ -365,6 +516,14 @@ def create_airport(name):
         city="Seoul",
         latitude="0.0",
         longitude="0.0",
+    )
+
+
+def create_aircraft(icao_code) -> Aircraft:
+    return Aircraft.objects.create(
+        icao_code=icao_code,
+        registration="HL1111",
+        name="Random aircraft",
     )
 
 

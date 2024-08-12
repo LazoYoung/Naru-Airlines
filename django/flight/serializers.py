@@ -34,7 +34,7 @@ class FlightSerializer(serializers.ModelSerializer):
     @staticmethod
     def validate_flight_number(value):
         if not regex_flt_number.fullmatch(value):
-            raise ValidationError("Prefix 'NR' must precede the number.")
+            raise ValidationError("Flight number must start with: NR")
         return value
 
     @staticmethod

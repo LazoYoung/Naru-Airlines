@@ -2,6 +2,7 @@ import os
 import random
 import shutil
 import string
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.staticfiles import finders
@@ -15,7 +16,7 @@ from rest_framework.test import APITestCase, APIClient
 from member.models import Member
 from member.tests import register_and_login
 from pilot.models import Pilot
-from .models import Airport, Aircraft, StandardRoute
+from .models import Airport, Aircraft, StandardRoute, Flight
 
 # temporary media folder
 TEST_DIR = settings.BASE_DIR / 'test_media'
@@ -239,7 +240,7 @@ class DispatchTest(APITestCase):
             email="<EMAIL>",
             password="<PASSWORD>",
         )
-        Pilot.objects.create(member=member)
+        self.pilot_user = Pilot.objects.create(member=member)
         self.pilot = APIClient()
         self.pilot.force_login(member)
         self.aircraft = create_aircraft("B744")
@@ -279,7 +280,7 @@ class DispatchTest(APITestCase):
         self.assertTrue(status.is_client_error(dispatch.status_code))
         self.assertTrue("aircraft" in dispatch.data)
 
-    def test_with_invalid_airport(self):
+    def test_invalid_airport(self):
         departure = create_airport("Departure airport")
         dispatch = self._dispatch_charter(self.pilot, data={
             "departure_airport": departure.icao_code,
@@ -289,7 +290,7 @@ class DispatchTest(APITestCase):
         self.assertTrue("departure_airport" not in dispatch.data)
         self.assertTrue("arrival_airport" in dispatch.data)
 
-    def test_with_invalid_flight_number(self):
+    def test_invalid_flight_number(self):
         StandardRoute.objects.create(
             flight_number="NR999",
             aircraft=self.aircraft,
@@ -299,6 +300,19 @@ class DispatchTest(APITestCase):
         dispatch = self._dispatch_standard(self.pilot, flight_number="NR111")
         self.assertTrue(status.is_client_error(dispatch.status_code))
         self.assertTrue("flight_number" in dispatch.data)
+
+    def test_route_already_in_use(self):
+        flt_num = "NR200"
+        Flight.objects.create(
+            flight_number=flt_num,
+            flight_time="2:10",
+            pilot=self.pilot_user,
+            callsign="NAR200",
+            aircraft=self.aircraft,
+            departure_time=timezone.now() + timedelta(hours=1),
+            departure_airport=create_airport(random_airport_code()),
+            arrival_airport=create_airport(random_airport_code()),
+        )
 
     @staticmethod
     def _dispatch_charter(client, data=None):

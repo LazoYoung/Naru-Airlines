@@ -97,14 +97,17 @@ class AircraftAPI(APIView):
 @permission_classes([IsPilotOrReadOnly])
 def dispatch_standard(request):
     flight_number = request.data['flight_number']
-    query = StandardRoute.objects.filter(flight_number=flight_number)
+    route_query = StandardRoute.objects.filter(flight_number=flight_number)
 
-    if not query.exists():
+    if not route_query.exists():
         raise ValidationError({'flight_number': 'No standard route found.'})
 
-    # todo: reject the request if there's a flight with the same number
+    route = route_query.get()
+    flight_query = Flight.objects.filter(flight_number=flight_number)
 
-    route = query.get()
+    if flight_query.exists():
+        raise ValidationError({'flight_number': 'This route is already taken.'})
+
     serializer = FlightSerializer(
         data={
             'flight_number': flight_number,

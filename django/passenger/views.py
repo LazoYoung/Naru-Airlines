@@ -10,7 +10,7 @@ def timetable(request):
     queryset = (
         Flight
         .objects
-        .filter(phase=Flight.Phase.PREFLIGHT)
+        .filter(phase=Flight.Phase.SCHEDULED)
         .order_by('departure_time')
     )
     serializer = FlightSerializer(queryset, many=True)

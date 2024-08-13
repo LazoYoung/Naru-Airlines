@@ -8,6 +8,7 @@ from flight.models import Airport
 # noinspection PyTypeChecker
 def run():
     file_path = "scripts/airports.csv"
+    allowed_types = ["medium_airport", "large_airport"]
     lines = get_lines(file_path)
 
     with open(file_path, 'r', encoding="UTF-8") as file:
@@ -15,7 +16,7 @@ def run():
         airports = []
 
         for row in tqdm(reader, total=(lines - 1)):
-            if row["type"] not in ["small_airport", "medium_airport", "large_airport"]:
+            if not row["iata_code"] or row["type"] not in allowed_types:
                 continue
 
             instance = Airport(

@@ -23,7 +23,7 @@ class Aircraft(models.Model):
 
 class Flight(models.Model):
     class Phase(models.IntegerChoices):
-        PREFLIGHT = 0
+        SCHEDULED = 0
         BOARDING = 1
         DEPARTING = 2
         CRUISING = 3
@@ -32,7 +32,7 @@ class Flight(models.Model):
 
     flight_number = models.CharField(max_length=8, primary_key=True)
     flight_time = models.CharField(max_length=6)
-    phase = models.IntegerField(choices=Phase, default=Phase.PREFLIGHT)
+    phase = models.IntegerField(choices=Phase, default=Phase.SCHEDULED)
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
     passengers = models.ManyToManyField(Passenger, blank=True)
     callsign = models.CharField(max_length=8)

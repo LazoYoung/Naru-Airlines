@@ -16,14 +16,13 @@
 | `api/profile/`                      | `profile`               | PUT    | bio, display_name, email, receive_emails                       |
 
 ## Flight dispatcher
-| URL                             | Method | Description                      | Form                                                                                               |
-|---------------------------------|--------|----------------------------------|----------------------------------------------------------------------------------------------------|
-| `api/dispatch/charter/`         | POST   | Submit charter flight schedule.  | flight_number, callsign, aircraft, flight_time, departure_time, departure_airport, arrival_airport |
-| `api/dispatch/standard/`        | POST   | Submit standard flight schedule. | flight_number, callsign, flight_time, departure_time                                               |
-| `api/schedules/`                | GET    | Get your flight plans.           |                                                                                                    |
-| `api/schedule/<flight_number>/` | GET    | Get one specific plan.           |                                                                                                    |
-| `api/schedule/<flight_number>/` | PUT    | Revise the flight plan.          | callsign, aircraft, departure_time, departure_airport, arrival_airport                             |
-| `api/schedule/<flight_number>/` | DELETE | Cancel the flight plan.          |                                                                                                    |
+| URL                             | Method | Description                      | Form                                                                      |
+|---------------------------------|--------|----------------------------------|---------------------------------------------------------------------------|
+| `api/dispatch/charter/`         | POST   | Submit charter flight schedule.  | aircraft, flight_time, departure_time, departure_airport, arrival_airport |
+| `api/dispatch/standard/`        | POST   | Submit standard flight schedule. | flight_number, aircraft                                                   |
+| `api/schedules/`                | GET    | Get your flight schedules.       |                                                                           |
+| `api/schedule/<flight_number>/` | GET    | Get one specific schedule.       |                                                                           |
+| `api/schedule/<flight_number>/` | DELETE | Cancel the flight schedule.      |                                                                           |
 
 ## Standard route
 | URL                          | Method | Description              | Form / Response                                             |

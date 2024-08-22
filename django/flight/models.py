@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from passenger.models import Passenger
@@ -21,21 +22,11 @@ class Aircraft(models.Model):
     image = models.ImageField(upload_to="images/aircraft/", blank=True)
 
 
-class Flight(models.Model):
-    class Phase(models.IntegerChoices):
-        SCHEDULED = 0
-        BOARDING = 1
-        DEPARTING = 2
-        CRUISING = 3
-        LANDED = 4
-        ARRIVED = 5
-
-    flight_number = models.CharField(max_length=8, primary_key=True)
-    flight_time = models.CharField(max_length=6)
-    phase = models.IntegerField(choices=Phase, default=Phase.SCHEDULED)
+class FlightSchedule(models.Model):
+    flight_number = models.IntegerField(primary_key=True)
+    is_charter = models.BooleanField(default=False)
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
-    passengers = models.ManyToManyField(Passenger, blank=True)
-    callsign = models.CharField(max_length=8)
+    flight_time = models.CharField(max_length=5)
     aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_time = models.DateTimeField()
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
@@ -43,7 +34,10 @@ class Flight(models.Model):
 
 
 class StandardRoute(models.Model):
-    flight_number = models.CharField(max_length=8, primary_key=True)
+    flight_number = models.IntegerField(primary_key=True)
     aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
+    departure_day = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(31)])
+    departure_zulu = models.TimeField()
+    flight_time = models.DurationField()
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
     arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')

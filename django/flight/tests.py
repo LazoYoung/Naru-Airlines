@@ -18,7 +18,7 @@ from member.models import Member
 from member.tests import register_and_login
 from pilot.models import Pilot
 from .models import Airport, Aircraft, StandardRoute, FlightSchedule
-from .services import DispatchFlightService
+from .services import DispatcherService
 
 # temporary media folder
 TEST_DIR = settings.BASE_DIR / 'test_media'
@@ -277,7 +277,7 @@ class DispatchTest(APITestCase):
             password="<PASSWORD>",
         )
         self.pilot = Pilot.objects.create(member=member)
-        self.service = DispatchFlightService(self.pilot)
+        self.service = DispatcherService(self.pilot)
         self.pilot_client = APIClient()
         self.pilot_client.force_login(member)
         self.aircraft = create_aircraft("B744")

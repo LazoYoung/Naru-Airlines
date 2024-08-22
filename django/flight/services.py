@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Optional
 
 from django.db import IntegrityError
 from rest_framework import status
@@ -28,7 +29,7 @@ class DispatchError(Exception):
 @dataclass
 class StandardDTO:
     flight_number: int
-    aircraft: Aircraft
+    aircraft: Optional[Aircraft]
 
 
 @dataclass
@@ -40,7 +41,7 @@ class CharterDTO:
     arrival_airport: Airport
 
 
-class DispatchFlightService(object):
+class DispatcherService(object):
     standard_numbers = set(range(100, 300))
     charter_numbers = set(range(300, 400))
 

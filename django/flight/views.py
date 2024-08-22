@@ -11,7 +11,7 @@ from pilot.permissions import IsPilotOrReadOnly
 from .models import FlightSchedule, Aircraft, StandardRoute
 from .serializers import AircraftSerializer, StandardRouteSerializer, DispatchStandardSerializer, \
     DispatchCharterSerializer, FlightScheduleSerializer
-from .services import DispatchFlightService, StandardDTO, CharterDTO, DispatchError
+from .services import DispatcherService, StandardDTO, CharterDTO, DispatchError
 
 
 @api_view(['GET'])
@@ -106,7 +106,7 @@ def dispatch_standard(request: Request):
         aircraft=data['aircraft'],
     )
 
-    service = DispatchFlightService(request.user.pilot)
+    service = DispatcherService(request.user.pilot)
     try:
         schedule = service.dispatch_standard(dto)
         serializer = FlightScheduleSerializer(instance=schedule)
@@ -130,7 +130,7 @@ def dispatch_charter(request: Request):
         arrival_airport=data['arrival_airport'],
     )
 
-    service = DispatchFlightService(request.user.pilot)
+    service = DispatcherService(request.user.pilot)
     try:
         schedule = service.dispatch_charter(dto)
         serializer = FlightScheduleSerializer(instance=schedule)

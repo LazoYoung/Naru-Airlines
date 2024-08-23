@@ -1,7 +1,6 @@
 import os
 import random
 import shutil
-import string
 from datetime import timedelta, time
 from time import strptime
 
@@ -10,15 +9,16 @@ from django.contrib.staticfiles import finders
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
-from django.utils import timezone, dateparse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 
 from member.models import Member
 from member.tests import register_and_login
 from pilot.models import Pilot
-from .models import Airport, Aircraft, StandardRoute, FlightSchedule
+from .models import StandardRoute, FlightSchedule
 from .services import DispatcherService
+from .utils import create_airport, get_dummy_aircraft, _random_airport_code, create_aircraft
 
 # temporary media folder
 TEST_DIR = settings.BASE_DIR / 'test_media'
@@ -178,8 +178,8 @@ class StandardRouteTests(APITestCase):
 
     def test_post(self):
         acf = self.aircraft.icao_code
-        dep = create_airport(random_airport_code())
-        arr = create_airport(random_airport_code())
+        dep = create_airport()
+        arr = create_airport()
         flt_num = self.flight_id
         flt_time = self.random_duration()
         day = self.random_day()
@@ -191,7 +191,7 @@ class StandardRouteTests(APITestCase):
                 "aircraft": acf,
                 "departure_day": day,
                 "departure_zulu": zulu,
-                "flight_time": str(flt_time),
+                "flight_time": flt_time,
                 "departure_airport": dep.icao_code,
                 "arrival_airport": arr.icao_code,
             }
@@ -202,15 +202,15 @@ class StandardRouteTests(APITestCase):
         self.assertEqual(post.data["aircraft"], acf)
         self.assertEqual(post.data["departure_day"], day)
         self.assertEqual(post.data["departure_zulu"], zulu)
-        self.assertEqual(self.to_timedelta(post.data["flight_time"]), flt_time)
+        self.assertEqual(post.data["flight_time"], flt_time)
         self.assertEqual(post.data["departure_airport"], dep.icao_code)
         self.assertEqual(post.data["arrival_airport"], arr.icao_code)
 
     def test_put(self):
         flt_num = self.route1.flight_number
         aircraft = create_aircraft("B748")
-        dep = create_airport(random_airport_code())
-        arr = create_airport(random_airport_code())
+        dep = create_airport()
+        arr = create_airport()
         put = self.admin.put(
             path=self._reverse(flight_number=flt_num),
             data={
@@ -240,8 +240,8 @@ class StandardRouteTests(APITestCase):
             departure_day=self.random_day(),
             departure_zulu=self.random_zulu(),
             flight_time=self.random_duration(),
-            departure_airport=create_airport(random_airport_code()),
-            arrival_airport=create_airport(random_airport_code()),
+            departure_airport=create_airport(),
+            arrival_airport=create_airport(),
         )
         self.flight_id += 1
         return route
@@ -260,7 +260,9 @@ class StandardRouteTests(APITestCase):
 
     @staticmethod
     def random_duration():
-        return timedelta(minutes=random.randint(30, 720))
+        hour = random.randint(0, 8)
+        minute = random.randint(0, 59)
+        return f"{hour}:{minute}"
 
     @staticmethod
     def to_timedelta(str):
@@ -319,7 +321,7 @@ class DispatchTest(APITestCase):
         self.assertTrue("aircraft" in dispatch.data)
 
     def test_invalid_airport(self):
-        departure = create_airport("Departure airport")
+        departure = create_airport()
         dispatch = self._dispatch_charter(self.pilot_client, data={
             "departure_airport": departure.icao_code,
             "arrival_airport": "@@@@"
@@ -348,8 +350,8 @@ class DispatchTest(APITestCase):
     def _dispatch_charter(client, data=None):
         if data is None:
             data = {}
-        departure = create_airport("Departure airport")
-        arrival = create_airport("Arrival airport")
+        departure = create_airport()
+        arrival = create_airport()
         aircraft = get_dummy_aircraft()
         payload = {
             "aircraft": aircraft.icao_code,
@@ -389,8 +391,8 @@ class DispatchTest(APITestCase):
             pilot=pilot,
             aircraft=self.aircraft,
             departure_time=timezone.now() + timedelta(hours=1),
-            departure_airport=create_airport(random_airport_code()),
-            arrival_airport=create_airport(random_airport_code()),
+            departure_airport=create_airport(),
+            arrival_airport=create_airport(),
         )
         return schedule
 
@@ -524,8 +526,8 @@ class FlightScheduleTest(TestCase):
     def _dispatch_charter(self, departure_time=None):
         if departure_time is None:
             departure_time = timezone.now() + timezone.timedelta(hours=1)
-        departure = create_airport("Departure airport")
-        arrival = create_airport("Arrival airport")
+        departure = create_airport()
+        arrival = create_airport()
         aircraft = get_dummy_aircraft()
         result = self.client.post(reverse('dispatch_charter'), data={
             "aircraft": aircraft.icao_code,
@@ -535,43 +537,3 @@ class FlightScheduleTest(TestCase):
             "arrival_airport": arrival.icao_code,
         })
         return result
-
-
-def get_dummy_aircraft():
-    return Aircraft.objects.get_or_create(
-        icao_code="A320",
-        defaults={
-            "registration": "HL1234",
-            "name": "Airbus A320 IAE",
-        }
-    )[0]
-
-
-def create_airport(name):
-    return Airport.objects.create(
-        name=name,
-        icao_code=random_airport_code(True),
-        iata_code=random_airport_code(False),
-        iso_country="KR",
-        city="Seoul",
-        latitude="0.0",
-        longitude="0.0",
-    )
-
-
-def create_aircraft(icao_code) -> Aircraft:
-    return Aircraft.objects.create(
-        icao_code=icao_code,
-        registration="HL1111",
-        name="Random aircraft",
-    )
-
-
-def random_airport_code(icao=True):
-    length = 4 if icao else 3
-    field = 'icao_code' if icao else 'iata_code'
-    while True:
-        seq = string.ascii_uppercase + string.digits
-        code = ''.join(random.choice(seq) for _ in range(length))
-        if code not in Airport.objects.values_list(field, flat=True):
-            return code

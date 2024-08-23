@@ -38,6 +38,6 @@ class StandardRoute(models.Model):
     aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_day = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(31)])
     departure_zulu = models.TimeField()
-    flight_time = models.DurationField()
+    flight_time = models.CharField(max_length=5)
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
     arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')

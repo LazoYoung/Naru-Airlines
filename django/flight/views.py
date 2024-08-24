@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import get_object_or_404
@@ -139,68 +140,109 @@ def dispatch_charter(request: Request):
         return e.response()
 
 
-@api_view(['GET'])
-@permission_classes([IsPilotOrReadOnly])
-def schedules_all(request: Request):
-    queryset = (
-        FlightSchedule
-        .objects
-        .order_by('departure_time')
-    )
-    serializer = FlightScheduleSerializer(queryset, many=True)
-    return Response(serializer.data)
-
-
-@api_view(['GET'])
-@permission_classes([IsPilotOrReadOnly])
-def schedules_mine(request: Request):
-    queryset = (
-        FlightSchedule
-        .objects
-        .filter(pilot=request.user.pilot)
-        .order_by('departure_time')
-    )
-    serializer = FlightScheduleSerializer(queryset, many=True)
-    return Response(serializer.data)
-
-
-@api_view(['GET'])
-@permission_classes([IsPilotOrReadOnly])
-def schedules_available(request: Request):
-    queryset = (
-        FlightSchedule
-        .objects
-        .filter(pilot__isnull=True)
-        .order_by('departure_time')
-    )
-    serializer = FlightScheduleSerializer(queryset, many=True)
-    return Response(serializer.data)
-
-
 class ScheduleAPI(APIView):
-    permission_classes = [IsPilotOrReadOnly]
+    permission_classes = (IsPilotOrReadOnly,)
 
-    def get_object(self, flight_number):
+    def get(self, request: Request):
+        keys: set = request.query_params.keys()
+
+        if len(keys) == 0:
+            queryset = self._all_schedules(request)
+        elif 'mine' in keys:
+            queryset = self._my_schedules(request)
+        elif 'available' in keys:
+            queryset = self._available_schedules(request)
+        elif 'flight_number' in keys:
+            return self._one_flight(request)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = FlightScheduleSerializer(instance=queryset, many=True)
+        return Response(serializer.data)
+
+    def delete(self, request: Request):
+        flight_number = request.query_params.get('flight_number')
+        schedule = self._get_object(flight_number)
+        self.check_object_permissions(self.request, schedule)
+        schedule.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def _one_flight(self, request: Request):
+        flight_number = request.query_params.get('flight_number')
+        serializer = FlightScheduleSerializer(instance=self._get_object(flight_number))
+        return Response(serializer.data)
+
+    def _get_object(self, flight_number):
         obj = get_object_or_404(FlightSchedule, flight_number=flight_number)
         self.check_object_permissions(self.request, obj)
         return obj
 
-    def get(self, request, flight_number):
-        serializer = FlightScheduleSerializer(instance=self.get_object(flight_number))
-        return Response(serializer.data)
+    def _my_schedules(self, request: Request):
+        return self._queryset().filter(pilot=request.user.pilot).order_by('departure_time')
 
-    # def put(self, request, flight_number):
-    #     serializer = FlightScheduleSerializer(
-    #         instance=self.get_object(flight_number),
-    #         data=request.data,
-    #         partial=True
-    #     )
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    def _all_schedules(self, request: Request):
+        return self._queryset().order_by('departure_time')
 
-    def delete(self, request, flight_number):
-        schedule = self.get_object(flight_number)
-        self.check_object_permissions(self.request, schedule)
-        schedule.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def _available_schedules(self, request: Request):
+        return self._queryset().filter(pilot__isnull=True).order_by('departure_time')
+
+    @staticmethod
+    def _queryset():
+        return FlightSchedule.objects
+
+
+# @api_view(['GET'])
+# @permission_classes([IsPilotOrReadOnly])
+# def schedules_all(request: Request):
+#     queryset = (
+#         FlightSchedule
+#         .objects
+#         .order_by('departure_time')
+#     )
+#     serializer = FlightScheduleSerializer(queryset, many=True)
+#     return Response(serializer.data)
+#
+#
+# @api_view(['GET'])
+# @permission_classes([IsPilotOrReadOnly])
+# def schedules_mine(request: Request):
+#     queryset = (
+#         FlightSchedule
+#         .objects
+#         .filter(pilot=request.user.pilot)
+#         .order_by('departure_time')
+#     )
+#     serializer = FlightScheduleSerializer(queryset, many=True)
+#     return Response(serializer.data)
+#
+#
+# @api_view(['GET'])
+# @permission_classes([IsPilotOrReadOnly])
+# def schedules_available(request: Request):
+#     queryset = (
+#         FlightSchedule
+#         .objects
+#         .filter(pilot__isnull=True)
+#         .order_by('departure_time')
+#     )
+#     serializer = FlightScheduleSerializer(queryset, many=True)
+#     return Response(serializer.data)
+
+
+# class ScheduleAPI(APIView):
+#     permission_classes = [IsPilotOrReadOnly]
+#
+#     def get_object(self, flight_number):
+#         obj = get_object_or_404(FlightSchedule, flight_number=flight_number)
+#         self.check_object_permissions(self.request, obj)
+#         return obj
+#
+#     def get(self, request, flight_number):
+#         serializer = FlightScheduleSerializer(instance=self.get_object(flight_number))
+#         return Response(serializer.data)
+#
+#     def delete(self, request, flight_number):
+#         schedule = self.get_object(flight_number)
+#         self.check_object_permissions(self.request, schedule)
+#         schedule.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,6 +1,9 @@
 import random
 import string
 
+from django.urls.base import reverse
+from django.utils.http import urlencode
+
 from flight.models import Airport, Aircraft
 
 
@@ -46,3 +49,17 @@ def _random_airport_code(icao=True):
         code = ''.join(random.choice(seq) for _ in range(length))
         if code not in Airport.objects.values_list(field, flat=True):
             return code
+
+
+def reverse_query(view, urlconf=None, args=None, kwargs=None, current_app=None, query=None):
+    base_url = reverse(viewname=view, urlconf=urlconf, args=args, kwargs=kwargs, current_app=current_app)
+
+    if query is None:
+        return base_url
+
+    if isinstance(query, str):
+        query = {query: ''}
+    elif isinstance(query, list) or isinstance(query, tuple):
+        query = {(e, '') for e in query}
+
+    return "{}?{}".format(base_url, urlencode(query))

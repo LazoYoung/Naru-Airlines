@@ -19,7 +19,7 @@ from pilot.models import Pilot
 from scripts.schedule_automation import ScheduleManager
 from .models import StandardRoute, FlightSchedule
 from .services import DispatcherService
-from .utils import create_airport, get_dummy_aircraft, _random_airport_code, create_aircraft
+from .utils import create_airport, get_dummy_aircraft, _random_airport_code, create_aircraft, reverse_query
 
 # temporary media folder
 TEST_DIR = settings.BASE_DIR / 'test_media'
@@ -405,16 +405,16 @@ class FlightScheduleTest(TestCase):
         self.aircraft = create_aircraft("A320")
 
     def test_without_permission(self):
-        all = self.client.get(reverse('schedules_all'))
-        mine = self.client.get(reverse('schedules_mine'))
-        available = self.client.get(reverse('schedules_available'))
+        all = self.client.get(reverse('schedule'))
+        mine = self.client.get(reverse_query('schedule', query='mine'))
+        available = self.client.get(reverse_query('schedule', query='available'))
         self.assertTrue(status.is_client_error(all.status_code))
         self.assertTrue(status.is_client_error(mine.status_code))
         self.assertTrue(status.is_client_error(available.status_code))
 
     def test_empty_schedule(self):
         self._create_pilot()
-        response = self.client.get(reverse('schedules_all'))
+        response = self.client.get(reverse('schedule'))
         self.assertEqual(response.data, [])
         self.assertTrue(status.is_success(response.status_code))
 
@@ -435,7 +435,7 @@ class FlightScheduleTest(TestCase):
         flt_number4 = standard2.data['flight_number']
 
         # Schedules ordered by departure time
-        response = self.client.get(reverse('schedules_all'))
+        response = self.client.get(reverse('schedule'))
         self.assertTrue(status.is_success(response.status_code))
         data = response.data
         self.assertEqual(flt_number1, data[0]['flight_number'])
@@ -454,7 +454,7 @@ class FlightScheduleTest(TestCase):
 
         my_schedule = self._dispatch_charter()
         ghost_schedule = self._standard_schedule()
-        response = self.client.get(reverse('schedules_mine'))
+        response = self.client.get(reverse_query('schedule', query='mine'))
         self.assertTrue(status.is_success(response.status_code))
         self.assertContains(response, my_schedule.data['flight_number'])
         self.assertNotContains(response, ghost_schedule.flight_number)
@@ -464,7 +464,7 @@ class FlightScheduleTest(TestCase):
 
         schedule1 = self._dispatch_charter()
         schedule2 = self._standard_schedule()
-        response = self.client.get(reverse('schedules_available'))
+        response = self.client.get(reverse_query('schedule', query='available'))
         self.assertTrue(status.is_success(response.status_code))
         self.assertNotContains(response, schedule1.data['flight_number'])
         self.assertContains(response, schedule2.flight_number)
@@ -475,12 +475,12 @@ class FlightScheduleTest(TestCase):
         flt_number = dispatch.json()['flight_number']
         self.assertTrue(status.is_success(dispatch.status_code))
 
-        get_success = self.client.get(reverse('schedule', args=[flt_number]))
+        get_success = self.client.get(reverse_query('schedule', query={'flight_number': flt_number}))
         self.assertTrue(status.is_success(get_success.status_code))
         self.assertEqual(get_success.data['flight_number'], flt_number)
 
         # Unknown flight number
-        get_fail = self.client.get(reverse('schedule', args=["999"]))
+        get_fail = self.client.get(reverse_query('schedule', query={'flight_number': 999}))
         self.assertTrue(status.is_client_error(get_fail.status_code))
 
     def test_delete(self):
@@ -489,15 +489,15 @@ class FlightScheduleTest(TestCase):
         flight_number = dispatch.json()['flight_number']
         self.assertTrue(status.is_success(dispatch.status_code))
 
-        delete = self.client.delete(reverse('schedule', args=[flight_number]))
+        delete = self.client.delete(reverse_query('schedule', query={'flight_number': flight_number}))
         self.assertTrue(status.is_success(delete.status_code))
 
-        delete_fail1 = self.client.delete(reverse('schedule', args=["999"]))
+        delete_fail1 = self.client.delete(reverse_query('schedule', query={'flight_number': 999}))
         self.assertTrue(status.is_client_error(delete_fail1.status_code))
 
         # The flight does not belong to pilot #2
         self._create_pilot()
-        delete_fail2 = self.client.delete(reverse('schedule', args=[flight_number]))
+        delete_fail2 = self.client.delete(reverse_query('schedule', query={'flight_number': flight_number}))
         self.assertTrue(status.is_client_error(delete_fail2.status_code))
 
     def _create_pilot(self):

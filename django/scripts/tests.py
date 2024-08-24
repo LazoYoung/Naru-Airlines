@@ -29,7 +29,7 @@ class ScheduleAutomationTest(TestCase):
         self.next_number += 1
         return route
 
-    def test_script(self):
+    def test_departure_time(self):
         route1 = self._create_route(day=1, zulu=time(hour=9))
         route2 = self._create_route(day=30, zulu=time(hour=9))
         self.manager.update_time(time=datetime(2024, 12, 25))

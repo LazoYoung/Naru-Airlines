@@ -16,6 +16,7 @@ from rest_framework.test import APITestCase, APIClient
 from member.models import Member
 from member.tests import register_and_login
 from pilot.models import Pilot
+from scripts.schedule_automation import ScheduleManager
 from .models import StandardRoute, FlightSchedule
 from .services import DispatcherService
 from .utils import create_airport, get_dummy_aircraft, _random_airport_code, create_aircraft
@@ -398,42 +399,77 @@ class DispatchTest(APITestCase):
 
 
 class FlightScheduleTest(TestCase):
-    def test_schedules_without_permission(self):
-        no_perm = self.client.get(reverse('schedules'))
-        self.assertTrue(status.is_client_error(no_perm.status_code))
+    def setUp(self):
+        self.schedule_manager = ScheduleManager(test=True)
+        self.next_number = 800
+        self.aircraft = create_aircraft("A320")
 
-    def test_schedules(self):
+    def test_without_permission(self):
+        all = self.client.get(reverse('schedules_all'))
+        mine = self.client.get(reverse('schedules_mine'))
+        available = self.client.get(reverse('schedules_available'))
+        self.assertTrue(status.is_client_error(all.status_code))
+        self.assertTrue(status.is_client_error(mine.status_code))
+        self.assertTrue(status.is_client_error(available.status_code))
+
+    def test_empty_schedule(self):
         self._create_pilot()
-
-        response = self.client.get(reverse('schedules'))
+        response = self.client.get(reverse('schedules_all'))
         self.assertEqual(response.data, [])
         self.assertTrue(status.is_success(response.status_code))
 
-        dispatch1 = self._dispatch_charter(departure_time=timezone.now() + timezone.timedelta(hours=1))
-        flt_number1 = dispatch1.json()['flight_number']
-        dispatch2 = self._dispatch_charter(departure_time=timezone.now() + timezone.timedelta(hours=2))
-        flt_number2 = dispatch2.json()['flight_number']
-        dispatch3 = self._dispatch_charter(departure_time=timezone.now() + timezone.timedelta(hours=3))
-        flt_number3 = dispatch3.json()['flight_number']
-        self.assertTrue(status.is_success(dispatch1.status_code))
-        self.assertTrue(status.is_success(dispatch2.status_code))
-        self.assertTrue(status.is_success(dispatch3.status_code))
-
-        # Schedules ordered by departure time (asc)
-        response = self.client.get(reverse('schedules'))
-        self.assertTrue(status.is_success(response.status_code))
-        schedules = response.data
-        self.assertEqual(flt_number1, schedules[0]['flight_number'])
-        self.assertEqual(flt_number2, schedules[1]['flight_number'])
-        self.assertEqual(flt_number3, schedules[2]['flight_number'])
-
-        # New pilot has empty schedule
+    def test_all(self):
         self._create_pilot()
-        response = self.client.get(reverse('schedules'))
-        self.assertEqual(response.data, [])
-        self.assertTrue(status.is_success(response.status_code))
 
-    def test_get_flight(self):
+        charter1 = self._dispatch_charter(departure_time=timezone.now() + timezone.timedelta(hours=1))
+        charter2 = self._dispatch_charter(departure_time=timezone.now() + timezone.timedelta(hours=2))
+        standard1 = self._dispatch_standard(
+            schedule=self._standard_schedule(departure_time=timezone.now() + timezone.timedelta(hours=3))
+        )
+        standard2 = self._dispatch_standard(
+            schedule=self._standard_schedule(departure_time=timezone.now() + timezone.timedelta(hours=4))
+        )
+        flt_number1 = charter1.data['flight_number']
+        flt_number2 = charter2.data['flight_number']
+        flt_number3 = standard1.data['flight_number']
+        flt_number4 = standard2.data['flight_number']
+
+        # Schedules ordered by departure time
+        response = self.client.get(reverse('schedules_all'))
+        self.assertTrue(status.is_success(response.status_code))
+        data = response.data
+        self.assertEqual(flt_number1, data[0]['flight_number'])
+        self.assertEqual(flt_number2, data[1]['flight_number'])
+        self.assertEqual(flt_number3, data[2]['flight_number'])
+        self.assertEqual(flt_number4, data[3]['flight_number'])
+
+        # Correct types
+        self.assertTrue(data[0]['is_charter'])
+        self.assertTrue(data[1]['is_charter'])
+        self.assertFalse(data[2]['is_charter'])
+        self.assertFalse(data[3]['is_charter'])
+
+    def test_mine(self):
+        self._create_pilot()
+
+        my_schedule = self._dispatch_charter()
+        ghost_schedule = self._standard_schedule()
+        response = self.client.get(reverse('schedules_mine'))
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertContains(response, my_schedule.data['flight_number'])
+        self.assertNotContains(response, ghost_schedule.flight_number)
+
+    def test_available(self):
+        self._create_pilot()
+
+        schedule1 = self._dispatch_charter()
+        schedule2 = self._standard_schedule()
+        response = self.client.get(reverse('schedules_available'))
+        self.assertTrue(status.is_success(response.status_code))
+        self.assertNotContains(response, schedule1.data['flight_number'])
+        self.assertContains(response, schedule2.flight_number)
+
+    def test_get(self):
         self._create_pilot()
         dispatch = self._dispatch_charter()
         flt_number = dispatch.json()['flight_number']
@@ -447,61 +483,7 @@ class FlightScheduleTest(TestCase):
         get_fail = self.client.get(reverse('schedule', args=["999"]))
         self.assertTrue(status.is_client_error(get_fail.status_code))
 
-    # def test_put_flight(self):
-    #     self._create_pilot()
-    #     dispatch1 = self._dispatch_charter()
-    #     flt_number1 = dispatch1.json()['flight_number']
-    #     self.assertTrue(status.is_success(dispatch1.status_code))
-    #
-    #     put_success1 = self.client.put(
-    #         path=reverse('schedule', args=[flt_number1]),
-    #         content_type='application/json',
-    #         data={"callsign": "NAR123"}
-    #     )
-    #     self.assertTrue(status.is_success(put_success1.status_code))
-    #
-    #     self._create_pilot()
-    #     dispatch2 = self._dispatch_charter()
-    #     flt_number2 = dispatch2.json()['flight_number']
-    #     self.assertTrue(status.is_success(dispatch2.status_code))
-    #
-    #     departure = create_airport("Departure airport")
-    #     arrival = create_airport("Arrival airport")
-    #     aircraft = get_dummy_aircraft()
-    #     put_success2 = self.client.put(
-    #         path=reverse('schedule', args=[flt_number2]),
-    #         content_type='application/json',
-    #         data={
-    #             "aircraft": aircraft.icao_code,
-    #             "departure_time": timezone.now() + timezone.timedelta(hours=2),
-    #             "departure_airport": departure.icao_code,
-    #             "arrival_airport": arrival.icao_code,
-    #         }
-    #     )
-    #     self.assertTrue(status.is_success(put_success2.status_code))
-    #
-    #     # flt_number1 does not belong to pilot #2
-    #     put_fail1 = self.client.put(
-    #         path=reverse('schedule', args=[flt_number1]),
-    #         content_type='application/json',
-    #         data={
-    #             "callsign": "NAR456"
-    #         }
-    #     )
-    #     self.assertTrue(status.is_client_error(put_fail1.status_code))
-    #
-    #     # Field `flt_number` is immutable.
-    #     put_fail2 = self.client.put(
-    #         path=reverse('schedule', args=[flt_number2]),
-    #         content_type='application/json',
-    #         data={
-    #             "flight_number": "NR567"
-    #         }
-    #     )
-    #     self.assertTrue(status.is_client_error(put_fail2.status_code))
-    #     self.assertTrue('flight_number' in put_fail2.data)
-
-    def test_delete_flight(self):
+    def test_delete(self):
         self._create_pilot()
         dispatch = self._dispatch_charter()
         flight_number = dispatch.json()['flight_number']
@@ -523,17 +505,41 @@ class FlightScheduleTest(TestCase):
         pilot = Pilot.objects.create(member=member)
         return pilot
 
+    def _standard_schedule(self, flight_number=None, departure_time=timezone.now()):
+        if flight_number is None:
+            flight_number = self.next_number
+            self.next_number += 1
+        StandardRoute.objects.create(
+            flight_number=flight_number,
+            aircraft=self.aircraft,
+            flight_time="1:00",
+            departure_day=departure_time.day,
+            departure_zulu=departure_time.time(),
+            departure_airport=create_airport(),
+            arrival_airport=create_airport(),
+        )
+        self.schedule_manager.update_time()
+        self.schedule_manager.run()
+        schedule = FlightSchedule.objects.filter(flight_number=flight_number).get()
+        return schedule
+
     def _dispatch_charter(self, departure_time=None):
         if departure_time is None:
             departure_time = timezone.now() + timezone.timedelta(hours=1)
         departure = create_airport()
         arrival = create_airport()
-        aircraft = get_dummy_aircraft()
+        aircraft = self.aircraft
         result = self.client.post(reverse('dispatch_charter'), data={
             "aircraft": aircraft.icao_code,
             "flight_time": "1:20",
             "departure_time": departure_time,
             "departure_airport": departure.icao_code,
             "arrival_airport": arrival.icao_code,
+        })
+        return result
+
+    def _dispatch_standard(self, schedule: FlightSchedule):
+        result = self.client.post(reverse('dispatch_standard'), data={
+            "flight_number": schedule.flight_number
         })
         return result

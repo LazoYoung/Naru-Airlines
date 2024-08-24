@@ -103,7 +103,7 @@ def dispatch_standard(request: Request):
     data = serializer.validated_data
     dto = StandardDTO(
         flight_number=data['flight_number'],
-        aircraft=data['aircraft'],
+        aircraft=data.get('aircraft'),
     )
 
     service = DispatcherService(request.user.pilot)
@@ -141,11 +141,36 @@ def dispatch_charter(request: Request):
 
 @api_view(['GET'])
 @permission_classes([IsPilotOrReadOnly])
-def schedules(request: Request):
+def schedules_all(request: Request):
+    queryset = (
+        FlightSchedule
+        .objects
+        .order_by('departure_time')
+    )
+    serializer = FlightScheduleSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsPilotOrReadOnly])
+def schedules_mine(request: Request):
     queryset = (
         FlightSchedule
         .objects
         .filter(pilot=request.user.pilot)
+        .order_by('departure_time')
+    )
+    serializer = FlightScheduleSerializer(queryset, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+@permission_classes([IsPilotOrReadOnly])
+def schedules_available(request: Request):
+    queryset = (
+        FlightSchedule
+        .objects
+        .filter(pilot__isnull=True)
         .order_by('departure_time')
     )
     serializer = FlightScheduleSerializer(queryset, many=True)

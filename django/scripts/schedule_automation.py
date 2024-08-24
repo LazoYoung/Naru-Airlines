@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone as tz, tzinfo
 
 from django.db import IntegrityError
 from django.utils import timezone
@@ -18,6 +18,8 @@ class ScheduleManager:
         self._now = time
 
     def run(self):
+        self.count = 0
+        self.skip = 0
         used_numbers = FlightSchedule.objects.values_list('flight_number', flat=True)
         routes = StandardRoute.objects.exclude(flight_number__in=used_numbers)
 
@@ -55,6 +57,7 @@ class ScheduleManager:
             day=route.departure_day,
             hour=zulu.hour,
             minute=zulu.minute,
+            tzinfo=tz.utc,
         )
 
         try:

@@ -20,7 +20,9 @@
 |---------------------------------|--------|----------------------------------|---------------------------------------------------------------------------|
 | `api/dispatch/charter/`         | POST   | Submit charter flight schedule.  | aircraft, flight_time, departure_time, departure_airport, arrival_airport |
 | `api/dispatch/standard/`        | POST   | Submit standard flight schedule. | flight_number, aircraft                                                   |
-| `api/schedules/`                | GET    | Get your flight schedules.       |                                                                           |
+| `api/schedules/all/`            | GET    | Get every flight schedule.       |                                                                           |
+| `api/schedules/mine/`           | GET    | Get your flight schedules.       |                                                                           |
+| `api/schedules/available/`      | GET    | Get available flight schedules.  |                                                                           |
 | `api/schedule/<flight_number>/` | GET    | Get one specific schedule.       |                                                                           |
 | `api/schedule/<flight_number>/` | DELETE | Cancel the flight schedule.      |                                                                           |
 

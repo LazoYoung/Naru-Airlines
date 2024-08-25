@@ -16,33 +16,33 @@
 | `api/profile/`                      | `profile`               | PUT    | bio, display_name, email, receive_emails                       |
 
 ## Flight dispatcher
-| URL                                | Method | Description                      | Form                                                                      |
-|------------------------------------|--------|----------------------------------|---------------------------------------------------------------------------|
-| `api/dispatch/charter/`            | POST   | Submit charter flight schedule.  | aircraft, flight_time, departure_time, departure_airport, arrival_airport |
-| `api/dispatch/standard/`           | POST   | Submit standard flight schedule. | flight_number, aircraft                                                   |
-| `api/schedule/`                    | GET    | Get all flight schedules.        |                                                                           |
-| `api/schedule?mine/`               | GET    | Get your flight schedules.       |                                                                           |
-| `api/schedule?available/`          | GET    | Get available flight schedules.  |                                                                           |
-| `api/schedule?id=<flight_number>/` | GET    | Get one specific schedule.       |                                                                           |
-| `api/schedule?id=<flight_number>/` | DELETE | Cancel the flight schedule.      |                                                                           |
+| URL                             | Method | Description                      | Form                                                                      |
+|---------------------------------|--------|----------------------------------|---------------------------------------------------------------------------|
+| `api/dispatch/charter/`         | POST   | Submit charter flight schedule.  | aircraft, flight_time, departure_time, departure_airport, arrival_airport |
+| `api/dispatch/standard/`        | POST   | Submit standard flight schedule. | flight_number, aircraft                                                   |
+| `api/schedule/`                 | GET    | Get all flight schedules.        |                                                                           |
+| `api/schedule?mine/`            | GET    | Get your flight schedules.       |                                                                           |
+| `api/schedule?available/`       | GET    | Get available flight schedules.  |                                                                           |
+| `api/schedule/<flight_number>/` | GET    | Get one schedule.                |                                                                           |
+| `api/schedule/<flight_number>/` | DELETE | Cancel the schedule.             |                                                                           |
 
 ## Standard route
-| URL                             | Method | Description              | Form / Response                                             |
-|---------------------------------|--------|--------------------------|-------------------------------------------------------------|
-| `api/route/`                    | GET    | Get all standard routes. |                                                             |
-| `api/route/`                    | POST   | Create a new route.      | flight_number, aircraft, departure_airport, arrival_airport |
-| `api/route?id=<flight_number>/` | GET    | Get one route.           |                                                             |
-| `api/route?id=<flight_number>/` | PUT    | Modify the route.        |                                                             |
-| `api/route?id=<flight_number>/` | DELETE | Delete the route.        |                                                             |
+| URL                          | Method | Description              | Form / Response                                             |
+|------------------------------|--------|--------------------------|-------------------------------------------------------------|
+| `api/route/`                 | GET    | Get all standard routes. |                                                             |
+| `api/route/`                 | POST   | Create a new route.      | flight_number, aircraft, departure_airport, arrival_airport |
+| `api/route/<flight_number>/` | GET    | Get one route.           |                                                             |
+| `api/route/<flight_number>/` | PUT    | Modify the route.        |                                                             |
+| `api/route/<flight_number>/` | DELETE | Delete the route.        |                                                             |
 
 ## Fleet
-| URL                         | Method | Description                | Form                                 |
-|-----------------------------|--------|----------------------------|--------------------------------------|
-| `api/fleet/`                | GET    | Get all aircraft profiles. |                                      |
-| `api/fleet/`                | POST   | Create a new profile.      | icao_code, registration, name, image |
-| `api/fleet?id=<icao_code>/` | GET    | Get one profile.           |                                      |
-| `api/fleet?id=<icao_code>/` | PUT    | Modify the profile.        | registration, name, image            |
-| `api/fleet?id=<icao_code>/` | DELETE | Delete the profile.        |                                      |
+| URL                      | Method | Description                | Form                                 |
+|--------------------------|--------|----------------------------|--------------------------------------|
+| `api/fleet/`             | GET    | Get all aircraft profiles. |                                      |
+| `api/fleet/`             | POST   | Create a new profile.      | icao_code, registration, name, image |
+| `api/fleet/<icao_code>/` | GET    | Get one profile.           |                                      |
+| `api/fleet/<icao_code>/` | PUT    | Modify the profile.        | registration, name, image            |
+| `api/fleet/<icao_code>/` | DELETE | Delete the profile.        |                                      |
 
 ## Booking
 | URL              | Method | Description                      | Form |

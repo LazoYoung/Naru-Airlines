@@ -1,4 +1,3 @@
-from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import get_object_or_404
@@ -13,20 +12,24 @@ from .models import FlightSchedule, Aircraft, StandardRoute
 from .serializers import AircraftSerializer, StandardRouteSerializer, DispatchStandardSerializer, \
     DispatchCharterSerializer, FlightScheduleSerializer
 from .services import DispatcherService, StandardDTO, CharterDTO, DispatchError
-
-
-@api_view(['GET'])
-def routes(request):
-    data = StandardRoute.objects.all().values()
-    return Response(data=data, status=status.HTTP_200_OK)
+from .utils import has_query
 
 
 class RouteAPI(APIView):
     permission_classes = (IsAdminOrReadOnly,)
 
-    def get(self, request, flight_number):
-        serializer = StandardRouteSerializer(instance=self._route(flight_number))
-        return Response(serializer.data)
+    def get(self, request: Request):
+        if has_query(request):
+            if 'id' in request.query_params:
+                flight_number = request.query_params.get('id')
+                serializer = StandardRouteSerializer(instance=self._route(flight_number))
+                return Response(serializer.data)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            queryset = StandardRoute.objects.all()
+            serializer = StandardRouteSerializer(instance=queryset, many=True)
+            return Response(serializer.data)
 
     @staticmethod
     def post(request):
@@ -35,20 +38,28 @@ class RouteAPI(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def put(self, request, flight_number):
-        serializer = StandardRouteSerializer(
-            instance=self._route(flight_number),
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def put(self, request: Request):
+        if has_query(request):
+            flight_number = request.query_params.get('id')
+            serializer = StandardRouteSerializer(
+                instance=self._route(flight_number),
+                data=request.data,
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, flight_number):
-        instance = self._route(flight_number)
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request: Request):
+        if has_query(request):
+            flight_number = request.query_params.get('id')
+            instance = self._route(flight_number)
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def _route(flight_number):
@@ -60,35 +71,52 @@ def fleet_profiles(request):
     return Response(data=Aircraft.objects.all().values(), status=status.HTTP_200_OK)
 
 
-class AircraftAPI(APIView):
+class FleetAPI(APIView):
     permission_classes = (IsAdminOrReadOnly,)
     parser_classes = (MultiPartParser, FormParser)
 
-    def get(self, request, icao_code):
-        serializer = AircraftSerializer(instance=self._instance(icao_code))
-        return Response(serializer.data)
+    def get(self, request: Request):
+        if has_query(request):
+            if 'id' in request.query_params:
+                icao_code = request.query_params.get('id')
+                serializer = AircraftSerializer(instance=self._instance(icao_code))
+                return Response(serializer.data)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        else:
+            queryset = Aircraft.objects.all()
+            serializer = AircraftSerializer(instance=queryset, many=True)
+            return Response(serializer.data)
 
     @staticmethod
-    def post(request):
+    def post(request: Request):
         serializer = AircraftSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def put(self, request, icao_code):
-        serializer = AircraftSerializer(
-            instance=self._instance(icao_code),
-            data=request.data,
-            partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def put(self, request: Request):
+        if has_query(request):
+            if 'id' in request.query_params:
+                icao_code = request.query_params.get('id')
+                serializer = AircraftSerializer(
+                    instance=self._instance(icao_code),
+                    data=request.data,
+                    partial=True
+                )
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, icao_code):
-        instance = self._instance(icao_code)
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request: Request):
+        if has_query(request):
+            if 'id' in request.query_params:
+                icao_code = request.query_params.get('id')
+                instance = self._instance(icao_code)
+                instance.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def _instance(icao_code):
@@ -152,23 +180,23 @@ class ScheduleAPI(APIView):
             queryset = self._my_schedules(request)
         elif 'available' in keys:
             queryset = self._available_schedules(request)
-        elif 'flight_number' in keys:
-            return self._one_flight(request)
+        elif 'id' in keys:
+            return self._single_schedule(request)
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         serializer = FlightScheduleSerializer(instance=queryset, many=True)
         return Response(serializer.data)
 
     def delete(self, request: Request):
-        flight_number = request.query_params.get('flight_number')
+        flight_number = request.query_params.get('id')
         schedule = self._get_object(flight_number)
         self.check_object_permissions(self.request, schedule)
         schedule.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _one_flight(self, request: Request):
-        flight_number = request.query_params.get('flight_number')
+    def _single_schedule(self, request: Request):
+        flight_number = request.query_params.get('id')
         serializer = FlightScheduleSerializer(instance=self._get_object(flight_number))
         return Response(serializer.data)
 
@@ -189,60 +217,3 @@ class ScheduleAPI(APIView):
     @staticmethod
     def _queryset():
         return FlightSchedule.objects
-
-
-# @api_view(['GET'])
-# @permission_classes([IsPilotOrReadOnly])
-# def schedules_all(request: Request):
-#     queryset = (
-#         FlightSchedule
-#         .objects
-#         .order_by('departure_time')
-#     )
-#     serializer = FlightScheduleSerializer(queryset, many=True)
-#     return Response(serializer.data)
-#
-#
-# @api_view(['GET'])
-# @permission_classes([IsPilotOrReadOnly])
-# def schedules_mine(request: Request):
-#     queryset = (
-#         FlightSchedule
-#         .objects
-#         .filter(pilot=request.user.pilot)
-#         .order_by('departure_time')
-#     )
-#     serializer = FlightScheduleSerializer(queryset, many=True)
-#     return Response(serializer.data)
-#
-#
-# @api_view(['GET'])
-# @permission_classes([IsPilotOrReadOnly])
-# def schedules_available(request: Request):
-#     queryset = (
-#         FlightSchedule
-#         .objects
-#         .filter(pilot__isnull=True)
-#         .order_by('departure_time')
-#     )
-#     serializer = FlightScheduleSerializer(queryset, many=True)
-#     return Response(serializer.data)
-
-
-# class ScheduleAPI(APIView):
-#     permission_classes = [IsPilotOrReadOnly]
-#
-#     def get_object(self, flight_number):
-#         obj = get_object_or_404(FlightSchedule, flight_number=flight_number)
-#         self.check_object_permissions(self.request, obj)
-#         return obj
-#
-#     def get(self, request, flight_number):
-#         serializer = FlightScheduleSerializer(instance=self.get_object(flight_number))
-#         return Response(serializer.data)
-#
-#     def delete(self, request, flight_number):
-#         schedule = self.get_object(flight_number)
-#         self.check_object_permissions(self.request, schedule)
-#         schedule.delete()
-#         return Response(status=status.HTTP_204_NO_CONTENT)

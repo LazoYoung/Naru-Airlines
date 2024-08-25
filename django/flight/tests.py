@@ -19,7 +19,7 @@ from pilot.models import Pilot
 from scripts.schedule_automation import ScheduleManager
 from .models import StandardRoute, FlightSchedule
 from .services import DispatcherService
-from .utils import create_airport, get_dummy_aircraft, _random_airport_code, create_aircraft, reverse_query
+from .utils import create_airport, get_dummy_aircraft, create_aircraft, reverse_query
 
 # temporary media folder
 TEST_DIR = settings.BASE_DIR / 'test_media'
@@ -41,7 +41,7 @@ class FleetTest(APITestCase):
     def test_fleet_all(self):
         create_aircraft("A320")
         create_aircraft("B738")
-        response = self.client.get(reverse("fleet_profiles"))
+        response = self.client.get(reverse("fleet"))
         self.assertContains(response, "A320")
         self.assertContains(response, "B738")
 
@@ -58,7 +58,7 @@ class FleetTest(APITestCase):
     def test_without_permission(self):
         self.client.logout()
         response = self.client.post(
-            reverse("fleet_aircraft", kwargs={"icao_code": "A320"}),
+            reverse_query("fleet", query={"icao_code": "A320"}),
             data={}
         )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -67,7 +67,7 @@ class FleetTest(APITestCase):
         icao_code = "A320"
 
         post = self.admin.post(
-            path=reverse("fleet_aircraft"),
+            path=reverse("fleet"),
             data={
                 "icao_code": icao_code,
                 "registration": "HL5678",
@@ -121,7 +121,7 @@ class FleetTest(APITestCase):
 
     @staticmethod
     def _reverse(icao_code):
-        return reverse("fleet_aircraft", kwargs={"icao_code": icao_code})
+        return reverse_query("fleet", query={"id": icao_code})
 
     @staticmethod
     def _image():
@@ -153,7 +153,7 @@ class StandardRouteTests(APITestCase):
         self.route3 = self._create_route()
 
     def test_routes(self):
-        response = self.client.get(reverse("routes"))
+        response = self.client.get(reverse("route"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertContains(response, self.route1.flight_number)
         self.assertContains(response, self.route2.flight_number)
@@ -167,7 +167,7 @@ class StandardRouteTests(APITestCase):
         flt_time = str(self.route1.flight_time)
         dep = self.route1.departure_airport.icao_code
         arr = self.route1.arrival_airport.icao_code
-        get = self.client.get(reverse("route", kwargs={"flight_number": flt_num}))
+        get = self.client.get(reverse_query("route", query={"id": flt_num}))
         self.assertEqual(get.status_code, status.HTTP_200_OK)
         self.assertContains(get, flt_num)
         self.assertContains(get, acf)
@@ -213,7 +213,7 @@ class StandardRouteTests(APITestCase):
         dep = create_airport()
         arr = create_airport()
         put = self.admin.put(
-            path=self._reverse(flight_number=flt_num),
+            path=self._reverse(flt_num),
             data={
                 "aircraft": aircraft.icao_code,
                 "departure_airport": dep.icao_code,
@@ -249,7 +249,7 @@ class StandardRouteTests(APITestCase):
 
     @staticmethod
     def _reverse(flight_number):
-        return reverse("route", kwargs={"flight_number": flight_number})
+        return reverse_query("route", query={"id": flight_number})
 
     @staticmethod
     def random_day():
@@ -337,7 +337,8 @@ class DispatchTest(APITestCase):
         self.assertTrue("flight_number" in dispatch.data)
 
     def test_occupied_schedule(self):
-        dummy_user = Member.objects.create_user(handle='test', display_name='test', email='<EMAIL>', password='<PASSWORD>')
+        dummy_user = Member.objects.create_user(handle='test', display_name='test', email='<EMAIL>',
+                                                password='<PASSWORD>')
         dummy_pilot = Pilot.objects.create(member=dummy_user)
         schedule = self._create_schedule(pilot=dummy_pilot)
         dispatch = self._dispatch_standard(
@@ -345,7 +346,6 @@ class DispatchTest(APITestCase):
             flight_number=schedule.flight_number
         )
         self.assertTrue(status.is_client_error(dispatch.status_code))
-
 
     @staticmethod
     def _dispatch_charter(client, data=None):
@@ -475,12 +475,12 @@ class FlightScheduleTest(TestCase):
         flt_number = dispatch.json()['flight_number']
         self.assertTrue(status.is_success(dispatch.status_code))
 
-        get_success = self.client.get(reverse_query('schedule', query={'flight_number': flt_number}))
+        get_success = self.client.get(reverse_query('schedule', query={'id': flt_number}))
         self.assertTrue(status.is_success(get_success.status_code))
         self.assertEqual(get_success.data['flight_number'], flt_number)
 
         # Unknown flight number
-        get_fail = self.client.get(reverse_query('schedule', query={'flight_number': 999}))
+        get_fail = self.client.get(reverse_query('schedule', query={'id': 999}))
         self.assertTrue(status.is_client_error(get_fail.status_code))
 
     def test_delete(self):
@@ -489,15 +489,15 @@ class FlightScheduleTest(TestCase):
         flight_number = dispatch.json()['flight_number']
         self.assertTrue(status.is_success(dispatch.status_code))
 
-        delete = self.client.delete(reverse_query('schedule', query={'flight_number': flight_number}))
+        delete = self.client.delete(reverse_query('schedule', query={'id': flight_number}))
         self.assertTrue(status.is_success(delete.status_code))
 
-        delete_fail1 = self.client.delete(reverse_query('schedule', query={'flight_number': 999}))
+        delete_fail1 = self.client.delete(reverse_query('schedule', query={'id': 999}))
         self.assertTrue(status.is_client_error(delete_fail1.status_code))
 
         # The flight does not belong to pilot #2
         self._create_pilot()
-        delete_fail2 = self.client.delete(reverse_query('schedule', query={'flight_number': flight_number}))
+        delete_fail2 = self.client.delete(reverse_query('schedule', query={'id': flight_number}))
         self.assertTrue(status.is_client_error(delete_fail2.status_code))
 
     def _create_pilot(self):

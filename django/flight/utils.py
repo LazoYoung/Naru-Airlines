@@ -1,8 +1,10 @@
 import random
 import string
 
+from django.http import QueryDict
 from django.urls.base import reverse
 from django.utils.http import urlencode
+from rest_framework.request import Request
 
 from flight.models import Airport, Aircraft
 
@@ -49,6 +51,10 @@ def _random_airport_code(icao=True):
         code = ''.join(random.choice(seq) for _ in range(length))
         if code not in Airport.objects.values_list(field, flat=True):
             return code
+
+
+def has_query(request: Request):
+    return len(request.query_params.keys()) > 0
 
 
 def reverse_query(view, urlconf=None, args=None, kwargs=None, current_app=None, query=None):

@@ -1,6 +1,7 @@
 <script setup>
 import { reactive } from 'vue';
 import { onMounted, ref } from 'vue';
+import Navigation from "@/components/Navigation.vue";
 
 const props = defineProps({
     isAdmin: {
@@ -40,7 +41,9 @@ function doom() {
 }
 </script>
 
-<template></template>
+<template>
+    <Navigation></Navigation>
+</template>
 
 <style>
 body {

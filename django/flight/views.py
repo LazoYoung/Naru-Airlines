@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from member.permission import IsAdminOrReadOnly
-from pilot.permissions import IsPilotOrReadOnly, IsPilot
+from pilot.permissions import IsPilot
 from .models import FlightSchedule, Aircraft, StandardRoute
 from .serializers import AircraftSerializer, StandardRouteSerializer, DispatchStandardSerializer, \
     DispatchCharterSerializer, FlightScheduleSerializer

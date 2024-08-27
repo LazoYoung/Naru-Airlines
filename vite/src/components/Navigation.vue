@@ -46,7 +46,7 @@ function closeAccount() {
 
 function toggleAccount() {
     const account = document.querySelector(`#nav > .head .right > .account`);
-    if (account.getAttribute('state') == 'close') {
+    if (account.getAttribute('state') === 'close') {
         openAccount();
     } else {
         closeAccount();
@@ -57,7 +57,7 @@ function openMenu(menuName) {
     for (const menuElement of document.querySelectorAll(
         `#nav > .menus .menu`
     )) {
-        if (menuElement.getAttribute('menu') == menuName) {
+        if (menuElement.getAttribute('menu') === menuName) {
             menuElement.setAttribute('state', 'open');
         } else {
             menuElement.setAttribute('state', 'close');
@@ -133,7 +133,7 @@ function logout() {
                             :to="{ name: 'home' }"
                             @click.stop="closeAll"
                         >
-                            <img class="icon" src="../assets/logo.svg" />
+                            <img class="stat-icon" src="@/assets/logo.svg" alt="Logo" />
                         </RouterLink>
                     </div>
                     <div class="right">
@@ -159,7 +159,7 @@ function logout() {
                                     :to="{ name: 'passport' }"
                                     @click.stop="closeAll"
                                 >
-                                    <div class="icon">
+                                    <div class="stat-icon">
                                         <span class="material-symbols-outlined">
                                             person_book
                                         </span>
@@ -171,7 +171,7 @@ function logout() {
                                     :to="{ name: 'settings' }"
                                     @click.stop="closeAll"
                                 >
-                                    <div class="icon">
+                                    <div class="stat-icon">
                                         <span class="material-symbols-outlined">
                                             settings
                                         </span>
@@ -179,7 +179,7 @@ function logout() {
                                     <div class="text">Settings</div>
                                 </RouterLink>
                                 <div class="button" @click="logout">
-                                    <div class="icon">
+                                    <div class="stat-icon">
                                         <span class="material-symbols-outlined">
                                             logout
                                         </span>
@@ -242,7 +242,7 @@ function logout() {
                     </div>
                     <div class="menu" menu="m2" state="close">
                         <div class="button" @mouseover="openMenu(`m2`)">
-                            Ops Center
+                            Lounge
                         </div>
                         <div class="dropdown">
                             <div class="bg"></div>
@@ -271,30 +271,16 @@ function logout() {
                     </div>
                     <div class="menu" menu="m3" state="close">
                         <div class="button" @mouseover="openMenu(`m3`)">
-                            Lounge
+                            Operations
                         </div>
                         <div class="dropdown">
                             <div class="bg"></div>
                             <RouterLink
                                 class="button"
-                                :to="{ name: 'home' }"
+                                :to="{ name: 'dashboard' }"
                                 @click.stop="closeAll"
                             >
-                                aaaaaaaaaaaaaa
-                            </RouterLink>
-                            <RouterLink
-                                class="button"
-                                :to="{ name: 'home' }"
-                                @click.stop="closeAll"
-                            >
-                                bbbbbbbbbbb
-                            </RouterLink>
-                            <RouterLink
-                                class="button"
-                                :to="{ name: 'home' }"
-                                @click.stop="closeAll"
-                            >
-                                ccccccccccccccccccc
+                                Ops Center
                             </RouterLink>
                         </div>
                     </div>
@@ -306,6 +292,10 @@ function logout() {
 </template>
 
 <style>
+a {
+    text-decoration: none;
+}
+
 #nav {
     position: static;
     width: 100%;
@@ -494,7 +484,7 @@ function logout() {
     width: 100%;
     cursor: pointer;
 }
-#nav > .head .right > .account > .dropdown > .button > .icon,
+#nav > .head .right > .account > .dropdown > .button > .stat-icon,
 #nav > .head .right > .account > .dropdown > .button > .text {
     display: flex;
     flex-direction: row;
@@ -502,10 +492,10 @@ function logout() {
     align-items: center;
     height: 2.5rem;
 }
-#nav > .head .right > .account > .dropdown > .button > .icon {
+#nav > .head .right > .account > .dropdown > .button > .stat-icon {
     width: 2.5rem;
 }
-#nav > .head .right > .account > .dropdown > .button > .icon > span {
+#nav > .head .right > .account > .dropdown > .button > .stat-icon > span {
     font-size: 1.25rem;
     font-weight: 600;
     padding-left: 1px;
@@ -523,7 +513,7 @@ function logout() {
 #nav > .head .right > .account > .dropdown > .button:hover {
     background: rgb(240, 240, 240);
 }
-#nav > .head .right > .account > .dropdown > .button:hover > .icon > span {
+#nav > .head .right > .account > .dropdown > .button:hover > .stat-icon > span {
     color: black;
 }
 #nav > .head .right > .account > .dropdown > .button:hover > .text {

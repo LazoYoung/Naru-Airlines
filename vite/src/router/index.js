@@ -49,6 +49,21 @@ const router = createRouter({
             name: 'checkin',
             component: () => import('../views/CheckinView.vue'),
         },
+        {
+            path: '/ops',
+            name: 'dashboard',
+            component: () => import('../views/OpsCenter/Dashboard.vue')
+        },
+        {
+            path: '/ops/dispatcher',
+            name: 'dispatcher',
+            component: () => import('../views/OpsCenter/Dispatcher.vue')
+        },
+        {
+            path: '/ops/settings',
+            name: 'pilot-settings',
+            component: () => import('../views/OpsCenter/PilotSettings.vue')
+        },
     ],
 });
 

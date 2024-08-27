@@ -2,6 +2,8 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+import Components from 'unplugin-vue-components/vite'
+import {BootstrapVueNextResolver} from "bootstrap-vue-next";
 
 // https://vitejs.dev/config/
 // noinspection JSUnusedGlobalSymbols
@@ -13,6 +15,13 @@ export default defineConfig({
                     isCustomElement: isCustomElement,
                 },
             },
+        }),
+        Components({
+            resolvers: [BootstrapVueNextResolver({
+                aliases: {
+                    // BInput: 'BFormInput',
+                }
+            })],
         }),
     ],
     resolve: {

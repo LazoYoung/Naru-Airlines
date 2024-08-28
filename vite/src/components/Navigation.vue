@@ -2,8 +2,8 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { fetchProfile, getGravatarHash, home, useForm } from '@/api';
-import IconBanner from '@/components/icons/IconBanner.vue';
-import IconLogo from '@/components/icons/IconLogo.vue';
+import IconBanner from '@/components/icon/IconBanner.vue';
+import IconLogo from '@/components/icon/IconLogo.vue';
 import BasicMenu from '@/components/menu/BasicMenu.vue';
 import PilotMenu from '@/components/menu/PilotMenu.vue';
 

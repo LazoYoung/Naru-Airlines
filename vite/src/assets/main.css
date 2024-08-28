@@ -16,6 +16,7 @@
 html {
     font-size: calc(15px + (100vw - 1500px) / 400);
 }
+
 body {
     font-family: var(--font-family);
     font-weight: normal;
@@ -32,9 +33,11 @@ body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
 }
+
 body::-webkit-scrollbar {
     display: none;
 }
+
 * {
     margin: 0;
     padding: 0;
@@ -45,10 +48,12 @@ body::-webkit-scrollbar {
     line-height: 100%;
     box-sizing: border-box;
 }
+
 @media print {
     @page {
         margin: 15mm 15mm 20mm 15mm;
     }
+
     :root {
         --bg: white;
         --fg: black;
@@ -59,6 +64,7 @@ body::-webkit-scrollbar {
 a {
     text-decoration: none;
 }
+
 h1,
 h2,
 h3,
@@ -67,35 +73,44 @@ h5,
 h6 {
     font-weight: 500;
 }
+
 h1 {
     font-size: 3rem;
 }
+
 h2 {
     font-size: 2.5rem;
 }
+
 h3 {
     font-size: 2rem;
 }
+
 h4 {
     font-size: 1.75rem;
 }
+
 h5 {
     font-size: 1.5rem;
 }
+
 h6 {
     font-size: 1.25rem;
 }
+
 hr {
     width: 100%;
     height: 1px;
     background: var(--t210);
     border: none;
 }
+
 input,
 textarea,
 button {
     font-family: var(--font-family);
 }
+
 /* SVG */
 svg {
     fill: var(--fg);
@@ -103,10 +118,12 @@ svg {
     stroke-width: 0.1rem;
     overflow: visible;
 }
+
 svg * {
     fill: var(--fg);
     stroke: transparent;
 }
+
 text {
     font-family: var(--sans-serif);
 }
@@ -120,6 +137,7 @@ layer,
     width: 100%;
     height: 100%;
 }
+
 [noselect] {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -127,10 +145,12 @@ layer,
     -ms-user-select: none;
     user-select: none;
 }
+
 [none],
 .none {
     display: none !important;
 }
+
 [opa0],
 .opa0 {
     opacity: 0 !important;
@@ -143,16 +163,19 @@ outwrapper {
     padding: 0 2rem 0 2rem;
     margin: 0 auto;
 }
+
 outwrapper[wide] {
     width: 100%;
     max-width: unset;
     padding: 0 2rem 0 2rem;
 }
+
 inwrapper {
     display: block;
     position: relative;
     width: 100%;
 }
+
 @media (max-width: 900px) {
     outwrapper,
     outwrapper[wide] {

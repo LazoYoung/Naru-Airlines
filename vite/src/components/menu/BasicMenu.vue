@@ -4,7 +4,7 @@
             <span class="name">About</span>
             <span class="arrow">&#x25BC;</span>
         </label>
-        <div class="content">
+        <div class="flight-info-content">
             <a
                     href="https://github.com/LazoYoung/Naru-Airlines"
                     target="_blank"
@@ -26,7 +26,7 @@
             <span class="name">Community</span>
             <span class="arrow">&#x25BC;</span>
         </label>
-        <div class="content">
+        <div class="flight-info-content">
             <a href="#"><label>Forum &#0215;</label></a>
             <a href="#"><label>Gallery &#0215;</label></a>
             <a href="#"><label>Calendar &#0215;</label></a>

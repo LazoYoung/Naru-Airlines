@@ -1,9 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
+import NotFound from "@/views/NotFound.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
+        {
+            path: '/:pathMatch(.*)*',
+            name: 'not-found',
+            component: NotFound
+        },
         {
             path: '/',
             name: 'home',
@@ -63,6 +69,11 @@ const router = createRouter({
             path: '/ops/settings',
             name: 'pilot-settings',
             component: () => import('../views/OpsCenter/PilotSettings.vue')
+        },
+        {
+            path: '/ops/flight/:flightNumber',
+            name: 'flight',
+            component: () => import('../views/OpsCenter/FlightManager.vue')
         },
     ],
 });

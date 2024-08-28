@@ -13,14 +13,14 @@ defineProps({
                 <h2 class="title">{{title}}</h2>
             </div>
         </header>
-        <div class="content">
+        <div class="flight-info-content">
             <slot/>
         </div>
     </main>
 </template>
 
 <style scoped>
-div.content {
+div.flight-info-content {
     max-width: 60rem;
     margin: 0 auto;
 }
@@ -43,7 +43,7 @@ header > .box > .title {
 }
 
 @media (min-width: 640px) {
-    div.content {
+    div.flight-info-content {
         padding-left: 1.5rem;
         padding-right: 1.5rem;
     }
@@ -54,7 +54,7 @@ header > .box > .title {
 }
 
 @media (min-width: 1200px) {
-    div.content {
+    div.flight-info-content {
         padding-left: 2rem;
         padding-right: 2rem;
     }

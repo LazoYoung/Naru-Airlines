@@ -1,6 +1,6 @@
 <script setup>
 // noinspection JSUnusedGlobalSymbols
-import {onMounted, ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 
 const vButton = {
     mounted: (el) => {
@@ -18,9 +18,16 @@ const vButton = {
 };
 
 const timeRef = ref();
+let tickId = null;
 
 onMounted(() => {
-    setInterval(onTick, 1000);
+    tickId = setInterval(onTick, 1000);
+});
+
+onUnmounted(() => {
+    if (tickId) {
+        clearInterval(tickId);
+    }
 });
 
 function onTick() {
@@ -86,9 +93,12 @@ function onButtonRelease(event) {
         </div>
         <div id="rhs">
             <div id="header">
-<!--       todo - add breadcrumb         -->
+                <!--       todo - add breadcrumb         -->
             </div>
             <div id="content">
+                <h3 id="title">
+                    <slot name="title"></slot>
+                </h3>
                 <slot></slot>
             </div>
         </div>
@@ -118,7 +128,7 @@ a {
     //background-color: #64b8d7;
     //background-color: skyblue;
     //background-color: #04061f;
-    min-width: 20rem;
+    min-width: 18rem;
     height: 100vh;
 }
 
@@ -128,19 +138,23 @@ a {
 }
 
 #header {
-    height: 5rem;
+    height: 0;
     background-color: dimgray;
 }
 
 #content {
-    margin: 2rem;
+    margin: 4rem;
+}
+
+#title {
+    margin-bottom: 2rem;
 }
 
 #logo {
     display: flex;
     flex-direction: column;
     row-gap: 0.5rem;
-    padding: 1rem 3rem;
+    padding: 1.5rem 2rem;
 }
 
 #links {
@@ -211,5 +225,11 @@ a {
     display: flex;
     align-items: center;
     column-gap: 0.8rem;
+}
+
+@media screen and (max-width: 600px) {
+    #content {
+        margin: 2rem;
+    }
 }
 </style>

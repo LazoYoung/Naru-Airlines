@@ -11,7 +11,7 @@ from pilot.permissions import IsPilot
 from .models import FlightSchedule, Aircraft, StandardRoute
 from .serializers import AircraftSerializer, StandardRouteSerializer, DispatchStandardSerializer, \
     DispatchCharterSerializer, FlightScheduleSerializer
-from .services import DispatcherService, StandardDTO, CharterDTO, DispatchError
+from .services import DispatcherService, RoutineDTO, CharterDTO, DispatchError
 from .utils import has_query
 
 
@@ -107,19 +107,19 @@ class AircraftAPI(APIView):
 
 @api_view(['POST'])
 @permission_classes([IsPilot])
-def dispatch_standard(request: Request):
+def dispatch_routine(request: Request):
     serializer = DispatchStandardSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     data = serializer.validated_data
-    dto = StandardDTO(
+    dto = RoutineDTO(
         flight_number=data['flight_number'],
         aircraft=data.get('aircraft'),
     )
 
     service = DispatcherService(request.user.pilot)
     try:
-        schedule = service.dispatch_standard(dto)
+        schedule = service.dispatch_routine(dto)
         serializer = FlightScheduleSerializer(instance=schedule)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except DispatchError as e:

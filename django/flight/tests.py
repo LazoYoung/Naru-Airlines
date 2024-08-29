@@ -295,14 +295,14 @@ class DispatchTest(APITestCase):
     def test_without_permission(self):
         # try as guest
         charter = self._dispatch_charter(self.client)
-        standard = self._dispatch_standard(self.client)
+        standard = self._dispatch_routine(self.client)
         self.assertTrue(status.is_client_error(charter.status_code))
         self.assertTrue(status.is_client_error(standard.status_code))
 
         # try as member (non-pilot)
         register_and_login(self)
         charter = self._dispatch_charter(self.client)
-        standard = self._dispatch_standard(self.client)
+        standard = self._dispatch_routine(self.client)
         self.assertTrue(status.is_client_error(charter.status_code))
         self.assertTrue(status.is_client_error(standard.status_code))
 
@@ -311,7 +311,7 @@ class DispatchTest(APITestCase):
         self.assertTrue(status.is_success(dispatch.status_code))
 
     def test_standard(self):
-        dispatch = self._dispatch_standard(self.pilot_client)
+        dispatch = self._dispatch_routine(self.pilot_client)
         self.assertTrue(status.is_success(dispatch.status_code))
 
     def test_with_invalid_aircraft(self):
@@ -332,7 +332,7 @@ class DispatchTest(APITestCase):
         self.assertTrue("arrival_airport" in dispatch.data)
 
     def test_invalid_flight_number(self):
-        dispatch = self._dispatch_standard(self.pilot_client, flight_number=300)
+        dispatch = self._dispatch_routine(self.pilot_client, flight_number=300)
         self.assertTrue(status.is_client_error(dispatch.status_code))
         self.assertTrue("flight_number" in dispatch.data)
 
@@ -341,7 +341,7 @@ class DispatchTest(APITestCase):
                                                 password='<PASSWORD>')
         dummy_pilot = Pilot.objects.create(member=dummy_user)
         schedule = self._create_schedule(pilot=dummy_pilot)
-        dispatch = self._dispatch_standard(
+        dispatch = self._dispatch_routine(
             client=self.pilot_client,
             flight_number=schedule.flight_number
         )
@@ -367,7 +367,7 @@ class DispatchTest(APITestCase):
         )
         return result
 
-    def _dispatch_standard(self, client, flight_number=None, data=None):
+    def _dispatch_routine(self, client, flight_number=None, data=None):
         if flight_number is None:
             flight_number = self.schedule.flight_number
         if data is None:
@@ -377,7 +377,7 @@ class DispatchTest(APITestCase):
             "aircraft": self.aircraft.icao_code,
         }
         result = client.post(
-            path=reverse('dispatch_standard'),
+            path=reverse('dispatch_routine'),
             data=payload | data,
         )
         return result
@@ -423,10 +423,10 @@ class FlightScheduleTest(TestCase):
 
         charter1 = self._dispatch_charter(departure_time=timezone.now() + timezone.timedelta(hours=1))
         charter2 = self._dispatch_charter(departure_time=timezone.now() + timezone.timedelta(hours=2))
-        standard1 = self._dispatch_standard(
+        standard1 = self._dispatch_routine(
             schedule=self._standard_schedule(departure_time=timezone.now() + timezone.timedelta(hours=3))
         )
-        standard2 = self._dispatch_standard(
+        standard2 = self._dispatch_routine(
             schedule=self._standard_schedule(departure_time=timezone.now() + timezone.timedelta(hours=4))
         )
         flt_number1 = charter1.data['flight_number']
@@ -538,8 +538,8 @@ class FlightScheduleTest(TestCase):
         })
         return result
 
-    def _dispatch_standard(self, schedule: FlightSchedule):
-        result = self.client.post(reverse('dispatch_standard'), data={
+    def _dispatch_routine(self, schedule: FlightSchedule):
+        result = self.client.post(reverse('dispatch_routine'), data={
             "flight_number": schedule.flight_number
         })
         return result

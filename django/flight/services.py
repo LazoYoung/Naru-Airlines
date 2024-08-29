@@ -27,7 +27,7 @@ class DispatchError(Exception):
 
 
 @dataclass
-class StandardDTO:
+class RoutineDTO:
     flight_number: int
     aircraft: Optional[Aircraft]
 
@@ -68,7 +68,7 @@ class DispatcherService(object):
         except IntegrityError:
             return self.dispatch_charter(dto)
 
-    def dispatch_standard(self, dto: StandardDTO) -> FlightSchedule:
+    def dispatch_routine(self, dto: RoutineDTO) -> FlightSchedule:
         query = FlightSchedule.objects.filter(flight_number=dto.flight_number)
 
         if not query.exists():

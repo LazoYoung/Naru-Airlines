@@ -55,7 +55,7 @@ function toggleAccount() {
 
 function openMenu(menuName) {
     for (const menuElement of document.querySelectorAll(
-        `#nav > .menus .menu`
+        `#nav > .menus .card-sm`
     )) {
         if (menuElement.getAttribute('menu') === menuName) {
             menuElement.setAttribute('state', 'open');
@@ -211,7 +211,7 @@ function logout() {
         <div class="menus" state="close">
             <outwrapper>
                 <inwrapper>
-                    <div class="menu" menu="m1" state="close">
+                    <div class="card-sm" menu="m1" state="close">
                         <div class="button" @mouseover="openMenu(`m1`)">
                             Booking
                         </div>
@@ -240,7 +240,7 @@ function logout() {
                             </RouterLink>
                         </div>
                     </div>
-                    <div class="menu" menu="m2" state="close">
+                    <div class="card-sm" menu="m2" state="close">
                         <div class="button" @mouseover="openMenu(`m2`)">
                             Lounge
                         </div>
@@ -269,7 +269,7 @@ function logout() {
                             </RouterLink>
                         </div>
                     </div>
-                    <div class="menu" menu="m3" state="close">
+                    <div class="card-sm" menu="m3" state="close">
                         <div class="button" @mouseover="openMenu(`m3`)">
                             Operations
                         </div>
@@ -609,7 +609,7 @@ a {
     align-items: flex-start;
     gap: 6rem;
 }
-#nav > .menus .menu > .button {
+#nav > .menus .card-sm > .button {
     display: inline-block;
     height: 2.65rem;
     font-size: 1.5rem;
@@ -617,12 +617,12 @@ a {
     color: rgb(128, 128, 128);
     cursor: pointer;
 }
-#nav > .menus .menu > .button:hover,
-#nav > .menus .menu[state='open'] > .button {
+#nav > .menus .card-sm > .button:hover,
+#nav > .menus .card-sm[state='open'] > .button {
     color: black;
     border-bottom: solid 2px black;
 }
-#nav > .menus .menu > .dropdown {
+#nav > .menus .card-sm > .dropdown {
     position: fixed;
     width: 100%;
     padding-top: 1rem;
@@ -634,14 +634,14 @@ a {
     gap: 1rem;
     z-index: 10000000;
 }
-#nav > .menus .menu[state='close'] > .dropdown {
+#nav > .menus .card-sm[state='close'] > .dropdown {
     display: none;
 }
-#nav > .menus .menu > .dropdown > .button {
+#nav > .menus .card-sm > .dropdown > .button {
     font-size: 1.25rem;
     z-index: 10000000;
 }
-#nav > .menus .menu > .dropdown > .bg {
+#nav > .menus .card-sm > .dropdown > .bg {
     position: absolute;
     top: 0;
     left: -100%;
@@ -672,16 +672,16 @@ a {
         align-items: flex-start;
         gap: 0rem;
     }
-    #nav > .menus .menu {
+    #nav > .menus .card-sm {
         width: 100%;
         border-bottom: solid 1px rgb(210, 210, 210);
     }
-    #nav > .menus .menu[state='close'] {
+    #nav > .menus .card-sm[state='close'] {
         display: block;
     }
-    #nav > .menus .menu > .button,
-    #nav > .menus .menu > .button:hover,
-    #nav > .menus .menu[state='open'] > .button {
+    #nav > .menus .card-sm > .button,
+    #nav > .menus .card-sm > .button:hover,
+    #nav > .menus .card-sm[state='open'] > .button {
         display: flex;
         justify-content: flex-start;
         align-items: flex-end;
@@ -694,8 +694,8 @@ a {
         border-bottom: none;
         cursor: default;
     }
-    #nav > .menus .menu[state='close'] > .dropdown,
-    #nav > .menus .menu > .dropdown {
+    #nav > .menus .card-sm[state='close'] > .dropdown,
+    #nav > .menus .card-sm > .dropdown {
         position: static;
         display: block;
         padding: 1rem 1rem;
@@ -704,7 +704,7 @@ a {
         justify-content: flex-start;
         align-items: flex-start;
     }
-    #nav > .menus .menu > .dropdown > .bg {
+    #nav > .menus .card-sm > .dropdown > .bg {
         display: none;
     }
 }

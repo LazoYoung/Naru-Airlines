@@ -61,9 +61,9 @@ const router = createRouter({
             component: () => import('../views/OpsCenter/Dashboard.vue')
         },
         {
-            path: '/ops/dispatcher',
-            name: 'dispatcher',
-            component: () => import('../views/OpsCenter/Dispatcher.vue')
+            path: '/ops/routes',
+            name: 'routes',
+            component: () => import('../views/OpsCenter/Routes.vue')
         },
         {
             path: '/ops/settings',

@@ -66,11 +66,11 @@ function onButtonRelease(event) {
                         <span class="material-symbols-outlined">keyboard_arrow_right</span>
                     </div>
                 </RouterLink>
-                <RouterLink :to="{name: 'dispatcher'}">
+                <RouterLink :to="{name: 'routes'}">
                     <div class="nav-btn" v-button>
                         <div class="icon-box">
-                            <span class="material-symbols-outlined">description</span>
-                            <span class="nav-label">Dispatcher</span>
+                            <span class="material-symbols-outlined">flight_takeoff</span>
+                            <span class="nav-label">Routes</span>
                         </div>
                         <span class="material-symbols-outlined">keyboard_arrow_right</span>
                     </div>
@@ -225,6 +225,14 @@ a {
     display: flex;
     align-items: center;
     column-gap: 0.8rem;
+}
+
+.material-symbols-outlined {
+  font-variation-settings:
+  'FILL' 1,
+  'wght' 400,
+  'GRAD' 0,
+  'opsz' 24
 }
 
 @media screen and (max-width: 600px) {

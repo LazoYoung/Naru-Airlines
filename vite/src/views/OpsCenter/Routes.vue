@@ -3,7 +3,10 @@ import OpsLayout from "@/components/layout/OpsLayout.vue";
 </script>
 
 <template>
-    <OpsLayout></OpsLayout>
+    <OpsLayout>
+        <template #title>Airline Routes</template>
+        
+    </OpsLayout>
 </template>
 
 <style scoped>

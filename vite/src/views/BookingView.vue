@@ -14,7 +14,7 @@ import Button from '@/components/input/Button.vue';
                 <div class="index">
                     <div class="booking">
                         <div class="title"></div>
-                        <div class="flight-info-content">
+                        <div class="briefing-content">
                             <div class="info">
                                 <div class="line line1">
                                     <div
@@ -113,13 +113,13 @@ import Button from '@/components/input/Button.vue';
     border-radius: 1.5rem;
     background: rgb(240, 240, 240);
 }
-#booking-index .booking > .flight-info-content {
+#booking-index .booking > .briefing-content {
     display: flex;
 }
-#booking-index .booking > .flight-info-content > .info {
+#booking-index .booking > .briefing-content > .info {
     width: 80%;
 }
-#booking-index .booking > .flight-info-content > .control {
+#booking-index .booking > .briefing-content > .control {
     border-left: solid 1px rgb(210, 210, 210);
     width: 20%;
     padding: 0.75rem;
@@ -127,7 +127,7 @@ import Button from '@/components/input/Button.vue';
     flex-direction: column;
     justify-content: space-between;
 }
-#booking-index .booking > .flight-info-content > .control > * {
+#booking-index .booking > .briefing-content > .control > * {
     width: 100%;
 }
 #booking-index .booking .line {

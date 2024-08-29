@@ -2,21 +2,20 @@
 import OpsLayout from "@/components/layout/OpsLayout.vue";
 import {useRoute} from "vue-router";
 import {onMounted, ref, watch} from "vue";
+import Dispatcher from "@/components/widget/Dispatcher.vue";
 
 const route = useRoute();
 const flight = ref({
     number: 'N/A',
+    type: 'Routine',
     aircraft: 'A320',
     registration: 'HL7800',
     origin: 'KJFK',
     destination: 'KDTW',
+    date: 'Wed, Aug 28',
     eobt: '14:30 UTC',
-    ete: '02h 10m',
     eibt: '16:40 UTC',
-    blockFuel: 5100,
-    passengerCount: 125,
-    cargoPayload: 1800,
-    technicalLog: 'Last maintenance check completed on Aug 27, 2023. All systems operational.',
+    status: 'Departed',
 });
 const flightUpdates = ref([
     {status: 'Flight scheduled', time: 'Aug 28, 03:15 UTC'},
@@ -40,13 +39,13 @@ onMounted(() => {
 
 <template>
     <OpsLayout>
-        <template #title>{{flight.number}}</template>
+        <template #title>{{ flight.number }}</template>
         <div class="root">
-            <div class="card flight-info">
-                <h5 class="card-header">Flight Information</h5>
+            <div class="card briefing">
+                <h5 class="card-header">Flight Briefing</h5>
                 <div class="card-body">
-                    <div class="flight-info-content">
-                        <div class="briefing">
+                    <div id="briefing-content">
+                        <div id="briefing-header">
                             <svg width="100%" height="70" class="illust">
                                 <defs>
                                     <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5"
@@ -63,71 +62,68 @@ onMounted(() => {
                                 <line x1="100" y1="20" x2="280" y2="20" stroke-width="2" marker-end="url(#arrowhead)"/>
                                 <text class="time" x="40" y="50">{{ flight.eobt }}</text>
                                 <text class="time" x="360" y="50">{{ flight.eibt }}</text>
-                                <text class="time" x="195" y="50">{{ flight.ete }}</text>
+                                <text class="time" x="195" y="50">{{ flight.date }}</text>
                             </svg>
                         </div>
-                        <div class="ident">
+                        <div id="ident">
                             <div class="subject">Identifier</div>
                             <table class="table">
                                 <tr>
-                                    <td class="w-50">Flight number</td>
+                                    <td>Flight number</td>
                                     <td>{{ flight.number }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="w-50">Aircraft</td>
+                                    <td>Flight type</td>
+                                    <td>{{ flight.type }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Aircraft</td>
                                     <td>{{ flight.aircraft }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="w-50">Registration</td>
+                                    <td>Registration</td>
                                     <td>{{ flight.registration }}</td>
                                 </tr>
                             </table>
                         </div>
-                        <div class="loadsheet">
-                            <div class="subject">Loadsheet</div>
+                        <div id="departure">
+                            <div class="subject">Departure</div>
                             <table class="table">
                                 <tr>
-                                    <td class="w-50">Passengers</td>
-                                    <td>{{ flight.passengerCount }}</td>
+                                    <td>Date</td>
+                                    <td>{{ flight.date }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="w-50">Cargo</td>
-                                    <td>{{ flight.cargoPayload }} kg</td>
+                                    <td>Time</td>
+                                    <td>{{ flight.eobt }}</td>
                                 </tr>
                                 <tr>
-                                    <td class="w-50">Block Fuel</td>
-                                    <td>{{ flight.blockFuel }} kg</td>
+                                    <td>Status</td>
+                                    <td>{{ flight.status }}</td>
                                 </tr>
                             </table>
                         </div>
-                        <div class="tech-log">
-                            <div class="subject">Technical Log</div>
-                            <table class="table">
-                                <tr>
-                                    <td>{{ flight.technicalLog }}</td>
-                                </tr>
-                            </table>
-                        </div>
+<!--                        <div id="tech-log">-->
+<!--                            <div class="subject">Technical Log</div>-->
+<!--                            <table class="table">-->
+<!--                                <tr>-->
+<!--                                    <td>{{ flight.technicalLog }}</td>-->
+<!--                                </tr>-->
+<!--                            </table>-->
+<!--                        </div>-->
+                        <div class="btn btn-danger">Cancel Flight</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card menu">
-                <h5 class="card-header">Menu</h5>
+            <div class="card">
+                <h5 class="card-header">Dispatcher</h5>
                 <div class="card-body">
-                    <div>
-                        <div class="subject">Dispatcher</div>
-                        <button class="btn btn-secondary">Edit Flight</button>
-                        <button class="btn btn-danger">Cancel Flight</button>
-                    </div>
-                    <div class="mt-4">
-                        <div class="subject">Report</div>
-                        <button class="btn btn-primary">Simbrief OFP</button>
-                    </div>
+                    <Dispatcher></Dispatcher>
                 </div>
             </div>
 
-            <div class="card menu">
+            <div class="card card-sm">
                 <h5 class="card-header">Update</h5>
                 <div class="card-body">
                     <div class="timeline">
@@ -154,16 +150,12 @@ onMounted(() => {
     gap: 2rem;
 }
 
-.menu {
+.card-sm {
     width: 15rem;
 }
 
-.flight-info {
+.briefing {
     width: fit-content;
-}
-
-.card-body {
-    padding: 1.5rem 2rem;
 }
 
 .btn {
@@ -175,6 +167,7 @@ onMounted(() => {
 .timeline {
     position: relative;
     padding-left: 20px;
+    margin: 1rem;
 }
 
 .timeline-item {
@@ -222,21 +215,12 @@ onMounted(() => {
     line-height: normal;
 }
 
-.flight-info-content {
+#briefing-content {
     display: flex;
     flex-direction: column;
     row-gap: 1rem;
     width: 400px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-td {
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
+    margin: 1rem 1rem;
 }
 
 .subject {
@@ -244,6 +228,20 @@ td {
     font-size: 1em;
     font-weight: 600;
     margin-bottom: 0.75rem;
+}
+
+
+/* Table */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td {
+    width: 50%;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
 }
 
 

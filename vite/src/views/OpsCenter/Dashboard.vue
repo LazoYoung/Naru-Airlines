@@ -83,7 +83,7 @@ import Roster from "@/components/widget/Roster.vue";
     flex-direction: row;
     flex-wrap: wrap;
     align-items: start;
-    gap: 1rem 1rem;
+    gap: 2rem;
 }
 
 .card-body {

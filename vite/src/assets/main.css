@@ -45,7 +45,7 @@ body::-webkit-scrollbar {
     outline: none;
     border-spacing: 0;
     color: var(--fg);
-    line-height: 100%;
+    /*line-height: 100%;*/
     box-sizing: border-box;
 }
 

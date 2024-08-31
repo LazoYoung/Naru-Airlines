@@ -100,18 +100,18 @@ const stats = {
 }
 
 .orange {
-    background-color: #FFE5D3;
+    background-color: #ffd3bf;
 }
 
 .green {
-    background-color: #E8F5E9;
+    background-color: #d3f5d6;
 }
 
 .blue {
-    background-color: #E3F2FD;
+    background-color: #c5e2fd;
 }
 
 .yellow {
-    background-color: #FFF8E1;
+    background-color: #ffeeb9;
 }
 </style>

@@ -1,7 +1,7 @@
 <script setup>
-import { reactive } from 'vue';
-import { onMounted, ref } from 'vue';
 import Navigation from "@/components/Navigation.vue";
+import { reactive } from 'vue';
+import { ref } from 'vue';
 
 const props = defineProps({
     isAdmin: {
@@ -45,7 +45,7 @@ function doom() {
     <Navigation></Navigation>
 </template>
 
-<style>
+<style scoped>
 body {
     background: white;
 }

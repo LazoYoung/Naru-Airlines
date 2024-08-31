@@ -78,6 +78,5 @@ table {
 td {
     width: 50%;
     padding: 8px;
-    border-bottom: 1px solid #ddd;
 }
 </style>

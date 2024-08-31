@@ -39,7 +39,8 @@ onMounted(() => {
 
 <template>
     <OpsLayout>
-        <template #title>{{ flight.number }}</template>
+        <template #title>Flight Info</template>
+        <template #subtitle>Naru Airlines Flight {{ flight.number }}</template>
         <div class="root">
             <div class="card briefing">
                 <h5 class="card-header">Flight Briefing</h5>
@@ -236,12 +237,13 @@ onMounted(() => {
 table {
     width: 100%;
     border-collapse: collapse;
+    border-top: 1px solid #ddd;
 }
 
 td {
     width: 50%;
     padding: 8px;
-    border-bottom: 1px solid #ddd;
+    //border-bottom: 1px solid #ddd;
 }
 
 

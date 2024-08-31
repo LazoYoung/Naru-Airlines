@@ -53,7 +53,7 @@ function onButtonRelease(event) {
             <RouterLink :to="{'name': 'home'}">
                 <div id="logo">
                     <img src="@/assets/logo.svg" alt="Logo">
-                    <div id="subtitle">Operations Center</div>
+                    <div id="ops">Operations Center</div>
                 </div>
             </RouterLink>
             <div id="links">
@@ -99,6 +99,9 @@ function onButtonRelease(event) {
                 <h3 id="title">
                     <slot name="title"></slot>
                 </h3>
+                <h5 id="subtitle">
+                    <slot name="subtitle"></slot>
+                </h5>
                 <slot></slot>
             </div>
         </div>
@@ -146,7 +149,9 @@ a {
     margin: 4rem;
 }
 
-#title {
+#subtitle {
+    color: #3d3d3d;
+    font-size: 1em;
     margin-bottom: 2rem;
 }
 
@@ -164,7 +169,7 @@ a {
     margin-top: 1.5rem;
 }
 
-#subtitle {
+#ops {
     color: #00458b;
     font-style: italic;
     font-weight: 600;

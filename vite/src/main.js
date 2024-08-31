@@ -1,5 +1,5 @@
-import './assets/main.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
+import './assets/main.css';
 
 import {createApp} from 'vue';
 import {createBootstrap} from "bootstrap-vue-next";

@@ -6,7 +6,7 @@ import Checkbox from '@/components/input/Checkbox.vue';
 import Button from '@/components/input/Button.vue';
 import { fetchProfile, Form, useForm } from '@/api';
 import { onMounted, ref } from 'vue';
-import Gravatar from '@/components/icons/Gravatar.vue';
+import Gravatar from '@/components/icon/Gravatar.vue';
 import router from '@/router/index.js';
 import Alert from '@/alert.js';
 

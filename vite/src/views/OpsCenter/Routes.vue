@@ -1,6 +1,25 @@
 <script setup>
 import OpsLayout from "@/components/layout/OpsLayout.vue";
 import {BFormInput} from "bootstrap-vue-next";
+import AirportModal from "@/components/modal/AirportModal.vue";
+import {ref} from "vue";
+
+const icao_from = ref("");
+const icao_to = ref("");
+const openModalFrom = ref(false);
+const openModalTo = ref(false);
+
+function onSelectFrom(icao) {
+    if (icao) {
+        icao_from.value = icao;
+    }
+}
+
+function onSelectTo(icao) {
+    if (icao) {
+        icao_to.value = icao;
+    }
+}
 
 function toICAO(value, event) {
     let result;
@@ -15,11 +34,11 @@ function toICAO(value, event) {
 }
 
 function swap() {
-    const from = document.querySelector("#from");
-    const to = document.querySelector("#to");
-    const tmp = from.value;
-    from.value = to.value;
-    to.value = tmp;
+    // const from = document.querySelector("#from");
+    // const to = document.querySelector("#to");
+    const tmp = icao_from.value;
+    icao_from.value = icao_to.value;
+    icao_to.value = tmp;
 
     animateSwap();
 
@@ -51,10 +70,14 @@ function animateSwap() {
                         <BFormFloatingLabel label="From" label-for="from">
                             <BFormInput
                                     id="from"
+                                    v-model="icao_from"
                                     placeholder="From"
                                     autocomplete="off"
                                     :formatter="toICAO"
                             />
+                            <button class="finder" tabindex="-1" @click="openModalFrom = true">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
                         </BFormFloatingLabel>
                         <button id="swap" tabindex="-1" @click="swap">
                             <span class="material-symbols-outlined">swap_horizontal_circle</span>
@@ -62,27 +85,26 @@ function animateSwap() {
                         <BFormFloatingLabel label="To" label-for="to">
                             <BFormInput
                                     id="to"
+                                    v-model="icao_to"
                                     placeholder="To"
                                     autocomplete="off"
                                     :formatter="toICAO"
                             />
+                            <button class="finder" tabindex="-1" @click="openModalTo = true">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
                         </BFormFloatingLabel>
                     </div>
                 </BForm>
             </search>
         </div>
+
+        <AirportModal id="from" v-model:visible="openModalFrom" @select="onSelectFrom"></AirportModal>
+        <AirportModal id="to" v-model:visible="openModalTo" @select="onSelectTo"></AirportModal>
     </OpsLayout>
 </template>
 
 <style scoped>
-/* Override main.css */
-.form-floating>label {
-    all: unset;
-
-    //line-height: unset !important;
-}
-/* ----------------- */
-
 #filter {
     width: fit-content;
     padding: 1.5rem;
@@ -96,6 +118,21 @@ function animateSwap() {
     align-items: center;
 }
 
+#from, #to {
+    //width: 8rem;
+}
+
+.finder {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    padding: 1rem 0.75rem;
+    z-index: 3;
+    background: transparent;
+    cursor: pointer;
+}
+
 #swap {
     height: fit-content;
     padding: 0.5rem 0.5rem;
@@ -104,6 +141,7 @@ function animateSwap() {
 
 #swap .material-symbols-outlined {
     color: white;
+    vertical-align: top;
     font-variation-settings: 'FILL' 1,
     'wght' 400,
     'GRAD' 0,

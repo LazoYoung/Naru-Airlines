@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "air-datepicker": "^3.5.3",
     "bootstrap": "^5.3.3",
     "bootstrap-vue-next": "^0.24.10",
     "crypto-js": "^4.2.0",

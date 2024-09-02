@@ -2,12 +2,24 @@
 import OpsLayout from "@/components/layout/OpsLayout.vue";
 import {BFormInput} from "bootstrap-vue-next";
 import AirportModal from "@/components/modal/AirportModal.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import AirDatepicker from "air-datepicker";
+import 'air-datepicker/air-datepicker.css';
+import localeEn from "air-datepicker/locale/en";
 
 const icao_from = ref("");
 const icao_to = ref("");
 const openModalFrom = ref(false);
 const openModalTo = ref(false);
+
+onMounted(() => {
+    const dp = new AirDatepicker("#date", {
+        multipleDatesSeparator: ' - ',
+        range: true,
+        inline: false,
+        locale: localeEn,
+    });
+});
 
 function onSelectFrom(icao) {
     if (icao) {
@@ -34,8 +46,6 @@ function toICAO(value, event) {
 }
 
 function swap() {
-    // const from = document.querySelector("#from");
-    // const to = document.querySelector("#to");
     const tmp = icao_from.value;
     icao_from.value = icao_to.value;
     icao_to.value = tmp;
@@ -64,14 +74,14 @@ function animateSwap() {
         <template #subtitle>Choose a route to schedule a new flight.</template>
 
         <div id="root">
-            <search id="filter">
-                <BForm @submit.prevent>
-                    <div id="filter-layout">
-                        <BFormFloatingLabel label="From" label-for="from">
+            <BForm @submit.prevent>
+                <search id="filter">
+                    <div id="filter-airport">
+                        <BFormFloatingLabel label="Origin" label-for="from">
                             <BFormInput
                                     id="from"
                                     v-model="icao_from"
-                                    placeholder="From"
+                                    placeholder="Origin"
                                     autocomplete="off"
                                     :formatter="toICAO"
                             />
@@ -82,11 +92,11 @@ function animateSwap() {
                         <button id="swap" tabindex="-1" @click="swap">
                             <span class="material-symbols-outlined">swap_horizontal_circle</span>
                         </button>
-                        <BFormFloatingLabel label="To" label-for="to">
+                        <BFormFloatingLabel label="Destination" label-for="to">
                             <BFormInput
                                     id="to"
                                     v-model="icao_to"
-                                    placeholder="To"
+                                    placeholder="Destination"
                                     autocomplete="off"
                                     :formatter="toICAO"
                             />
@@ -95,12 +105,33 @@ function animateSwap() {
                             </button>
                         </BFormFloatingLabel>
                     </div>
-                </BForm>
-            </search>
+
+                    <div id="filter-date">
+                        <BFormFloatingLabel label="Date" label-for="date">
+                            <BFormInput
+                                    id="date"
+                                    placeholder="Date"
+                                    autocomplete="off"
+                            />
+                        </BFormFloatingLabel>
+                    </div>
+
+                    <div id="filter-aircraft">
+                        <BFormFloatingLabel label="Aircraft" label-for="aircraft">
+                            <BFormInput
+                                    id="aircraft"
+                                    placeholder="Aircraft"
+                                    autocomplete="off"
+                                    :formatter="toICAO"
+                            />
+                        </BFormFloatingLabel>
+                    </div>
+                </search>
+            </BForm>
         </div>
 
-        <AirportModal id="from" v-model:visible="openModalFrom" @select="onSelectFrom"></AirportModal>
-        <AirportModal id="to" v-model:visible="openModalTo" @select="onSelectTo"></AirportModal>
+        <AirportModal id="modal-from" v-model:visible="openModalFrom" @select="onSelectFrom"></AirportModal>
+        <AirportModal id="modal-to" v-model:visible="openModalTo" @select="onSelectTo"></AirportModal>
     </OpsLayout>
 </template>
 
@@ -110,16 +141,28 @@ function animateSwap() {
     padding: 1.5rem;
     border-radius: 1rem;
     background-color: gray;
+    justify-content: space-between;
 }
 
-#filter-layout {
+#filter, #filter > div {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-#from, #to {
-    //width: 8rem;
+#filter > div:not(:last-child):after {
+    content: "";
+    border: 1px solid white;
+    height: 3rem;
+    margin: 0 1.5rem;
+}
+
+#from, #to, #aircraft {
+    width: 9rem;
+}
+
+#date {
+    width: 14rem;
 }
 
 .finder {

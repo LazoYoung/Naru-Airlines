@@ -296,6 +296,10 @@ a {
     text-decoration: none;
 }
 
+span, div {
+    user-select: none;
+}
+
 #nav {
     position: static;
     width: 100%;

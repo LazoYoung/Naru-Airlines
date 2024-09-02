@@ -21,6 +21,13 @@ const props = defineProps({
     },
 });
 
+const airports = ref([
+    {icao: "RKSI", airport: "Incheon International", city: "Seoul"},
+    {icao: "RJAA", airport: "Narita International", city: "Tokyo"},
+    {icao: "KLAX", airport: "Los Angeles International", city: "California"},
+    {icao: "KLAS", airport: "Harry Reid International", city: "Las Vegas"},
+]);
+
 const formTable = ref();
 const canSubmit = ref(false);
 
@@ -51,14 +58,17 @@ function submit() {
     <Modal :id="props.id" v-model:visible="visible">
         <template #title>Airport finder</template>
         <div class="content">
-            <form class="form-query" @submit.prevent>
-                <BFormInput
-                        type="search"
-                        placeholder="Find by airport or city"
-                        autocomplete="off"
-                        aria-autocomplete="none"
-                ></BFormInput>
-            </form>
+            <div class="search">
+                <span class="material-symbols-outlined">search</span>
+                <form class="form-query" @submit.prevent>
+                    <BFormInput
+                            type="search"
+                            placeholder="Find by airport or city"
+                            autocomplete="off"
+                            aria-autocomplete="none"
+                    ></BFormInput>
+                </form>
+            </div>
 
             <form ref="formTable">
                 <table class="table">
@@ -71,29 +81,14 @@ function submit() {
                     </tr>
                     </thead>
                     <tbody>
-                    <tr @click="selectRow('RKSI')">
-                        <td><input type="radio" name="icao" value="RKSI"/></td>
-                        <td>RKSI</td>
-                        <td>Incheon International</td>
-                        <td>Seoul</td>
+                    <tr v-if="airports.length === 0">
+                        <td colspan="4" class="text-center">No matches found.</td>
                     </tr>
-                    <tr @click="selectRow('RJAA')">
-                        <td><input type="radio" name="icao" value="RJAA"/></td>
-                        <td>RJAA</td>
-                        <td>Narita International</td>
-                        <td>Tokyo</td>
-                    </tr>
-                    <tr @click="selectRow('KLAX')">
-                        <td><input type="radio" name="icao" value="KLAX"/></td>
-                        <td>KLAX</td>
-                        <td>Los Angeles International</td>
-                        <td>California</td>
-                    </tr>
-                    <tr @click="selectRow('KLAS')">
-                        <td><input type="radio" name="icao" value="KLAS"/></td>
-                        <td>KLAS</td>
-                        <td>Harry Reid International</td>
-                        <td>Las Vegas</td>
+                    <tr v-else v-for="data in airports" @click="selectRow(`${data.icao}`)">
+                        <td><input type="radio" name="icao" :value="data.icao"/></td>
+                        <td>{{ data.icao }}</td>
+                        <td>{{ data.airport }}</td>
+                        <td>{{ data.city }}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -109,6 +104,25 @@ function submit() {
 <style scoped>
 .content {
     padding: 1rem 2rem;
+}
+
+.search {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.search > span {
+    background: white;
+    border-radius: 1rem;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    text-align: center;
+    cursor: default;
+    user-select: none;
 }
 
 .footer {

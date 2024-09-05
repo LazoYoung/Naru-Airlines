@@ -96,9 +96,9 @@ function onButtonRelease(event) {
                 <!--       todo - add breadcrumb         -->
             </div>
             <div id="content">
-                <h3 id="title">
+                <h2 id="title">
                     <slot name="title"></slot>
-                </h3>
+                </h2>
                 <h5 id="subtitle">
                     <slot name="subtitle"></slot>
                 </h5>

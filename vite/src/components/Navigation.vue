@@ -133,7 +133,7 @@ function logout() {
                             :to="{ name: 'home' }"
                             @click.stop="closeAll"
                         >
-                            <img class="stat-icon" src="@/assets/logo.svg" alt="Logo" />
+                            <img class="stat-icon" src="@/assets/logo_full.svg" alt="Logo" />
                         </RouterLink>
                     </div>
                     <div class="right">

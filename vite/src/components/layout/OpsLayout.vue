@@ -52,7 +52,7 @@ function onButtonRelease(event) {
         <div id="lhs">
             <RouterLink :to="{'name': 'home'}">
                 <div id="logo">
-                    <img src="@/assets/logo.svg" alt="Logo">
+                    <img src="@/assets/logo_full.svg" alt="Logo">
                     <div id="ops">Operations Center</div>
                 </div>
             </RouterLink>

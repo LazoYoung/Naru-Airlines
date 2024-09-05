@@ -111,19 +111,6 @@ button {
     font-family: var(--font-family);
 }
 
-/* SVG */
-svg {
-    fill: var(--fg);
-    stroke: transparent;
-    stroke-width: 0.1rem;
-    overflow: visible;
-}
-
-svg * {
-    fill: var(--fg);
-    stroke: transparent;
-}
-
 text {
     font-family: var(--sans-serif);
 }

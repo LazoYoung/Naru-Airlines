@@ -2,15 +2,64 @@
 import OpsLayout from "@/components/layout/OpsLayout.vue";
 import {BFormInput} from "bootstrap-vue-next";
 import AirportModal from "@/components/modal/AirportModal.vue";
-import {onMounted, ref} from "vue";
+import {onMounted, reactive, ref, watch} from "vue";
 import AirDatepicker from "air-datepicker";
 import 'air-datepicker/air-datepicker.css';
 import localeEn from "air-datepicker/locale/en";
 
-const icao_from = ref("");
-const icao_to = ref("");
+class Route {
+    constructor(flt_num, origin, dest, etd, eta, acf, reg, available = true) {
+        this.flight_number = flt_num;
+        this.origin = origin;
+        this.dest = dest;
+        this.aircraft = acf;
+        this.registration = reg;
+        this.available = available;
+
+        let dep_date = this.toZuluDate(etd);
+        let arr_date = this.toZuluDate(eta);
+        this.dep_zulu = this.formatTime(dep_date) + "z";
+        this.arr_zulu = this.formatTime(arr_date) + "z";
+        this.date = dep_date.toLocaleString(undefined, {
+            timeZone: "UTC",
+            month: "short",
+            day: "numeric",
+        });
+
+        if (dep_date.getUTCDay() !== arr_date.getUTCDay()) {
+            this.extra_day = "+1 day";
+        } else {
+            this.extra_day = "";
+        }
+    }
+
+    formatTime(date, utc = true) {
+        let hours = utc ? date.getUTCHours() : date.getHours();
+        let minutes = utc ? date.getUTCMinutes() : date.getMinutes();
+        let hh = hours.toString().padStart(2, '0');
+        let mm = minutes.toString().padStart(2, '0');
+        return `${hh}:${mm}`;
+    }
+
+    toZuluDate(string) {
+        let zulu_time = new Date(string).toISOString();
+        return new Date(zulu_time);
+    }
+}
+
+// const origin = ref("");
+// const dest = ref("");
+// const date = ref("");
+// const aircraft = ref("");
+const filters = reactive({
+    origin: "",
+    dest: "",
+    date: "",
+    aircraft: "",
+});
 const openModalFrom = ref(false);
 const openModalTo = ref(false);
+const routes = ref([]);
 
 onMounted(() => {
     const dp = new AirDatepicker("#date", {
@@ -18,18 +67,31 @@ onMounted(() => {
         range: true,
         inline: false,
         locale: localeEn,
+        onSelect: (value) => {
+            console.log(value);
+        },
     });
+
+    routes.value = [
+        new Route("101", "RJTT", "RJCC", "2024-09-18T18:00:00.000000+09:00", "2024-09-18T20:30:00.000000+09:00", "A320", "HL7801", false),
+        new Route("102", "RJAA", "KLAX", "2024-10-01T21:50:00.000000+09:00", "2024-10-02T17:20:00.000000+09:00", "A320", "HL7801"),
+    ];
+});
+
+watch(filters, (value) => {
+    // todo: fetch using new filters
+    console.log(JSON.stringify(value));
 });
 
 function onSelectFrom(icao) {
     if (icao) {
-        icao_from.value = icao;
+        filters.origin = icao;
     }
 }
 
 function onSelectTo(icao) {
     if (icao) {
-        icao_to.value = icao;
+        filters.dest = icao;
     }
 }
 
@@ -46,9 +108,9 @@ function toICAO(value, event) {
 }
 
 function swap() {
-    const tmp = icao_from.value;
-    icao_from.value = icao_to.value;
-    icao_to.value = tmp;
+    const tmp = filters.origin;
+    filters.origin = filters.dest;
+    filters.dest = tmp;
 
     animateSwap();
 
@@ -79,7 +141,7 @@ function animateSwap() {
                     <BFormFloatingLabel label="Origin" label-for="from">
                         <BFormInput
                                 id="from"
-                                v-model="icao_from"
+                                v-model="filters.origin"
                                 placeholder="Origin"
                                 autocomplete="off"
                                 :formatter="toICAO"
@@ -94,7 +156,7 @@ function animateSwap() {
                     <BFormFloatingLabel label="Destination" label-for="to">
                         <BFormInput
                                 id="to"
-                                v-model="icao_to"
+                                v-model="filters.dest"
                                 placeholder="Destination"
                                 autocomplete="off"
                                 :formatter="toICAO"
@@ -108,6 +170,7 @@ function animateSwap() {
                     <BFormFloatingLabel label="Date" label-for="date">
                         <BFormInput
                                 id="date"
+                                v-model="filters.date"
                                 placeholder="Date"
                                 autocomplete="off"
                         />
@@ -117,6 +180,7 @@ function animateSwap() {
                     <BFormFloatingLabel label="Aircraft" label-for="aircraft">
                         <BFormInput
                                 id="aircraft"
+                                v-model="filters.aircraft"
                                 placeholder="Aircraft"
                                 autocomplete="off"
                                 :formatter="toICAO"
@@ -126,65 +190,27 @@ function animateSwap() {
             </div>
 
             <div id="routes">
-                <div class="card">
+                <div v-for="route in routes" class="card">
                     <div class="top">
                         <div class="ident">
                             <img class="icon" src="@/assets/icon_invert.png" alt="Icon"/>
-                            <span class="flt-num">NR101</span>
+                            <span class="flt-num">{{ "NR" + route.flight_number }}</span>
                         </div>
                         <div class="badges">
-                            <span class="badge rounded-pill text-bg-dark">A320</span>
-                            <span class="badge rounded-pill text-bg-dark">HL7801</span>
-                            <span class="badge rounded-pill text-bg-success">Available</span>
-                            <!--                            <span class="badge rounded-pill text-bg-danger">Occupied</span>-->
+                            <span class="badge rounded-pill text-bg-dark">{{ route.aircraft }}</span>
+                            <span class="badge rounded-pill text-bg-dark">{{ route.registration }}</span>
+                            <span v-if="route.available" class="badge rounded-pill text-bg-success">Available</span>
+                            <span v-else class="badge rounded-pill text-bg-danger">Occupied</span>
                         </div>
                     </div>
                     <div class="middle">
                         <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-                            <text x="20%" y="40%" class="icao">RJTT</text>
-                            <text x="80%" y="40%" class="icao">RJCC</text>
-                            <text x="20%" y="60%" class="time">07:00z</text>
-                            <text x="80%" y="60%" class="time">09:30z</text>
-                            <text x="50%" y="60%" class="date">Sep 5</text>
-                            <text x="50%" y="20%" class="extra"></text>
-                            <line x1="35%" y1="40%" x2="65%" y2="40%" stroke="dimgray" stroke-dasharray="4 2"/>
-                            <svg fill="#000000" x="0" y="0" width="100%" height="100%"
-                                 viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-                                <g class="plane" transform="scale(0.12) translate(0 -420)">
-                                    <path d="M186.62,464H160a16,16,0,0,1-14.57-22.6l64.46-142.25L113.1,297,77.8,339.77C71.07,348.23,65.7,352,52,352H34.08a17.66,17.66,0,0,1-14.7-7.06c-2.38-3.21-4.72-8.65-2.44-16.41l19.82-71c.15-.53.33-1.06.53-1.58a.38.38,0,0,0,0-.15,14.82,14.82,0,0,1-.53-1.59L16.92,182.76c-2.15-7.61.2-12.93,2.56-16.06a16.83,16.83,0,0,1,13.6-6.7H52c10.23,0,20.16,4.59,26,12l34.57,42.05,97.32-1.44-64.44-142A16,16,0,0,1,160,48h26.91a25,25,0,0,1,19.35,9.8l125.05,152,57.77-1.52c4.23-.23,15.95-.31,18.66-.31C463,208,496,225.94,496,256c0,9.46-3.78,27-29.07,38.16-14.93,6.6-34.85,9.94-59.21,9.94-2.68,0-14.37-.08-18.66-.31l-57.76-1.54-125.36,152A25,25,0,0,1,186.62,464Z"/>
-                                </g>
-                            </svg>
-                            <circle fill="none" stroke="dimgray" stroke-width="2px" cx="35%" cy="40%" r="2%"></circle>
-                            <circle fill="dimgray" cx="35%" cy="40%" r="1%"></circle>
-                            <circle fill="none" stroke="dimgray" stroke-width="2px" cx="65%" cy="40%" r="2%"></circle>
-                            <circle fill="dimgray" cx="65%" cy="40%" r="1%"></circle>
-                        </svg>
-                    </div>
-                    <div class="bottom">
-                        <button type="button" class="btn btn-primary w-50 m-auto">Select Flight</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="top">
-                        <div class="ident">
-                            <img class="icon" src="@/assets/icon_invert.png" alt="Icon"/>
-                            <span class="flt-num">NR102</span>
-                        </div>
-                        <div class="badges">
-                            <span class="badge rounded-pill text-bg-dark">A320</span>
-                            <span class="badge rounded-pill text-bg-dark">HL7801</span>
-                            <span class="badge rounded-pill text-bg-success">Available</span>
-                        </div>
-                    </div>
-                    <div class="middle">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-                            <text x="20%" y="40%" class="icao">RJAA</text>
-                            <text x="80%" y="40%" class="icao">KLAX</text>
-                            <text x="20%" y="60%" class="time">12:50z</text>
-                            <text x="80%" y="60%" class="time">08:20z</text>
-                            <text x="50%" y="60%" class="date">Oct 1</text>
-                            <text x="50%" y="20%" class="extra">+1 day</text>
+                            <text x="20%" y="40%" class="icao">{{ route.origin }}</text>
+                            <text x="80%" y="40%" class="icao">{{ route.dest }}</text>
+                            <text x="20%" y="60%" class="time">{{ route.dep_zulu }}</text>
+                            <text x="80%" y="60%" class="time">{{ route.arr_zulu }}</text>
+                            <text x="50%" y="60%" class="date">{{ route.date }}</text>
+                            <text x="50%" y="20%" class="extra">{{ route.extra_day }}</text>
                             <line x1="35%" y1="40%" x2="65%" y2="40%" stroke="dimgray" stroke-dasharray="4 2"/>
                             <svg fill="#000000" x="0" y="0" width="100%" height="100%"
                                  viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">

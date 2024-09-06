@@ -29,6 +29,7 @@ class FlightSchedule(models.Model):
     flight_time = models.CharField(max_length=5)
     aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_time = models.DateTimeField()
+    # todo: add eta field
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
     arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
 

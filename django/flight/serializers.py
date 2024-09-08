@@ -1,6 +1,6 @@
 import re
-from datetime import timedelta
 
+from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -27,17 +27,12 @@ def airport_field():
     )
 
 
-def validate_duration(value):
-    if not re.compile(r'[0-1]?[0-9]:[0-5][0-9]').fullmatch(value):
-        raise ValidationError("HH:MM is valid format.")
+# def validate_duration(value):
+#     if not re.compile(r'[0-1]?[0-9]:[0-5][0-9]').fullmatch(value):
+#         raise ValidationError("HH:MM is valid format.")
 
 
-# def validate_callsign(value):
-#     if not re.compile(r'[A-Z]{3}\d+').fullmatch(value):
-#         raise ValidationError("ICAO code must precede the number.")
-
-
-class DispatchStandardSerializer(serializers.Serializer):
+class DispatchRoutineSerializer(serializers.Serializer):
     flight_number = serializers.IntegerField()
     aircraft = aircraft_field(required=False)
     # callsign = serializers.CharField(validators=[validate_callsign])
@@ -46,8 +41,9 @@ class DispatchStandardSerializer(serializers.Serializer):
 class DispatchCharterSerializer(serializers.Serializer):
     # callsign = serializers.CharField(validators=[validate_callsign])
     aircraft = aircraft_field(required=True)
-    flight_time = serializers.CharField(validators=[validate_duration])
+    # flight_time = serializers.CharField(validators=[validate_duration])
     departure_time = serializers.DateTimeField()
+    block_time = serializers.IntegerField(validators=[MinValueValidator(30)])
     departure_airport = airport_field()
     arrival_airport = airport_field()
 

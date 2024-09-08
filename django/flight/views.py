@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from member.permission import IsAdminOrReadOnly
 from pilot.permissions import IsPilot
 from .models import FlightSchedule, Aircraft, StandardRoute
-from .serializers import AircraftSerializer, StandardRouteSerializer, DispatchStandardSerializer, \
+from .serializers import AircraftSerializer, StandardRouteSerializer, DispatchRoutineSerializer, \
     DispatchCharterSerializer, FlightScheduleSerializer
 from .services import DispatcherService, RoutineDTO, CharterDTO, DispatchError
 from .utils import has_query
@@ -108,7 +108,7 @@ class AircraftAPI(APIView):
 @api_view(['POST'])
 @permission_classes([IsPilot])
 def dispatch_routine(request: Request):
-    serializer = DispatchStandardSerializer(data=request.data)
+    serializer = DispatchRoutineSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
 
     data = serializer.validated_data
@@ -135,7 +135,7 @@ def dispatch_charter(request: Request):
     data = serializer.validated_data
     dto = CharterDTO(
         aircraft=data['aircraft'],
-        flight_time=data['flight_time'],
+        block_time=data['block_time'],
         departure_time=data['departure_time'],
         departure_airport=data['departure_airport'],
         arrival_airport=data['arrival_airport'],

@@ -47,10 +47,6 @@ class Route {
     }
 }
 
-// const origin = ref("");
-// const dest = ref("");
-// const date = ref("");
-// const aircraft = ref("");
 const filters = reactive({
     origin: "",
     dest: "",

@@ -26,10 +26,10 @@ class FlightSchedule(models.Model):
     flight_number = models.IntegerField(primary_key=True)
     is_charter = models.BooleanField(default=False)
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
-    flight_time = models.CharField(max_length=5)
     aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_time = models.DateTimeField()
-    # todo: add eta field
+    # flight_time = models.CharField(max_length=5)
+    block_time = models.IntegerField()
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
     arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
 
@@ -39,6 +39,7 @@ class StandardRoute(models.Model):
     aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_day = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(31)])
     departure_zulu = models.TimeField()
-    flight_time = models.CharField(max_length=5)
+    block_time = models.IntegerField()  # in minutes
+    # flight_time = models.CharField(max_length=5)
     departure_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')
     arrival_airport = models.ForeignKey(Airport, on_delete=models.PROTECT, related_name='+')

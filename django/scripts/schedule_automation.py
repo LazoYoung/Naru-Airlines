@@ -64,7 +64,7 @@ class ScheduleManager:
             FlightSchedule.objects.create(
                 flight_number=route.flight_number,
                 is_charter=False,
-                flight_time=route.flight_time,
+                block_time=route.block_time,
                 aircraft=route.aircraft,
                 departure_time=departure_time,
                 departure_airport=route.departure_airport,

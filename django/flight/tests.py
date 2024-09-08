@@ -164,7 +164,7 @@ class StandardRouteTests(APITestCase):
         acf = self.route1.aircraft.icao_code
         day = self.route1.departure_day
         zulu = self.route1.departure_zulu.isoformat()
-        flt_time = str(self.route1.flight_time)
+        block_time = str(self.route1.block_time)
         dep = self.route1.departure_airport.icao_code
         arr = self.route1.arrival_airport.icao_code
         get = self.client.get(reverse("route", kwargs={"flight_number": flt_num}))
@@ -173,7 +173,7 @@ class StandardRouteTests(APITestCase):
         self.assertContains(get, acf)
         self.assertContains(get, day)
         self.assertContains(get, zulu)
-        self.assertContains(get, flt_time)
+        self.assertContains(get, block_time)
         self.assertContains(get, dep)
         self.assertContains(get, arr)
 
@@ -182,7 +182,7 @@ class StandardRouteTests(APITestCase):
         dep = create_airport()
         arr = create_airport()
         flt_num = self.flight_id
-        flt_time = self.random_duration()
+        block_time = random.randint(60, 300)
         day = self.random_day()
         zulu = self.random_zulu().isoformat()
         post = self.admin.post(
@@ -192,7 +192,7 @@ class StandardRouteTests(APITestCase):
                 "aircraft": acf,
                 "departure_day": day,
                 "departure_zulu": zulu,
-                "flight_time": flt_time,
+                "block_time": block_time,
                 "departure_airport": dep.icao_code,
                 "arrival_airport": arr.icao_code,
             }
@@ -203,19 +203,21 @@ class StandardRouteTests(APITestCase):
         self.assertEqual(post.data["aircraft"], acf)
         self.assertEqual(post.data["departure_day"], day)
         self.assertEqual(post.data["departure_zulu"], zulu)
-        self.assertEqual(post.data["flight_time"], flt_time)
+        self.assertEqual(post.data["block_time"], block_time)
         self.assertEqual(post.data["departure_airport"], dep.icao_code)
         self.assertEqual(post.data["arrival_airport"], arr.icao_code)
 
     def test_put(self):
         flt_num = self.route1.flight_number
         aircraft = create_aircraft("B748")
+        block_time = random.randint(60, 300)
         dep = create_airport()
         arr = create_airport()
         put = self.admin.put(
             path=self._reverse(flt_num),
             data={
                 "aircraft": aircraft.icao_code,
+                "block_time": block_time,
                 "departure_airport": dep.icao_code,
                 "arrival_airport": arr.icao_code,
             }
@@ -224,6 +226,7 @@ class StandardRouteTests(APITestCase):
 
         get = self.client.get(self._reverse(flt_num))
         self.assertContains(get, aircraft.icao_code)
+        self.assertContains(get, block_time)
         self.assertContains(get, dep.icao_code)
         self.assertContains(get, arr.icao_code)
 
@@ -240,7 +243,7 @@ class StandardRouteTests(APITestCase):
             aircraft=self.aircraft,
             departure_day=self.random_day(),
             departure_zulu=self.random_zulu(),
-            flight_time=self.random_duration(),
+            block_time=random.randint(60, 300),
             departure_airport=create_airport(),
             arrival_airport=create_airport(),
         )
@@ -258,12 +261,6 @@ class StandardRouteTests(APITestCase):
     @staticmethod
     def random_zulu():
         return time(hour=random.randint(0, 23), minute=random.randint(0, 59))
-
-    @staticmethod
-    def random_duration():
-        hour = random.randint(0, 8)
-        minute = random.randint(0, 59)
-        return f"{hour}:{minute}"
 
     @staticmethod
     def to_timedelta(str):
@@ -285,12 +282,6 @@ class DispatchTest(APITestCase):
         self.pilot_client.force_login(member)
         self.aircraft = create_aircraft("B744")
         self.schedule = self._create_schedule()
-        # self.route = StandardRoute.objects.create(
-        #     flight_number="NR200",
-        #     aircraft=self.aircraft,
-        #     departure_airport=create_airport(random_airport_code()),
-        #     arrival_airport=create_airport(random_airport_code()),
-        # )
 
     def test_without_permission(self):
         # try as guest
@@ -356,7 +347,7 @@ class DispatchTest(APITestCase):
         aircraft = get_dummy_aircraft()
         payload = {
             "aircraft": aircraft.icao_code,
-            "flight_time": "1:20",
+            "block_time": random.randint(60, 300),
             "departure_time": timezone.now() + timezone.timedelta(hours=1),
             "departure_airport": departure.icao_code,
             "arrival_airport": arrival.icao_code,
@@ -387,7 +378,7 @@ class DispatchTest(APITestCase):
         self.assertFalse(flt_number is None, "Flight number not available.")
         schedule = FlightSchedule.objects.create(
             flight_number=flt_number,
-            flight_time=timedelta(hours=1),
+            block_time=random.randint(60, 300),
             is_charter=charter,
             pilot=pilot,
             aircraft=self.aircraft,
@@ -505,16 +496,16 @@ class FlightScheduleTest(TestCase):
         pilot = Pilot.objects.create(member=member)
         return pilot
 
-    def _standard_schedule(self, flight_number=None, departure_time=timezone.now()):
+    def _standard_schedule(self, flight_number=None, departure_time=timezone.now(), block_time=60):
         if flight_number is None:
             flight_number = self.next_number
             self.next_number += 1
         StandardRoute.objects.create(
             flight_number=flight_number,
             aircraft=self.aircraft,
-            flight_time="1:00",
             departure_day=departure_time.day,
             departure_zulu=departure_time.time(),
+            block_time=block_time,
             departure_airport=create_airport(),
             arrival_airport=create_airport(),
         )
@@ -531,7 +522,7 @@ class FlightScheduleTest(TestCase):
         aircraft = self.aircraft
         result = self.client.post(reverse('dispatch_charter'), data={
             "aircraft": aircraft.icao_code,
-            "flight_time": "1:20",
+            "block_time": random.randint(60, 300),
             "departure_time": departure_time,
             "departure_airport": departure.icao_code,
             "arrival_airport": arrival.icao_code,

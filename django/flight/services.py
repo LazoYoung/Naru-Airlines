@@ -35,7 +35,7 @@ class RoutineDTO:
 @dataclass
 class CharterDTO:
     aircraft: Aircraft
-    flight_time: str
+    block_time: int
     departure_time: datetime
     departure_airport: Airport
     arrival_airport: Airport
@@ -60,7 +60,7 @@ class DispatcherService(object):
                 is_charter=True,
                 pilot=self.pilot,
                 aircraft=dto.aircraft,
-                flight_time=dto.flight_time,
+                block_time=dto.block_time,
                 departure_time=dto.departure_time,
                 departure_airport=dto.departure_airport,
                 arrival_airport=dto.arrival_airport,

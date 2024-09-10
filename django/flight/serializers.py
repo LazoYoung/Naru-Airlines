@@ -32,6 +32,12 @@ def airport_field():
 #         raise ValidationError("HH:MM is valid format.")
 
 
+class AircraftSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Aircraft
+        fields = '__all__'
+
+
 class DispatchRoutineSerializer(serializers.Serializer):
     flight_number = serializers.IntegerField()
     aircraft = aircraft_field(required=False)
@@ -49,15 +55,11 @@ class DispatchCharterSerializer(serializers.Serializer):
 
 
 class FlightScheduleSerializer(serializers.ModelSerializer):
+    aircraft = AircraftSerializer()
+
     class Meta:
         model = FlightSchedule
         exclude = ['pilot']
-
-
-class AircraftSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Aircraft
-        fields = '__all__'
 
 
 class StandardRouteSerializer(serializers.ModelSerializer):

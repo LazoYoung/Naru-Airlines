@@ -8,7 +8,7 @@ import 'air-datepicker/air-datepicker.css';
 import localeEn from "air-datepicker/locale/en";
 
 class Route {
-    constructor(flt_num, origin, dest, etd, eta, acf, reg, available = true) {
+    constructor(flt_num, origin, dest, etd, block_time, acf, reg, available = true) {
         this.flight_number = flt_num;
         this.origin = origin;
         this.dest = dest;
@@ -17,7 +17,8 @@ class Route {
         this.available = available;
 
         let dep_date = this.toZuluDate(etd);
-        let arr_date = this.toZuluDate(eta);
+        let deltaTime = block_time * 60 * 1000;
+        let arr_date = new Date(dep_date.getTime() + deltaTime)
         this.dep_zulu = this.formatTime(dep_date) + "z";
         this.arr_zulu = this.formatTime(arr_date) + "z";
         this.date = dep_date.toLocaleString(undefined, {
@@ -48,9 +49,10 @@ class Route {
 }
 
 const filters = reactive({
-    origin: "",
-    dest: "",
-    date: "",
+    departure_airport: "",
+    arrival_airport: "",
+    date_from: "",
+    date_to: "",
     aircraft: "",
 });
 const openModalFrom = ref(false);
@@ -59,35 +61,72 @@ const routes = ref([]);
 
 onMounted(() => {
     const dp = new AirDatepicker("#date", {
-        multipleDatesSeparator: ' - ',
+        multipleDatesSeparator: ' ~ ',
         range: true,
         inline: false,
         locale: localeEn,
+        dateFormat: "yyyy-MM-dd",
         onSelect: (value) => {
             console.log(value);
+            let date = value.formattedDate;
+            filters.date_from = date[0];
+
+            if (date[1]) {
+                filters.date_to = date[1];
+            } else {
+                filters.date_to = filters.date_from;
+            }
         },
     });
 
-    routes.value = [
-        new Route("101", "RJTT", "RJCC", "2024-09-18T18:00:00.000000+09:00", "2024-09-18T20:30:00.000000+09:00", "A320", "HL7801", false),
-        new Route("102", "RJAA", "KLAX", "2024-10-01T21:50:00.000000+09:00", "2024-10-02T17:20:00.000000+09:00", "A320", "HL7801"),
-    ];
+    fetchRoutes();
 });
 
-watch(filters, (value) => {
-    // todo: fetch using new filters
-    console.log(JSON.stringify(value));
-});
+watch(filters, (value) => fetchRoutes());
+
+async function fetchRoutes() {
+    const url = new URL("/api/schedule/", document.location.origin);
+
+    for (let key in filters) {
+        let value = filters[key];
+
+        if (value) {
+            url.searchParams.append(key, value);
+        }
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) return;
+
+    const json = await response.json();
+    routes.value = [];
+
+    for (const data of json) {
+        const aircraft = data["aircraft"];
+        const route = new Route(
+            data["flight_number"],
+            data["departure_airport"],
+            data["arrival_airport"],
+            data["departure_time"],
+            data["block_time"],
+            aircraft["icao_code"],
+            aircraft["registration"],
+            data["is_occupied"]
+        );
+        routes.value.push(route);
+    }
+}
 
 function onSelectFrom(icao) {
     if (icao) {
-        filters.origin = icao;
+        filters.departure_airport = icao;
     }
 }
 
 function onSelectTo(icao) {
     if (icao) {
-        filters.dest = icao;
+        filters.arrival_airport = icao;
     }
 }
 
@@ -104,13 +143,11 @@ function toICAO(value, event) {
 }
 
 function swap() {
-    const tmp = filters.origin;
-    filters.origin = filters.dest;
-    filters.dest = tmp;
+    const tmp = filters.departure_airport;
+    filters.departure_airport = filters.arrival_airport;
+    filters.arrival_airport = tmp;
 
     animateSwap();
-
-    // todo: submit form
 }
 
 function animateSwap() {
@@ -137,7 +174,7 @@ function animateSwap() {
                     <BFormFloatingLabel label="Origin" label-for="from">
                         <BFormInput
                                 id="from"
-                                v-model="filters.origin"
+                                v-model="filters.departure_airport"
                                 placeholder="Origin"
                                 autocomplete="off"
                                 :formatter="toICAO"
@@ -152,7 +189,7 @@ function animateSwap() {
                     <BFormFloatingLabel label="Destination" label-for="to">
                         <BFormInput
                                 id="to"
-                                v-model="filters.dest"
+                                v-model="filters.arrival_airport"
                                 placeholder="Destination"
                                 autocomplete="off"
                                 :formatter="toICAO"
@@ -166,7 +203,6 @@ function animateSwap() {
                     <BFormFloatingLabel label="Date" label-for="date">
                         <BFormInput
                                 id="date"
-                                v-model="filters.date"
                                 placeholder="Date"
                                 autocomplete="off"
                         />

@@ -360,7 +360,7 @@ class DispatchTest(APITestCase):
 
     def _dispatch_routine(self, client, flight_number=None, data=None):
         if flight_number is None:
-            flight_number = self.schedule.flight_number
+            flight_number = self._create_schedule().flight_number
         if data is None:
             data = {}
         payload = {
@@ -381,6 +381,7 @@ class DispatchTest(APITestCase):
             block_time=random.randint(60, 300),
             is_charter=charter,
             pilot=pilot,
+            is_occupied=pilot is not None,
             aircraft=self.aircraft,
             departure_time=timezone.now() + timedelta(hours=1),
             departure_airport=create_airport(),

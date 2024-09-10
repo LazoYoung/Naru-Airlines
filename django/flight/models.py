@@ -25,6 +25,7 @@ class Aircraft(models.Model):
 class FlightSchedule(models.Model):
     flight_number = models.IntegerField(primary_key=True)
     is_charter = models.BooleanField(default=False)
+    is_occupied = models.BooleanField(default=False)
     pilot = models.ForeignKey(Pilot, on_delete=models.SET_NULL, null=True)
     aircraft = models.ForeignKey(Aircraft, on_delete=models.PROTECT, related_name='+')
     departure_time = models.DateTimeField()

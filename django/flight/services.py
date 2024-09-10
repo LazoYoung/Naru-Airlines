@@ -79,13 +79,14 @@ class DispatcherService(object):
         if schedule.is_charter:
             raise DispatchError("This is a charter flight.", bad_request=True)
 
-        if schedule.pilot:
+        if schedule.is_occupied:
             raise DispatchError("This flight is occupied.", bad_request=True)
 
         if dto.aircraft:
             schedule.aircraft = dto.aircraft
 
         schedule.pilot = self.pilot
+        schedule.is_occupied = True
         schedule.save()
         return schedule
 

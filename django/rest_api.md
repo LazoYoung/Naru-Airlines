@@ -20,20 +20,20 @@
 |---------------------------------|--------|---------------------------------|--------------------------------------------------------------------------|
 | `api/dispatch/charter/`         | POST   | Submit charter flight schedule. | aircraft, departure_time, block_time, departure_airport, arrival_airport |
 | `api/dispatch/routine/`         | POST   | Submit routine flight schedule. | flight_number, aircraft                                                  |
-| `api/schedule/`                 | GET    | Get all flight schedules.       |                                                                          |
-| `api/schedule?mine/`            | GET    | Get your flight schedules.      |                                                                          |
-| `api/schedule?available/`       | GET    | Get available flight schedules. |                                                                          |
+| `api/schedule/`                 | GET    | Get flight schedules.           | departure_airport, arrival_airport, aircraft, date                       |
+| `api/schedule?mine/`            | GET    | Get your flight schedules.      | departure_airport, arrival_airport, aircraft, date                       |
+| `api/schedule?available/`       | GET    | Get available flight schedules. | departure_airport, arrival_airport, aircraft, date                       |
 | `api/schedule/<flight_number>/` | GET    | Get one schedule.               |                                                                          |
 | `api/schedule/<flight_number>/` | DELETE | Cancel the schedule.            |                                                                          |
 
 ## Standard route
-| URL                          | Method | Description              | Form / Response                                                                                        |
-|------------------------------|--------|--------------------------|--------------------------------------------------------------------------------------------------------|
-| `api/route/`                 | GET    | Get all standard routes. |                                                                                                        |
-| `api/route/`                 | POST   | Create a new route.      | flight_number, aircraft, departure_day, departure_zulu, block_time, departure_airport, arrival_airport |
-| `api/route/<flight_number>/` | GET    | Get one route.           |                                                                                                        |
-| `api/route/<flight_number>/` | PUT    | Modify the route.        |                                                                                                        |
-| `api/route/<flight_number>/` | DELETE | Delete the route.        |                                                                                                        |
+| URL                          | Method | Description          | Form / Response                                                                                        |
+|------------------------------|--------|----------------------|--------------------------------------------------------------------------------------------------------|
+| `api/route/`                 | GET    | Get standard routes. | departure_airport, arrival_airport, aircraft                                                           |
+| `api/route/`                 | POST   | Create a new route.  | flight_number, aircraft, departure_day, departure_zulu, block_time, departure_airport, arrival_airport |
+| `api/route/<flight_number>/` | GET    | Get one route.       |                                                                                                        |
+| `api/route/<flight_number>/` | PUT    | Modify the route.    |                                                                                                        |
+| `api/route/<flight_number>/` | DELETE | Delete the route.    |                                                                                                        |
 
 ## Fleet
 | URL                      | Method | Description                | Form                                 |

@@ -1,3 +1,5 @@
+from datetime import datetime, date
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.generics import get_object_or_404
@@ -20,8 +22,31 @@ class RoutesAPI(APIView):
 
     @staticmethod
     def get(request: Request):
-        queryset = StandardRoute.objects.all()
-        serializer = StandardRouteSerializer(instance=queryset, many=True)
+        qs = StandardRoute.objects.all()
+        dep = request.query_params.get("departure_airport")
+        arr = request.query_params.get("arrival_airport")
+        aircraft = request.query_params.get("aircraft")
+        # date = request.query_params.get("date")
+
+        if dep:
+            qs = qs.filter(departure_airport=dep)
+
+        if arr:
+            qs = qs.filter(arrival_airport=arr)
+
+        if aircraft:
+            qs = qs.filter(aircraft=aircraft)
+
+        # if date:
+        #     if '-' in date:
+        #         split = date.split('-')
+        #         date_from = datetime.fromisoformat(split[0])
+        #         date_to = datetime.fromisoformat(split[1])
+        #     else:
+        #         date_from = datetime.fromisoformat(date)
+        #         date_to = date_from
+
+        serializer = StandardRouteSerializer(instance=qs, many=True)
         return Response(serializer.data)
 
     @staticmethod
@@ -151,32 +176,57 @@ def dispatch_charter(request: Request):
 
 
 class SchedulesAPI(APIView):
-    permission_classes = (IsPilot,)
+    # todo: uncomment this line
+    # permission_classes = (IsPilot,)
 
     def get(self, request: Request):
-        if not has_query(request):
-            queryset = self._all_schedules(request)
-        elif 'mine' in request.query_params:
-            queryset = self._my_schedules(request)
+        if 'mine' in request.query_params:
+            qs = self._my_schedules(request)
         elif 'available' in request.query_params:
-            queryset = self._available_schedules(request)
+            qs = self._available_schedules(request)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            qs = self._all_schedules(request)
 
-        serializer = FlightScheduleSerializer(instance=queryset, many=True)
+        dep = request.query_params.get("departure_airport")
+        arr = request.query_params.get("arrival_airport")
+        aircraft = request.query_params.get("aircraft")
+        date_from = request.query_params.get("date_from")
+        date_to = request.query_params.get("date_to")
+
+        if dep:
+            qs = qs.filter(departure_airport=dep)
+
+        if arr:
+            qs = qs.filter(arrival_airport=arr)
+
+        if aircraft:
+            qs = qs.filter(aircraft=aircraft)
+
+        if date_from and date_to:
+            try:
+                date_from = date.fromisoformat(date_from)
+                date_to = date.fromisoformat(date_to)
+                qs = qs.filter(departure_time__date__range=(date_from, date_to))
+            except Exception as e:
+                print(e)
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        qs = qs.order_by('departure_time')
+
+        serializer = FlightScheduleSerializer(instance=qs, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def _my_schedules(request: Request):
-        return FlightSchedule.objects.filter(pilot=request.user.pilot).order_by('departure_time')
+    def _all_schedules(request: Request):
+        return FlightSchedule.objects
 
     @staticmethod
-    def _all_schedules(request: Request):
-        return FlightSchedule.objects.order_by('departure_time')
+    def _my_schedules(request: Request):
+        return FlightSchedule.objects.filter(pilot=request.user.pilot)
 
     @staticmethod
     def _available_schedules(request: Request):
-        return FlightSchedule.objects.filter(pilot__isnull=True).order_by('departure_time')
+        return FlightSchedule.objects.filter(pilot__isnull=True)
 
 
 class ScheduleAPI(APIView):

@@ -26,7 +26,6 @@ class RoutesAPI(APIView):
         dep = request.query_params.get("departure_airport")
         arr = request.query_params.get("arrival_airport")
         aircraft = request.query_params.get("aircraft")
-        # date = request.query_params.get("date")
 
         if dep:
             qs = qs.filter(departure_airport=dep)
@@ -36,15 +35,6 @@ class RoutesAPI(APIView):
 
         if aircraft:
             qs = qs.filter(aircraft=aircraft)
-
-        # if date:
-        #     if '-' in date:
-        #         split = date.split('-')
-        #         date_from = datetime.fromisoformat(split[0])
-        #         date_to = datetime.fromisoformat(split[1])
-        #     else:
-        #         date_from = datetime.fromisoformat(date)
-        #         date_to = date_from
 
         serializer = StandardRouteSerializer(instance=qs, many=True)
         return Response(serializer.data)
@@ -176,8 +166,7 @@ def dispatch_charter(request: Request):
 
 
 class SchedulesAPI(APIView):
-    # todo: uncomment this line
-    # permission_classes = (IsPilot,)
+    permission_classes = (IsPilot,)
 
     def get(self, request: Request):
         if 'mine' in request.query_params:

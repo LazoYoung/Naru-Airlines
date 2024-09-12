@@ -22,7 +22,7 @@ class ScheduleAutomationTest(TestCase):
             aircraft=self.acf,
             departure_day=day,
             departure_zulu=zulu,
-            flight_time="1:00",
+            block_time=60,
             departure_airport=self.dep,
             arrival_airport=self.arr,
         )

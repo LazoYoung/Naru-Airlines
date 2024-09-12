@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from member.permission import IsAdminOrReadOnly
-from pilot.permissions import IsPilot
+from pilot.permissions import IsPilot, IsPilotOrReadOnly
 from .models import FlightSchedule, Aircraft, StandardRoute
 from .serializers import AircraftSerializer, StandardRouteSerializer, DispatchRoutineSerializer, \
     DispatchCharterSerializer, FlightScheduleSerializer
@@ -166,8 +166,6 @@ def dispatch_charter(request: Request):
 
 
 class SchedulesAPI(APIView):
-    permission_classes = (IsPilot,)
-
     def get(self, request: Request):
         if 'mine' in request.query_params:
             qs = self._my_schedules(request)
@@ -201,7 +199,6 @@ class SchedulesAPI(APIView):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
         qs = qs.order_by('departure_time')
-
         serializer = FlightScheduleSerializer(instance=qs, many=True)
         return Response(serializer.data)
 
@@ -211,7 +208,9 @@ class SchedulesAPI(APIView):
 
     @staticmethod
     def _my_schedules(request: Request):
-        return FlightSchedule.objects.filter(pilot=request.user.pilot)
+        if request.user.is_authenticated:
+            return FlightSchedule.objects.filter(pilot=request.user.pilot)
+        return FlightSchedule.objects.none()
 
     @staticmethod
     def _available_schedules(request: Request):
@@ -219,7 +218,7 @@ class SchedulesAPI(APIView):
 
 
 class ScheduleAPI(APIView):
-    permission_classes = (IsPilot,)
+    permission_classes = (IsPilotOrReadOnly,)
 
     def get(self, request, flight_number):
         serializer = FlightScheduleSerializer(instance=self._get_object(flight_number))

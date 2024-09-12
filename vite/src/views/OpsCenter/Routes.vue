@@ -8,13 +8,13 @@ import 'air-datepicker/air-datepicker.css';
 import localeEn from "air-datepicker/locale/en";
 
 class Route {
-    constructor(flt_num, origin, dest, etd, block_time, acf, reg, available = true) {
+    constructor(flt_num, origin, dest, etd, block_time, acf, reg, occupied = false) {
         this.flight_number = flt_num;
         this.origin = origin;
         this.dest = dest;
         this.aircraft = acf;
         this.registration = reg;
-        this.available = available;
+        this.occupied = occupied;
 
         let dep_date = this.toZuluDate(etd);
         let deltaTime = block_time * 60 * 1000;
@@ -231,8 +231,8 @@ function animateSwap() {
                         <div class="badges">
                             <span class="badge rounded-pill text-bg-dark">{{ route.aircraft }}</span>
                             <span class="badge rounded-pill text-bg-dark">{{ route.registration }}</span>
-                            <span v-if="route.available" class="badge rounded-pill text-bg-success">Available</span>
-                            <span v-else class="badge rounded-pill text-bg-danger">Occupied</span>
+                            <span v-if="route.occupied" class="badge rounded-pill text-bg-danger">Occupied</span>
+                            <span v-else class="badge rounded-pill text-bg-success">Available</span>
                         </div>
                     </div>
                     <div class="middle">

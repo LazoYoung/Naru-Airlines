@@ -2,12 +2,18 @@
 import {onMounted, ref} from "vue";
 
 class Flight {
-    constructor(number, origin, dest, etd, eta) {
+    constructor(number, origin, dest, etd, block_time) {
         const _MS_PER_MIN = 1000 * 60
         const now = new Date(Date.now());
         const dep_date = this.toZuluDate(etd);
-        const arr_date = this.toZuluDate(eta);
+        const deltaTime = block_time * 60 * 1000;
+        const arr_date = new Date(dep_date.getTime() + deltaTime)
         const minutes = Math.floor((dep_date - now) / _MS_PER_MIN);
+        this.dep_zulu = this.formatTime(dep_date) + "z";
+        this.arr_zulu = this.formatTime(arr_date) + "z";
+        this.number = number;
+        this.origin = origin;
+        this.dest = dest;
 
         if (minutes < 0) {
             this.badge_color = "text-bg-danger";
@@ -21,12 +27,6 @@ class Flight {
                 this.badge_color = "text-bg-secondary";
             }
         }
-
-        this.dep_zulu = this.formatTime(dep_date) + "z";
-        this.arr_zulu = this.formatTime(arr_date) + "z";
-        this.number = number;
-        this.origin = origin;
-        this.dest = dest;
     }
 
     formatDuration(minutes) {
@@ -84,13 +84,27 @@ class Flight {
 
 const flights = ref();
 
-onMounted(() => {
-    flights.value = [
-        new Flight(101, "RKSI", "RJAA", "2024-09-06T18:00:00.000000+09:00", "2024-09-06T20:30:00.000000+09:00", true),
-        new Flight(102, "RJAA", "KLAX", "2024-09-07T14:00:00.000000+09:00", "2024-09-07T19:00:00.000000+09:00"),
-        new Flight(103, "KLAX", "KLAS", "2024-09-08T06:00:00.000000+09:00", "2024-09-08T07:00:00.000000+09:00"),
-    ];
-});
+onMounted(() => fetchSchedules());
+
+async function fetchSchedules() {
+    const response = await fetch("api/schedule?mine");
+
+    if (!response.ok) return;
+
+    const json = await response.json();
+    flights.value = [];
+
+    for (const data of json) {
+        const flight = new Flight(
+            data['flight_number'],
+            data['departure_airport'],
+            data['arrival_airport'],
+            data['departure_time'],
+            data['block_time']
+        );
+        flights.value.push(flight);
+    }
+}
 </script>
 
 <template>

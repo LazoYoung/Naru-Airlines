@@ -396,13 +396,13 @@ class FlightScheduleTest(TestCase):
         self.next_number = 800
         self.aircraft = create_aircraft("A320")
 
-    def test_without_permission(self):
-        all = self.client.get(reverse('schedules'))
-        mine = self.client.get(reverse_query('schedules', query='mine'))
-        available = self.client.get(reverse_query('schedules', query='available'))
-        self.assertTrue(status.is_client_error(all.status_code))
-        self.assertTrue(status.is_client_error(mine.status_code))
-        self.assertTrue(status.is_client_error(available.status_code))
+    # def test_without_permission(self):
+    #     all = self.client.get(reverse('schedules'))
+    #     mine = self.client.get(reverse_query('schedules', query='mine'))
+    #     available = self.client.get(reverse_query('schedules', query='available'))
+    #     self.assertTrue(status.is_client_error(all.status_code))
+    #     self.assertTrue(status.is_client_error(mine.status_code))
+    #     self.assertTrue(status.is_client_error(available.status_code))
 
     def test_empty_schedule(self):
         self._create_pilot()

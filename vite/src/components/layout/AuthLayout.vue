@@ -1,49 +1,56 @@
 <script setup>
-import Logo from "@/components/icon/IconLogo.vue";
 </script>
 
 <template>
     <main>
-        <div>
-            <RouterLink :to="{name: 'home'}">
-                <Logo id="auth_logo" />
-            </RouterLink>
-        </div>
-
         <div id="auth_body">
-            <slot />
+            <div id="logo">
+                <RouterLink :to="{name: 'home'}">
+                    <img src="@/assets/icon.png" alt="Naru Airlines Logo">
+                </RouterLink>
+            </div>
+
+            <slot/>
         </div>
     </main>
 </template>
 
 <style scoped>
 main {
+    background-color: white;
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding-top: 3rem;
-    background-color: rgb(0, 0, 0);
 }
+
 #auth_body {
-    width: 100%;
-    margin-top: 1.5rem;
+    width: 60%;
     padding: 1rem 1.5rem 1rem 1.5rem;
-    background-color: var(--form-bg);
-    overflow: hidden;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: white;
 }
-#auth_logo {
-    width: 6rem;
-    height: 6rem;
-    fill: currentColor;
+
+#logo {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 1rem;
 }
+
+#logo img {
+    width: 4rem;
+}
+
 @media (min-width: 640px) {
     main {
         justify-content: center;
         padding-top: 0;
+        background-color: #eeeeee;
     }
+
     #auth_body {
-        max-width: 24rem;
+        max-width: 18rem;
         border-radius: 0.5rem;
     }
 }

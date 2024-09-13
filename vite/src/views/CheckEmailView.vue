@@ -16,7 +16,7 @@ div.inbox {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 12rem 0;
+    padding: 10rem 0;
     row-gap: 1rem;
     max-width: 100vw;
     border-radius: 0;
@@ -28,7 +28,7 @@ p.title {
     font-weight: bold;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 640px) {
     div.inbox {
         max-width: 100%;
         border-radius: 1rem;

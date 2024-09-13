@@ -57,30 +57,35 @@ function sendEmail() {
             <section class="input">
                 <TextInput
                         v-model="form['display_name']"
-                        hint="Name"
-                        label="inner"
-                        :error_message="form.errors['display_name']"
+                        placeholder="Name"
+                        :message="form.errors['display_name']"
                 ></TextInput>
                 <TextInput
                         v-model="form['email']"
                         type="email"
-                        hint="E-mail"
-                        :error_message="form.errors['email']"
+                        placeholder="E-mail"
+                        :message="form.errors['email']"
                 ></TextInput>
                 <TextInput
                         v-model="form['password']"
                         type="password"
-                        hint="Password"
-                        :error_message="form.errors['password']"
+                        placeholder="Password"
+                        :message="form.errors['password']"
                 ></TextInput>
                 <TextInput
                         v-model="form['confirm_password']"
                         type="password"
-                        hint="Confirm Password"
-                        :error_message="form.errors['confirm_password']"
+                        placeholder="Confirm Password"
+                        :message="form.errors['confirm_password']"
                 ></TextInput>
             </section>
-            <button filled type="submit" :disabled="form.processing">Sign up</button>
+            <button
+                    class="btn btn-primary"
+                    type="submit"
+                    :disabled="form.processing"
+            >
+                Sign up
+            </button>
         </form>
     </AuthLayout>
 </template>
@@ -89,17 +94,15 @@ function sendEmail() {
 form {
     display: flex;
     flex-direction: column;
-    row-gap: 1.5rem;
-    padding: 1rem;
+    row-gap: 1rem;
 }
 
-button {
-    box-shadow: black 0.3rem 0.3rem 0.3rem;
+form > button {
+    font-weight: 600;
 }
 
 section.input {
     display: flex;
     flex-direction: column;
-    row-gap: 1rem;
 }
 </style>

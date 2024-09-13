@@ -28,23 +28,29 @@ function onSubmit() {
                 <TextInput
                         type="email"
                         v-model="form['email']"
-                        hint="E-mail"
-                        :error_message="form.errors['email']"
+                        placeholder="E-mail"
+                        :message="form.errors['email']"
                 ></TextInput>
                 <TextInput
                         type="password"
                         v-model="form['new_password']"
-                        hint="New password"
-                        :error_message="form.errors['new_password']"
+                        placeholder="New password"
+                        :message="form.errors['new_password']"
                 ></TextInput>
                 <TextInput
                         type="password"
                         v-model="form['confirm_password']"
-                        hint="Confirm password"
-                        :error_message="form.errors['confirm_password']"
+                        placeholder="Confirm password"
+                        :message="form.errors['confirm_password']"
                 ></TextInput>
             </section>
-            <button type="submit" :disabled="form.processing" filled>Reset password</button>
+            <button
+                    type="submit"
+                    class="btn btn-primary"
+                    :disabled="form.processing"
+            >
+                Reset password
+            </button>
         </form>
     </AuthLayout>
 </template>
@@ -53,13 +59,15 @@ function onSubmit() {
 form {
     display: flex;
     flex-direction: column;
-    row-gap: 1.5rem;
-    padding: 1rem;
+    row-gap: 1rem;
 }
 
 section.input {
     display: flex;
     flex-direction: column;
-    row-gap: 1rem;
+}
+
+form > button {
+    font-weight: 600;
 }
 </style>

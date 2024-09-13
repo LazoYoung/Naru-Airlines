@@ -21,7 +21,7 @@ const props = defineProps({
     },
     message_type: {
         type: String,
-        default: 'info',
+        default: 'error',
     },
     required: {
         type: Boolean,
@@ -75,7 +75,7 @@ function reloadElements() {
 <template>
     <!--  todo: support form-textarea, form-datetime  -->
     <div class="form">
-        <label v-html="label"></label>
+        <label v-if="label" v-html="label"></label>
         <div class="input" ref="target">
             <input
                 ref="input"

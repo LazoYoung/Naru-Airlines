@@ -12,18 +12,18 @@ const props = defineProps({
 </script>
 
 <template>
-    <p :class="'message ' + props.type">
+    <div :class="'message ' + props.type">
         {{ message }}
-    </p>
+    </div>
 </template>
 
 <style scoped>
 .message {
     padding-top: 0.25rem;
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: 400;
-    line-height: 1rem;
-    min-height: 1.25rem;
+    line-height: 0.5rem;
+    min-height: 1.5rem;
 }
 .message.info {
     color: rgb(128, 128, 128);

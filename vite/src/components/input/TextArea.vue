@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import {onMounted, ref, watch} from 'vue';
 import InputMessage from '@/components/input/InputMessage.vue';
 
 const props = defineProps({
@@ -23,9 +23,9 @@ const props = defineProps({
         type: String,
         default: 'info',
     },
-    required: {
+    optional: {
         type: Boolean,
-        default: true,
+        default: false,
     },
     autofocus: {
         type: Boolean,
@@ -75,28 +75,28 @@ function reloadElements() {
 <template>
     <!--  todo: support form-textarea, form-datetime  -->
     <div class="form">
-        <label v-html="label"></label>
+        <label v-if="label" v-html="label"></label>
         <div class="textarea" ref="target">
             <textarea
-                ref="textarea"
-                v-model="model"
-                :type="type"
-                :required="required"
-                :placeholder="placeholder"
-                :autofocus="autofocus"
-                :tabindex="tabindex"
-                :readonly="readonly"
-                autocomplete="off"
-                spellcheck="false"
-                data-gramm="false"
-                :disabled="disabled"
+                    ref="textarea"
+                    v-model="model"
+                    :type="type"
+                    :required="!optional"
+                    :placeholder="placeholder"
+                    :autofocus="autofocus"
+                    :tabindex="tabindex"
+                    :readonly="readonly"
+                    autocomplete="off"
+                    spellcheck="false"
+                    data-gramm="false"
+                    :disabled="disabled"
             />
             <div class="border"></div>
         </div>
         <InputMessage
-            class="message"
-            :message="message"
-            :type="message_type"
+                class="message"
+                :message="message"
+                :type="message_type"
         ></InputMessage>
     </div>
 </template>
@@ -110,6 +110,7 @@ function reloadElements() {
     line-height: 1rem;
     min-height: 1.25rem;
 }
+
 .form > .textarea {
     display: flex;
     width: 100%;
@@ -120,6 +121,7 @@ function reloadElements() {
     overflow: hidden;
     position: relative;
 }
+
 .form > .textarea > textarea,
 .form > .textarea > textarea:-webkit-autofill,
 .form > .textarea > textarea:-webkit-autofill:hover,
@@ -132,6 +134,7 @@ function reloadElements() {
     color: black;
     -webkit-text-fill-color: black !important;
 }
+
 .form > .textarea > .border {
     position: absolute;
     top: 0;
@@ -142,14 +145,17 @@ function reloadElements() {
     pointer-events: none;
     box-shadow: inset 0 0 0 0.1rem rgb(210, 210, 210);
 }
+
 .form > .textarea > textarea:focus ~ .border,
 .form > .textarea > textarea:active ~ .border {
     box-shadow: inset 0 0 0 0.1rem rgb(0, 0, 0);
 }
+
 .form > .textarea > textarea:disabled {
     background: rgb(230, 230, 230);
     cursor: not-allowed;
 }
+
 .form > .textarea > textarea::placeholder,
 .form > .textarea > textarea::-webkit-textarea-placeholderr {
     color: rgb(180, 180, 180);

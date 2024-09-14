@@ -23,9 +23,9 @@ const props = defineProps({
         type: String,
         default: 'error',
     },
-    required: {
+    optional: {
         type: Boolean,
-        default: true,
+        default: false,
     },
     autofocus: {
         type: Boolean,
@@ -81,7 +81,7 @@ function reloadElements() {
                 ref="input"
                 v-model="model"
                 :type="type"
-                :required="required"
+                :required="!optional"
                 :placeholder="placeholder"
                 :autofocus="autofocus"
                 :tabindex="tabindex"

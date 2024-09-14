@@ -2,12 +2,10 @@
 import {computed} from "vue";
 import {getGravatarHash} from "@/api";
 
-// todo: cache image
-
 const props = defineProps({
     email: {
         type: String,
-        required: true,
+        default: '',
     },
     hash: {
         type: String,
@@ -23,6 +21,9 @@ const props = defineProps({
     },
 });
 const imgSrc = computed(() => {
+    if (!props.email)
+        return null;
+
     let hash = props.hash ? props.hash : getGravatarHash(props.email);
     return `https://www.gravatar.com/avatar/${hash}?s=${props.size}`;
 });
@@ -36,6 +37,7 @@ const imgSrc = computed(() => {
                     href="https://www.gravatar.com"
                     target="_blank"
                     class="w-full h-full block"
+                    tabindex="-1"
             >
                 <img :src="imgSrc" layer alt="My Avatar"/>
                 <div ref="imgHintElem" layer class="p-hover-bg p-hidden">

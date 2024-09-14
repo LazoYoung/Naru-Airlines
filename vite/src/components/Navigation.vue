@@ -429,6 +429,9 @@ span, div {
     height: 2.5rem;
     cursor: pointer;
 }
+#nav > .head .right > .account[state='close']:hover {
+    background-color: whitesmoke;
+}
 #nav > .head .right > .account[state='open'] > .profile {
     width: 100%;
 }

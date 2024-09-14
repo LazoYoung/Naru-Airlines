@@ -67,13 +67,15 @@ label {
     color: var(--form-input-fg);
 }
 
-div.check-btn {
+.check-btn {
+    --form-input-bg: dimgray;
+    --form-bg: transparent;
     position: absolute;
     top: 0;
     left: 0;
     width: 1.5rem;
     height: 1.5rem;
-    outline: 2px solid var(--form-input-bg);
+    border: var(--form-input-bg) solid 2px;
     border-radius: 100%;
     background-color: var(--form-bg);
     transition: background-color 200ms ease-in-out;

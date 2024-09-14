@@ -4,12 +4,12 @@
         <p>Hi {{ name }},</p>
         <p>You asked us to change your e-mail address of your account.</p>
         <p>If this was your action, click the link below to proceed.</p>
-        <a href="{{ scheme }}://{{ domain }}{% url 'verify_account' uid=uid token=token %}"
+        <a href="{{ scheme }}://{{ domain }}{% url 'verify_change_email' uid=uid token=token %}"
            style="border: 0; color: #ffffff; background-color: #5865F2; padding: 15px; font-weight: bold; text-decoration: none; border-radius: 5px;">
             Approve Email
         </a>
         <p style="margin-top: 40px;">Or you can copy the link below to your browser</p>
-        <p>{{ scheme }}://{{ domain }}{% url 'verify_account' uid=uid token=token %}</p>
+        <p>{{ scheme }}://{{ domain }}{% url 'verify_change_email' uid=uid token=token %}</p>
         <p>Naru Aviation Research Unit</p>
     </div>
 </div>

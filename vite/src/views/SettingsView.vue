@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import MainLayout from '@/components/layout/MainLayout.vue';
 import TextInput from '@/components/input/TextInput.vue';
-import Textarea from '@/components/input/Textarea.vue';
+import TextArea from '@/components/input/TextArea.vue';
 import Checkbox from '@/components/input/Checkbox.vue';
-import Button from '@/components/input/Button.vue';
-import { fetchProfile, Form, useForm } from '@/api';
-import { onMounted, ref } from 'vue';
+import NeoButton from '@/components/input/NeoButton.vue';
+import {fetchProfile, Form, useForm} from '@/api';
+import {onMounted, ref} from 'vue';
 import Gravatar from '@/components/icon/Gravatar.vue';
 import router from '@/router/index.js';
 import Alert from '@/alert.js';
@@ -38,9 +38,10 @@ defineProps({
 
 onMounted(() => fetchProfile(profile).then((_) => onProfileFetch()));
 
-function saveProfile() {
-    let nameChanged =
-        profileForm['display_name'] !== profile.value['display_name'];
+async function saveProfile() {
+    await fetchProfile(profile);
+
+    let nameChanged = profileForm['display_name'] !== profile.value['display_name'];
     let bioChanged = profileForm['bio'] !== profile.value['bio'];
 
     if (!nameChanged && !bioChanged) {
@@ -48,14 +49,14 @@ function saveProfile() {
         return;
     }
 
-    submit(profileForm, 'PUT', '/api/profile/');
+    submitChanges(profileForm, 'PUT', '/api/profile/');
 }
 
-function savePrivacy() {
+async function savePrivacy() {
+    await fetchProfile(profile);
+
     let passwordChanged = passwordForm['new_password'];
-    let emailChanged =
-        passwordForm['new_email'] &&
-        passwordForm['email'] !== passwordForm['new_email'];
+    let emailChanged = emailForm['new_email'] !== profile.value['email'];
 
     if (!passwordChanged && !emailChanged) {
         warn.pop('Nothing has changed.');
@@ -63,22 +64,22 @@ function savePrivacy() {
     }
 
     if (passwordChanged) {
-        submit(passwordForm, 'POST', '/api/change-password/');
+        submitChanges(passwordForm, 'POST', '/api/change-password/');
     }
 
     if (emailChanged) {
-        submit(emailForm, 'POST', '/api/send-verify-email/');
+        submitChanges(emailForm, 'POST', '/api/send-verify-email/', "E-mail sent!");
     }
 }
 
 function saveNotification() {
-    submit(notificationForm, 'PUT', '/api/profile/');
+    submitChanges(notificationForm, 'PUT', '/api/profile/');
 }
 
 function onProfileFetch() {
     if (profile.value === null) {
         router
-            .push({ name: 'login' })
+            .push({name: 'login'})
             .then((_) => error.pop('Session expired.'));
         return;
     }
@@ -87,30 +88,29 @@ function onProfileFetch() {
 }
 
 function reloadForm() {
-    profileForm.clear();
     profileForm['display_name'] = profile.value['display_name'];
     profileForm['bio'] = profile.value['bio'];
-
-    emailForm.clear();
     emailForm['email'] = profile.value['email'];
     emailForm['new_email'] = profile.value['email'];
-
-    passwordForm.clear();
-
-    notificationForm.clear();
     notificationForm['receive_emails'] = profile.value['receive_emails'];
+    passwordForm.clear();
 }
 
-function submit(form: Form, method: string, url: string) {
+function submitChanges(
+    form: Form,
+    method: string,
+    url: string,
+    ok_message = "Changes saved!",
+    fail_message = "Changes rejected."
+) {
     form.submit(method, url).then((response) => {
         if (response.ok) {
-            info.pop('Changes saved.');
+            info.pop(ok_message);
         } else {
-            error.pop('Changes rejected.');
+            error.pop(fail_message);
         }
     });
 }
-const a = 'a';
 </script>
 
 <template>
@@ -120,45 +120,46 @@ const a = 'a';
                 <div class="horizontal">
                     <section class="grow">
                         <div class="heading">
-                            <p class="title">Profile</p>
-                            <p class="subtitle">Express your own identity.</p>
+                            <div class="title">Profile</div>
+                            <div class="subtitle">Express your own identity.</div>
                         </div>
                         <div id="narrow-profile-img">
                             <Gravatar
-                                :email="emailForm['email']"
-                                :size="300"
-                                large
+                                    :email="emailForm['email']"
+                                    :size="300"
+                                    tabindex="-1"
+                                    large
                             ></Gravatar>
                         </div>
                         <form id="profile-form" @submit.prevent="saveProfile">
                             <TextInput
-                                v-model="profileForm['display_name']"
-                                :message="profileForm.errors['display_name']"
-                                placeholder="Name"
-                                label="Name"
+                                    v-model="profileForm['display_name']"
+                                    :message="profileForm.errors['display_name']"
+                                    placeholder="Name"
+                                    label="Name"
                             ></TextInput>
-                            <Textarea
-                                v-model="profileForm['bio']"
-                                :message="profileForm.errors['bio']"
-                                :required="false"
-                                placeholder="Bio"
-                                label="Bio"
-                            ></Textarea>
+                            <TextArea
+                                    optional
+                                    v-model="profileForm['bio']"
+                                    :message="profileForm.errors['bio']"
+                                    placeholder="Bio"
+                                    label="Bio"
+                            ></TextArea>
                         </form>
                         <div>
-                            <Button
-                                form="profile-form"
-                                :disabled="profileForm.processing"
-                                >Save</Button
+                            <NeoButton
+                                    form="profile-form"
+                                    :disabled="profileForm.processing"
                             >
-                            <button form="privacy-form" disabled>Save</button>
+                                Save
+                            </NeoButton>
                         </div>
                     </section>
                     <div id="wide-profile-img">
                         <Gravatar
-                            :email="emailForm['email']"
-                            :size="300"
-                            large
+                                :email="emailForm['email']"
+                                :size="300"
+                                large
                         ></Gravatar>
                     </div>
                 </div>
@@ -166,93 +167,75 @@ const a = 'a';
             <div class="wide-horizontal">
                 <section class="box">
                     <div class="heading">
-                        <p class="title">Privacy</p>
-                        <p class="subtitle">Manage your account credentials.</p>
+                        <div class="title">Privacy</div>
+                        <div class="subtitle">Manage your account credentials.</div>
                     </div>
                     <form id="privacy-form" @submit.prevent="savePrivacy">
                         <TextInput
-                            v-model="emailForm['new_email']"
-                            :error_message="emailForm.errors['new_email']"
-                            hint="E-mail"
-                            label="top"
-                            type="email"
-                            fixed_label
+                                v-model="emailForm['new_email']"
+                                :message="emailForm.errors['new_email']"
+                                placeholder="E-mail"
+                                label="E-mail"
+                                type="email"
                         />
                         <TextInput
-                            v-model="passwordForm['old_password']"
-                            :error_message="passwordForm.errors['old_password']"
-                            :required="false"
-                            hint="Current Password"
-                            label="top"
-                            type="password"
-                            small
-                            fixed_label
+                                optional
+                                v-model="passwordForm['old_password']"
+                                :message="passwordForm.errors['old_password']"
+                                placeholder="Current Password"
+                                label="Password"
+                                type="password"
                         />
                         <TextInput
-                            v-model="passwordForm['new_password']"
-                            :error_message="passwordForm.errors['new_password']"
-                            :required="false"
-                            hint="New Password"
-                            label="top"
-                            type="password"
-                            small
-                            fixed_label
+                                optional
+                                v-model="passwordForm['new_password']"
+                                :message="passwordForm.errors['new_password']"
+                                placeholder="New Password"
+                                type="password"
                         />
                         <TextInput
-                            v-model="passwordForm['confirm_password']"
-                            :error_message="
-                                passwordForm.errors['confirm_password']
-                            "
-                            :required="false"
-                            hint="Confirm Password"
-                            label="top"
-                            type="password"
-                            small
-                            fixed_label
+                                optional
+                                v-model="passwordForm['confirm_password']"
+                                :message="passwordForm.errors['confirm_password']"
+                                placeholder="Confirm Password"
+                                type="password"
                         />
                     </form>
                     <div>
-                        <button
-                            type="submit"
-                            form="privacy-form"
-                            :disabled="
-                                emailForm.processing || passwordForm.processing
-                            "
-                            small
-                            filled
+                        <NeoButton
+                                form="privacy-form"
+                                :disabled="emailForm.processing || passwordForm.processing"
                         >
                             Save
-                        </button>
+                        </NeoButton>
                     </div>
                 </section>
                 <div class="pillar-x-2"></div>
                 <section class="box">
                     <div class="heading">
-                        <p class="title">Notification</p>
-                        <p class="subtitle">
+                        <div class="title">Notification</div>
+                        <div class="subtitle">
                             Decide how you like to be notified.
-                        </p>
+                        </div>
                     </div>
                     <form
-                        id="notification-form"
-                        @submit.prevent="saveNotification"
+                            id="notification-form"
+                            @submit.prevent="saveNotification"
                     >
                         <Checkbox
-                            label="Receive e-mails"
-                            v-model="notificationForm['receive_emails']"
+                                label="Receive e-mails"
+                                v-model="notificationForm['receive_emails']"
                         />
                     </form>
-                    <div class="wide-grow" />
+                    <div class="wide-grow"/>
                     <div>
-                        <button
-                            type="submit"
-                            form="notification-form"
-                            :disabled="notificationForm.processing"
-                            small
-                            filled
+                        <NeoButton
+                                type="submit"
+                                form="notification-form"
+                                :disabled="notificationForm.processing"
                         >
                             Save
-                        </button>
+                        </NeoButton>
                     </div>
                 </section>
             </div>
@@ -319,7 +302,8 @@ section {
 }
 
 section.box {
-    background-color: white;
+    background-color: #eeeeee;
+    border: lightgray solid 2px;
     box-shadow: rgb(0, 0, 0, 70%) 0.5rem 0.5rem 0.5rem;
     padding: 2rem;
     margin-bottom: 2rem;
@@ -328,13 +312,11 @@ section.box {
 form {
     display: flex;
     flex-direction: column;
-    row-gap: 1rem;
 }
 
 .heading > .title {
-    color: aliceblue;
+    color: black;
     font-size: 1.4rem;
-    padding-bottom: 0.5rem;
 }
 
 .heading > .subtitle {

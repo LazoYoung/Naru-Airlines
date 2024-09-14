@@ -1,4 +1,6 @@
 <script setup>
+import Navigation from "@/components/Navigation.vue";
+
 defineProps({
     title: {
         type: String,
@@ -7,6 +9,7 @@ defineProps({
 </script>
 
 <template>
+    <Navigation></Navigation>
     <main>
         <header>
             <div class="box">
@@ -26,7 +29,7 @@ div.content {
 }
 
 header {
-    padding-top: 6rem;
+    padding-top: 2rem;
 }
 
 header > .box {
@@ -39,7 +42,7 @@ header > .box > .title {
     font-size: 1.5rem;
     line-height: 2rem;
     font-weight: 600;
-    text-shadow: rgb(0, 0, 0, 50%) 0.2rem 0.2rem 0.1rem;
+    text-shadow: rgb(0, 0, 0, 25%) 2px 2px 2px;
 }
 
 @media (min-width: 640px) {

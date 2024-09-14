@@ -2,6 +2,7 @@
 import Navigation from "@/components/Navigation.vue";
 import { reactive } from 'vue';
 import { ref } from 'vue';
+import MainLayout from "@/components/layout/MainLayout.vue";
 
 const props = defineProps({
     isAdmin: {
@@ -42,7 +43,7 @@ function doom() {
 </script>
 
 <template>
-    <Navigation></Navigation>
+    <MainLayout title="Home"></MainLayout>
 </template>
 
 <style scoped>

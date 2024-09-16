@@ -72,7 +72,7 @@ const stats = {
     padding: 1.25rem 0.75rem;
     display: flex;
     align-items: center;
-    //box-shadow: 2px 4px 4px rgba(0, 0, 0, 0.15);
+    /*box-shadow: 2px 4px 4px rgba(0, 0, 0, 0.15);*/
 }
 
 .stat-item:nth-child(4) {

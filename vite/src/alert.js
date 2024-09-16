@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 import Animate from "@/animate.js";
 
@@ -17,17 +17,17 @@ class Alert {
      * @param timeout Pop-up duration
      * @param style CSS style mappings
      */
-    constructor(type = 'success', style = {}, timeout = 5000) {
+    constructor(type = "success", style = {}, timeout = 5000) {
         let defStyle = {};
         this.type = type;
         this.style = Object.assign(defStyle, style);
         this.timeout = timeout;
-        this.notifications = document.querySelector('#notifications');
+        this.notifications = document.querySelector("#notifications");
 
         if (!this.notifications) {
-            this.notifications = document.createElement('div');
-            this.notifications.id = 'notifications';
-            const styleElem = document.createElement('style');
+            this.notifications = document.createElement("div");
+            this.notifications.id = "notifications";
+            const styleElem = document.createElement("style");
             styleElem.innerText = this.getStyle();
             this.notifications.appendChild(styleElem);
             document.body.appendChild(this.notifications);
@@ -60,29 +60,29 @@ class Alert {
      * @param message text to display
      */
     pop(message) {
-        const notification = document.createElement('div');
-        notification.classList.add('notification');
+        const notification = document.createElement("div");
+        notification.classList.add("notification");
 
         if (this.type) {
             notification.classList.add(this.type);
         }
-        if (this.type === 'rainbow') {
-            notification.setAttribute('color', this.type);
+        if (this.type === "rainbow") {
+            notification.setAttribute("color", this.type);
         }
 
         let animate = new Animate(notification);
-        let msg = document.createElement('div');
-        msg.classList.add('message');
+        let msg = document.createElement("div");
+        msg.classList.add("message");
         msg.innerHTML = message;
-        let close = document.createElement('div');
-        close.classList.add('close');
-        let closeBtn = document.createElement('div');
+        let close = document.createElement("div");
+        close.classList.add("close");
+        let closeBtn = document.createElement("div");
         let ct = setTimeout(() => {
             this.close(animate, notification, null);
         }, this.timeout);
-        closeBtn.classList.add('btn');
-        closeBtn.innerHTML = '×';
-        closeBtn.addEventListener('click', () => {
+        closeBtn.classList.add("btn");
+        closeBtn.innerHTML = "×";
+        closeBtn.addEventListener("click", () => {
             this.close(animate, notification, ct);
         });
         close.appendChild(closeBtn);
@@ -96,7 +96,7 @@ class Alert {
         this.notifications.appendChild(notification);
         setTimeout(() => {
             //notification.classList.add('show');
-            animate.spring(0.35, 5).to({right: '0px'}, 1000);
+            animate.spring(0.35, 5).to({ right: "0px" }, 1000);
         }, 100);
     }
 
@@ -111,8 +111,8 @@ class Alert {
             clearTimeout(ct);
         }
 
-        notification.classList.add('hide');
-        animate.easeout().to({right: '-900px'}, 200);
+        notification.classList.add("hide");
+        animate.easeout().to({ right: "-900px" }, 200);
         setTimeout(() => {
             this.notifications.removeChild(notification);
 

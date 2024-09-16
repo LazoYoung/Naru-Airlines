@@ -16,14 +16,14 @@ class Animate {
         const processor = this.processor;
 
         function animate() {
-            if (element.hasAttribute('animate')) {
-                const task = animatings[element.getAttribute('animate')];
+            if (element.hasAttribute("animate")) {
+                const task = animatings[element.getAttribute("animate")];
                 if (task) {
                     task.kill();
                 }
             }
 
-            element.setAttribute('animate', id);
+            element.setAttribute("animate", id);
             animatings[id] = _this;
 
             const start = window.performance.now();
@@ -34,47 +34,50 @@ class Animate {
             const transforms = {};
             const transformsFrom = {};
             for (const key in styles) {
-                if (typeof styles[key] === 'number') {
-                    styles[key] = styles[key] + 'px';
+                if (typeof styles[key] === "number") {
+                    styles[key] = styles[key] + "px";
                 }
 
-                if (key === 'transform') {
-                    types[key] = 'transform';
-                    for (const part of styles.transform.split(' ')) {
-                        const match = part.match(/(.+)\(([0-9.\-]+(?:.+)?)\)/);
+                if (key === "transform") {
+                    types[key] = "transform";
+                    for (const part of styles.transform.split(" ")) {
+                        const match = part.match(/(.+)\(([0-9.-]+(?:.+)?)\)/);
                         if (!match) {
                             continue;
                         }
                         const type = match[1];
-                        const metric = match[2].replace(/[0-9.\-]+/, '');
-                        const value = parseFloat(match[2].replace(metric, ''));
+                        const metric = match[2].replace(/[0-9.-]+/, "");
+                        const value = parseFloat(match[2].replace(metric, ""));
                         transforms[type] = {
                             value: value,
                             metric: metric,
                         };
                     }
-                    for (const part of element.style.transform.split(' ')) {
-                        const match = part.match(/(.+)\(([0-9.\-]+(?:.+)?)\)/);
+                    for (const part of element.style.transform.split(" ")) {
+                        const match = part.match(/(.+)\(([0-9.-]+(?:.+)?)\)/);
                         if (!match) {
                             continue;
                         }
                         const type = match[1];
-                        const metric = match[2].replace(/[0-9.\-]+/, '');
-                        const value = parseFloat(match[2].replace(metric, ''));
+                        const metric = match[2].replace(/[0-9.-]+/, "");
+                        const value = parseFloat(match[2].replace(metric, ""));
                         transformsFrom[type] = {
                             value: value,
                             metric: metric,
                         };
                     }
-                } else if (styles[key].match(/[0-9.\-]+px/)) {
-                    types[key] = 'px';
-                    from[key] = parseFloat(style[key].replace('px', ''), 10);
-                } else if (styles[key].match(/[0-9.\-]+rem/)) {
-                    types[key] = 'rem';
-                    from[key] = parseFloat(style[key].replace('px', ''), 10);
-                } else if (styles[key].match(/[0-9.\-]+%/)) {
-                    types[key] = '%';
-                    from[key] = parseFloat(element.style[key].replace('%', '') || 0, 10);
+                } else if (styles[key].match(/[0-9.-]+px/)) {
+                    types[key] = "px";
+                    from[key] = parseFloat(style[key].replace("px", ""), 10);
+                } else if (styles[key].match(/[0-9.-]+rem/)) {
+                    types[key] = "rem";
+                    from[key] = parseFloat(style[key].replace("px", ""), 10);
+                } else if (styles[key].match(/[0-9.-]+%/)) {
+                    types[key] = "%";
+                    from[key] = parseFloat(
+                        element.style[key].replace("%", "") || 0,
+                        10
+                    );
                 }
             }
 
@@ -82,8 +85,8 @@ class Animate {
                 let p = processor(n);
 
                 for (const key in styles) {
-                    if (types[key] === 'transform') {
-                        let value = '';
+                    if (types[key] === "transform") {
+                        let value = "";
                         for (const part in transforms) {
                             let from = transformsFrom[part]?.value || 0.0;
                             let target = transforms[part].value;
@@ -92,23 +95,29 @@ class Animate {
                             value += `${part}(${step}${transforms[part].metric}) `;
                         }
                         element.style.transform = value;
-                    } else if (['px', 'rem'].includes(types[key])) {
+                    } else if (["px", "rem"].includes(types[key])) {
                         let target;
-                        if (types[key] === 'px') {
-                            target = parseFloat(styles[key].replace('px', ''), 10);
-                        } else if (types[key] === 'rem') {
+                        if (types[key] === "px") {
+                            target = parseFloat(
+                                styles[key].replace("px", ""),
+                                10
+                            );
+                        } else if (types[key] === "rem") {
                             target = Animate.#rem(
-                                parseFloat(styles[key].replace('rem', ''), 10)
+                                parseFloat(styles[key].replace("rem", ""), 10)
                             );
                         }
                         let move = target - from[key];
                         let step = from[key] + move * p;
-                        element.style[key] = step + 'px';
-                    } else if (types[key] === '%') {
-                        let target = parseFloat(styles[key].replace('%', ''), 10);
+                        element.style[key] = step + "px";
+                    } else if (types[key] === "%") {
+                        let target = parseFloat(
+                            styles[key].replace("%", ""),
+                            10
+                        );
                         let move = target - from[key];
                         let step = from[key] + move * p;
-                        element.style[key] = step + '%';
+                        element.style[key] = step + "%";
                     }
                 }
             }
@@ -121,7 +130,7 @@ class Animate {
                 const t = (now - start) / duration;
                 if (t >= 1) {
                     update(1);
-                    element.removeAttribute('animate');
+                    element.removeAttribute("animate");
                     delete animatings[id];
                     return;
                 }
@@ -144,7 +153,7 @@ class Animate {
 
     kill() {
         this.killed = true;
-        this.element.removeAttribute('animate');
+        this.element.removeAttribute("animate");
         delete animatings[this.id];
     }
 
@@ -168,7 +177,7 @@ class Animate {
             var kSplineTableSize = 11;
             var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
 
-            var float32ArraySupported = typeof Float32Array === 'function';
+            var float32ArraySupported = typeof Float32Array === "function";
 
             function A(aA1, aA2) {
                 return 1.0 - 3.0 * aA2 + 3.0 * aA1;
@@ -187,7 +196,11 @@ class Animate {
 
             // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
             function getSlope(aT, aA1, aA2) {
-                return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+                return (
+                    3.0 * A(aA1, aA2) * aT * aT +
+                    2.0 * B(aA1, aA2) * aT +
+                    C(aA1)
+                );
             }
 
             function binarySubdivide(aX, aA, aB, mX1, mX2) {
@@ -205,7 +218,7 @@ class Animate {
                 } while (
                     Math.abs(currentX) > SUBDIVISION_PRECISION &&
                     ++i < SUBDIVISION_MAX_ITERATIONS
-                    );
+                );
                 return currentT;
             }
 
@@ -226,7 +239,7 @@ class Animate {
             }
 
             if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
-                throw new Error('bezier x values must be in [0, 1] range');
+                throw new Error("bezier x values must be in [0, 1] range");
             }
 
             if (mX1 === mY1 && mX2 === mY2) {
@@ -248,7 +261,8 @@ class Animate {
 
                 for (
                     ;
-                    currentSample !== lastSample && sampleValues[currentSample] <= aX;
+                    currentSample !== lastSample &&
+                    sampleValues[currentSample] <= aX;
                     ++currentSample
                 ) {
                     intervalStart += kSampleStepSize;
@@ -258,7 +272,8 @@ class Animate {
                 // Interpolate to provide an initial guess for t
                 var dist =
                     (aX - sampleValues[currentSample]) /
-                    (sampleValues[currentSample + 1] - sampleValues[currentSample]);
+                    (sampleValues[currentSample + 1] -
+                        sampleValues[currentSample]);
                 var guessForT = intervalStart + dist * kSampleStepSize;
 
                 var initialSlope = getSlope(guessForT, mX1, mX2);
@@ -414,7 +429,8 @@ class Animate {
             }
 
             return (t) => {
-                let sinusoid = A * Math.cos(omega_d * t) + B * Math.sin(omega_d * t);
+                let sinusoid =
+                    A * Math.cos(omega_d * t) + B * Math.sin(omega_d * t);
                 return -(Math.exp(-t * zeta * omega) * sinusoid) + 1;
             };
         }
@@ -450,7 +466,9 @@ class Animate {
     }
 
     static #rem(n = 1) {
-        return n * parseFloat(getComputedStyle(document.documentElement).fontSize);
+        return (
+            n * parseFloat(getComputedStyle(document.documentElement).fontSize)
+        );
     }
 }
 //

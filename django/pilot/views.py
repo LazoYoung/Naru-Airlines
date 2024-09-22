@@ -7,8 +7,8 @@ from pilot.models import Pilot, PilotStats
 from pilot.permissions import IsPilot
 
 
-@permission_classes([IsPilot])
 @api_view(['GET'])
+@permission_classes([IsPilot])
 def stats(request: Request):
     pilot = Pilot.objects.filter(member=request.user)
     model = PilotStats.objects.filter(pilot=pilot)

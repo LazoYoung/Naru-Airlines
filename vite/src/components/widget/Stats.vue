@@ -1,10 +1,11 @@
-<script setup>
-const stats = {
-    flight_count: 55,
-    flight_hours: 120,
-    rating: "#3",
-    rank: "First Officer",
-};
+<script setup lang="ts">
+import {onMounted, ref} from "vue";
+import {fetchStat, type PilotStat} from "@/api/pilot";
+
+const stats = ref<PilotStat>();
+
+// todo: test if data is actually retrieved
+onMounted(() => fetchStat(ref));
 </script>
 
 <template>
@@ -14,7 +15,7 @@ const stats = {
                 <span class="material-symbols-outlined">airlines</span>
             </div>
             <div class="stat-info">
-                <h2 class="stat-value">{{ stats.flight_count }}</h2>
+                <h2 class="stat-value">{{ stats?.flightCount ?? 0 }}</h2>
                 <p class="stat-label">Flights</p>
             </div>
         </div>
@@ -23,7 +24,7 @@ const stats = {
                 <span class="material-symbols-outlined">timer</span>
             </div>
             <div class="stat-info">
-                <h2 class="stat-value">{{ stats.flight_hours }}</h2>
+                <h2 class="stat-value">{{ stats?.flightHour ?? 0 }}</h2>
                 <p class="stat-label">Flight hours</p>
             </div>
         </div>
@@ -32,7 +33,7 @@ const stats = {
                 <span class="material-symbols-outlined">military_tech</span>
             </div>
             <div class="stat-info">
-                <h2 class="stat-value-sm">{{ stats.rank }}</h2>
+                <h2 class="stat-value-sm">{{ stats?.rank ?? "N/A" }}</h2>
                 <p class="stat-label">Rank</p>
             </div>
         </div>
@@ -41,7 +42,7 @@ const stats = {
                 <span class="material-symbols-outlined">leaderboard</span>
             </div>
             <div class="stat-info">
-                <h2 class="stat-value">{{ stats.rating }}</h2>
+                <h2 class="stat-value">{{ stats?.grade ?? 0 }}</h2>
                 <p class="stat-label">Rating</p>
             </div>
         </div>

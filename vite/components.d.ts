@@ -9,7 +9,11 @@ declare module 'vue' {
   export interface GlobalComponents {
     AirportModal: typeof import('./src/components/modal/AirportModal.vue')['default']
     AuthLayout: typeof import('./src/components/layout/AuthLayout.vue')['default']
+    BAccordion: typeof import('bootstrap-vue-next')['BAccordion']
+    BAccordionItem: typeof import('bootstrap-vue-next')['BAccordionItem']
     BasicMenu: typeof import('./src/components/menu/BasicMenu.vue')['default']
+    BButton: typeof import('bootstrap-vue-next')['BButton']
+    BFormFloatingLabel: typeof import('bootstrap-vue-next')['BFormFloatingLabel']
     Checkbox: typeof import('./src/components/input/Checkbox.vue')['default']
     Dispatcher: typeof import('./src/components/widget/Dispatcher.vue')['default']
     Gravatar: typeof import('./src/components/icon/Gravatar.vue')['default']

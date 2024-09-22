@@ -6,4 +6,5 @@ urlpatterns = [
     path('api/', include('member.urls')),
     path('api/', include('flight.urls')),
     path('api/', include('passenger.urls')),
+    path('api/', include('pilot.urls')),
 ]

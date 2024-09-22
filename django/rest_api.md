@@ -44,6 +44,11 @@
 | `api/fleet/<icao_code>/` | PUT    | Modify the profile.        | registration, name, image            |
 | `api/fleet/<icao_code>/` | DELETE | Delete the profile.        |                                      |
 
+# Pilot
+| URL                | Method | Description      | Form                                               |
+|--------------------|--------|------------------|----------------------------------------------------|
+| `api/pilot/stats/` | GET    | Get pilot stats. | flight_count, flight_hour, rank, experience, grade |
+
 ## Booking
 | URL              | Method | Description                      | Form |
 |------------------|--------|----------------------------------|------|

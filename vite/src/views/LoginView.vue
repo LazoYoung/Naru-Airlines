@@ -1,19 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import TextInput from "@/components/input/TextInput.vue";
-import {home, useForm} from "@/api";
+import { Form, home, useForm } from "@/api/common";
 import AuthLayout from "@/components/layout/AuthLayout.vue";
 
-const form = useForm(['email', 'password']);
+const form: Form = useForm(["email", "password"]);
 
 function onSubmit() {
-    form.submitPost("/api/login/")
-        .then(response => {
-            if (response.ok) {
-                home();
-            } else {
-                form['password'] = '';
-            }
-        });
+    form.submitPost("/api/login/").then((response) => {
+        if (response.ok) {
+            home();
+        } else {
+            form["password"] = "";
+        }
+    });
 }
 </script>
 
@@ -21,24 +20,26 @@ function onSubmit() {
     <AuthLayout>
         <form class="form-group" @submit.prevent="onSubmit">
             <TextInput
-                    type="email"
-                    placeholder="Email"
-                    v-model="form.email"
-                    :message="form.errors['email']"
+                type="email"
+                placeholder="Email"
+                v-model="form['email']"
+                :message="form.errors['email']"
             />
             <TextInput
-                    type="password"
-                    placeholder="Password"
-                    v-model="form.password"
-                    :message="form.errors['password']"
+                type="password"
+                placeholder="Password"
+                v-model="form['password']"
+                :message="form.errors['password']"
             />
             <div class="actions">
-                <RouterLink class="reset-link" :to="{name: 'reset-password'}">Forgot password?</RouterLink>
+                <RouterLink class="reset-link" :to="{ name: 'reset-password' }">
+                    Forgot password?
+                </RouterLink>
             </div>
             <button
-                    class="btn btn-primary"
-                    type="submit"
-                    :disabled="form.processing"
+                class="btn btn-primary"
+                type="submit"
+                :disabled="form.processing"
             >
                 Login
             </button>

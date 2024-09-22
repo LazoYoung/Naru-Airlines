@@ -30,7 +30,6 @@ import Roster from "@/components/widget/Roster.vue";
                     <Stats></Stats>
                 </div>
             </div>
-
         </div>
     </OpsLayout>
 </template>

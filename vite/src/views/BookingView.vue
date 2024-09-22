@@ -1,5 +1,5 @@
 <script setup>
-import Button from '@/components/input/Button.vue';
+import Button from "@/components/input/NeoButton.vue";
 </script>
 
 <template>

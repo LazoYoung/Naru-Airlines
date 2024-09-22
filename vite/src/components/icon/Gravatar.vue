@@ -1,28 +1,27 @@
 <script setup>
-import {computed} from "vue";
-import {getGravatarHash} from "@/api";
+import { computed } from "vue";
+import { getGravatarHash } from "@/api/common";
 
 const props = defineProps({
     email: {
         type: String,
-        default: '',
+        default: "",
     },
     hash: {
         type: String,
-        default: null
+        default: null,
     },
     large: {
         type: Boolean,
-        default: false
+        default: false,
     },
     size: {
         type: Number,
-        default: 256
+        default: 256,
     },
 });
 const imgSrc = computed(() => {
-    if (!props.email)
-        return null;
+    if (!props.email) return null;
 
     let hash = props.hash ? props.hash : getGravatarHash(props.email);
     return `https://www.gravatar.com/avatar/${hash}?s=${props.size}`;
@@ -34,19 +33,19 @@ const imgSrc = computed(() => {
     <div v-if="large" class="ratio-box">
         <div v-if="large" class="img-box" layer>
             <a
-                    href="https://www.gravatar.com"
-                    target="_blank"
-                    class="w-full h-full block"
-                    tabindex="-1"
+                href="https://www.gravatar.com"
+                target="_blank"
+                class="w-full h-full block"
+                tabindex="-1"
             >
-                <img :src="imgSrc" layer alt="My Avatar"/>
+                <img :src="imgSrc" layer alt="My Avatar" />
                 <div ref="imgHintElem" layer class="p-hover-bg p-hidden">
                     <p class="p-hover-fg p-font">Change my gravatar</p>
                 </div>
             </a>
         </div>
     </div>
-    <img v-else :src="imgSrc" class="img-box" alt="My Avatar"/>
+    <img v-else :src="imgSrc" class="img-box" alt="My Avatar" />
 </template>
 
 <style>

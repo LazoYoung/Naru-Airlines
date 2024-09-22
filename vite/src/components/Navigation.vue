@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
-import { fetchProfile, getGravatarHash, home, useForm } from '@/api';
-import IconBanner from '@/components/icon/IconBanner.vue';
-import IconLogo from '@/components/icon/IconLogo.vue';
-import BasicMenu from '@/components/menu/BasicMenu.vue';
-import PilotMenu from '@/components/menu/PilotMenu.vue';
+import { onMounted, ref } from "vue";
+import { RouterLink } from "vue-router";
+import { fetchProfile, getGravatarHash, home, useForm } from "@/api/common";
+import IconBanner from "@/components/icon/IconBanner.vue";
+import IconLogo from "@/components/icon/IconLogo.vue";
+import BasicMenu from "@/components/menu/BasicMenu.vue";
+import PilotMenu from "@/components/menu/PilotMenu.vue";
 
 const profile = ref(null);
 const nav = ref(null);
@@ -24,29 +24,29 @@ onMounted(() => {
 });
 
 function getProfileImageSource() {
-    let hash = getGravatarHash(profile.value['email']);
+    let hash = getGravatarHash(profile.value["email"]);
     return `https://www.gravatar.com/avatar/${hash}?s=512`;
 }
 
 function openAccount() {
     const account = document.querySelector(`#nav > .head .right > .account`);
-    account.setAttribute('state', 'open');
+    account.setAttribute("state", "open");
 
     const bg = document.querySelector(`#nav > .bg`);
-    bg.setAttribute('state', 'open');
+    bg.setAttribute("state", "open");
 }
 
 function closeAccount() {
     const account = document.querySelector(`#nav > .head .right > .account`);
-    account.setAttribute('state', 'close');
+    account.setAttribute("state", "close");
 
     const bg = document.querySelector(`#nav > .bg`);
-    bg.setAttribute('state', 'close');
+    bg.setAttribute("state", "close");
 }
 
 function toggleAccount() {
     const account = document.querySelector(`#nav > .head .right > .account`);
-    if (account.getAttribute('state') === 'close') {
+    if (account.getAttribute("state") === "close") {
         openAccount();
     } else {
         closeAccount();
@@ -57,10 +57,10 @@ function openMenu(menuName) {
     for (const menuElement of document.querySelectorAll(
         `#nav > .menus .card-sm`
     )) {
-        if (menuElement.getAttribute('menu') === menuName) {
-            menuElement.setAttribute('state', 'open');
+        if (menuElement.getAttribute("menu") === menuName) {
+            menuElement.setAttribute("state", "open");
         } else {
-            menuElement.setAttribute('state', 'close');
+            menuElement.setAttribute("state", "close");
         }
     }
 }
@@ -71,19 +71,19 @@ function closeMenu() {
 
 function openSidebar() {
     const menus = document.querySelector(`#nav > .menus`);
-    menus.setAttribute('state', 'open');
-    menuButton.value.setAttribute('state', 'open');
+    menus.setAttribute("state", "open");
+    menuButton.value.setAttribute("state", "open");
 }
 
 function closeSidebar() {
     const menus = document.querySelector(`#nav > .menus`);
-    menus.setAttribute('state', 'close');
-    menuButton.value.setAttribute('state', 'close');
+    menus.setAttribute("state", "close");
+    menuButton.value.setAttribute("state", "close");
 }
 
 function toggleSidebar() {
     const menus = document.querySelector(`#nav > .menus`);
-    if (menus.getAttribute('state') == 'close') {
+    if (menus.getAttribute("state") == "close") {
         openSidebar();
     } else {
         closeSidebar();
@@ -100,7 +100,7 @@ function closeAll() {
 
 function logout() {
     useForm()
-        .submitPost('/api/logout/')
+        .submitPost("/api/logout/")
         .then((response) => {
             if (response.ok) {
                 closeAll();
@@ -133,7 +133,11 @@ function logout() {
                             :to="{ name: 'home' }"
                             @click.stop="closeAll"
                         >
-                            <img class="stat-icon" src="@/assets/logo_full.svg" alt="Logo" />
+                            <img
+                                class="stat-icon"
+                                src="@/assets/logo_full.svg"
+                                alt="Logo"
+                            />
                         </RouterLink>
                     </div>
                     <div class="right">
@@ -150,7 +154,7 @@ function logout() {
                                     />
                                 </div>
                                 <div class="name">
-                                    {{ profile['display_name'] }}
+                                    {{ profile["display_name"] }}
                                 </div>
                             </div>
                             <div class="dropdown">
@@ -296,7 +300,8 @@ a {
     text-decoration: none;
 }
 
-span, div {
+span,
+div {
     user-select: none;
 }
 
@@ -321,7 +326,7 @@ span, div {
     pointer-events: all;
     transition: opacity 0.1s ease-out;
 }
-#nav > .bg[state='close'] {
+#nav > .bg[state="close"] {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease-out;
@@ -376,11 +381,11 @@ span, div {
 #nav > .head .left > .button > .line.bottom {
     margin-top: 0.75rem;
 }
-#nav > .head .left > .button[state='open'] > .line.top {
+#nav > .head .left > .button[state="open"] > .line.top {
     margin: 0;
     transform: rotate(45deg);
 }
-#nav > .head .left > .button[state='open'] > .line.bottom {
+#nav > .head .left > .button[state="open"] > .line.bottom {
     margin: 0;
     transform: rotate(-45deg);
 }
@@ -429,10 +434,10 @@ span, div {
     height: 2.5rem;
     cursor: pointer;
 }
-#nav > .head .right > .account[state='close']:hover {
+#nav > .head .right > .account[state="close"]:hover {
     background-color: whitesmoke;
 }
-#nav > .head .right > .account[state='open'] > .profile {
+#nav > .head .right > .account[state="open"] > .profile {
     width: 100%;
 }
 #nav > .head .right > .account > .profile > .image {
@@ -475,13 +480,17 @@ span, div {
     height: calc(7.5rem + 0.25rem);
     overflow: hidden;
     border-top: solid 1px rgb(210, 210, 210);
-    transition: width 0.1s ease-out, height 0.1s ease-out;
+    transition:
+        width 0.1s ease-out,
+        height 0.1s ease-out;
     white-space: nowrap;
 }
-#nav > .head .right > .account[state='close'] > .dropdown {
+#nav > .head .right > .account[state="close"] > .dropdown {
     width: 0;
     height: 0;
-    transition: width 0.2s ease-out, height 0.1s ease-out;
+    transition:
+        width 0.2s ease-out,
+        height 0.1s ease-out;
 }
 #nav > .head .right > .account > .dropdown > .button {
     display: flex;
@@ -593,7 +602,7 @@ span, div {
         width: 0;
         padding-right: 0;
     }
-    #nav > .head .right > .account[state='open'] > .profile > .name {
+    #nav > .head .right > .account[state="open"] > .profile > .name {
         width: unset;
         padding-right: 1rem;
     }
@@ -625,7 +634,7 @@ span, div {
     cursor: pointer;
 }
 #nav > .menus .card-sm > .button:hover,
-#nav > .menus .card-sm[state='open'] > .button {
+#nav > .menus .card-sm[state="open"] > .button {
     color: black;
     border-bottom: solid 2px black;
 }
@@ -641,7 +650,7 @@ span, div {
     gap: 1rem;
     z-index: 10000000;
 }
-#nav > .menus .card-sm[state='close'] > .dropdown {
+#nav > .menus .card-sm[state="close"] > .dropdown {
     display: none;
 }
 #nav > .menus .card-sm > .dropdown > .button {
@@ -666,7 +675,7 @@ span, div {
         padding-top: 0;
         border-bottom: none;
     }
-    #nav > .menus[state='close'] {
+    #nav > .menus[state="close"] {
         display: none;
     }
     #nav > .menus outwrapper {
@@ -683,12 +692,12 @@ span, div {
         width: 100%;
         border-bottom: solid 1px rgb(210, 210, 210);
     }
-    #nav > .menus .card-sm[state='close'] {
+    #nav > .menus .card-sm[state="close"] {
         display: block;
     }
     #nav > .menus .card-sm > .button,
     #nav > .menus .card-sm > .button:hover,
-    #nav > .menus .card-sm[state='open'] > .button {
+    #nav > .menus .card-sm[state="open"] > .button {
         display: flex;
         justify-content: flex-start;
         align-items: flex-end;
@@ -701,7 +710,7 @@ span, div {
         border-bottom: none;
         cursor: default;
     }
-    #nav > .menus .card-sm[state='close'] > .dropdown,
+    #nav > .menus .card-sm[state="close"] > .dropdown,
     #nav > .menus .card-sm > .dropdown {
         position: static;
         display: block;

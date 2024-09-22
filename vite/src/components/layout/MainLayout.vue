@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation.vue";
 defineProps({
     title: {
         type: String,
-    }
+    },
 });
 </script>
 
@@ -13,11 +13,11 @@ defineProps({
     <main>
         <header>
             <div class="box">
-                <h2 class="title">{{title}}</h2>
+                <h2 class="title">{{ title }}</h2>
             </div>
         </header>
         <div class="content">
-            <slot/>
+            <slot />
         </div>
     </main>
 </template>

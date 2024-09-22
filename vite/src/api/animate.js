@@ -339,7 +339,7 @@ class Animate {
             let omega_d = omega * Math.sqrt(1 - zeta * zeta);
 
             function nvl(x, ifnull) {
-                return x === undefined || x === null ? ifnull : x;
+                return x == null ? ifnull : x;
             }
 
             function computeOmega(A, B, k, zeta) {

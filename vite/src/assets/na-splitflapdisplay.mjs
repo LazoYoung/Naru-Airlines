@@ -1,5 +1,5 @@
 export default customElements.define(
-    'na-splitflapdisplay',
+    "na-splitflapdisplay",
 
     class extends HTMLElement {
         constructor() {
@@ -7,9 +7,9 @@ export default customElements.define(
         }
 
         connectedCallback() {
-            const shadow = this.attachShadow({ mode: 'open' });
+            const shadow = this.attachShadow({ mode: "open" });
 
-            const style = document.createElement('style');
+            const style = document.createElement("style");
             style.textContent = `
                 * {
                     box-sizing: border-box;
@@ -33,16 +33,16 @@ export default customElements.define(
             `;
             shadow.appendChild(style);
 
-            const top = document.createElement('div');
-            const topText = document.createElement('div');
+            const top = document.createElement("div");
+            const topText = document.createElement("div");
 
-            top.classList.add('top');
-            topText.classList.add('toptext');
-            topText.innerHTML = 'A';
+            top.classList.add("top");
+            topText.classList.add("toptext");
+            topText.innerHTML = "A";
 
-            const bottom = document.createElement('div');
-            const top2 = document.createElement('div');
-            const bottom2 = document.createElement('div');
+            const bottom = document.createElement("div");
+            const top2 = document.createElement("div");
+            const bottom2 = document.createElement("div");
 
             shadow.appendChild(top);
             shadow.appendChild(bottom);
@@ -54,22 +54,22 @@ export default customElements.define(
 
         adoptedCallback() {}
 
-        static observedAttributes = ['value'];
+        static observedAttributes = ["value"];
 
         get value() {
-            return 'a';
+            return "a";
         }
 
         set value(newValue) {
             if (newValue) {
-                this.setAttribute('value', newValue);
+                this.setAttribute("value", newValue);
             } else {
-                this.removeAttribute('value');
+                this.removeAttribute("value");
             }
         }
 
         attributeChangedCallback(name, oldValue, newValue) {
-            if (oldValue == newValue) {
+            if (oldValue === newValue) {
                 return;
             }
             if (this[name]) {

@@ -1,6 +1,6 @@
 "use strict";
 
-import Animate from "@/animate.js";
+import Animate from "@/api/animate.js";
 
 /**
  * @license Original source kindly provided by wnynya (https://github.com/wnynya)

@@ -4,16 +4,16 @@ import TextInput from "@/components/input/TextInput.vue";
 import TextArea from "@/components/input/TextArea.vue";
 import Checkbox from "@/components/input/Checkbox.vue";
 import NeoButton from "@/components/input/NeoButton.vue";
-import { fetchProfile, Form, useForm } from "@/api";
+import { fetchProfile, Form, Profile, useForm } from "@/api/common";
 import { onMounted, ref } from "vue";
 import Gravatar from "@/components/icon/Gravatar.vue";
-import router from "@/router/index.js";
-import Alert from "@/alert.js";
+import router from "@/router/index";
+import Alert from "@/api/alert.js";
 
 const info = new Alert("success");
 const warn = new Alert("warn");
 const error = new Alert("error");
-const profile = ref(null);
+const profile = ref<Profile | undefined>();
 const profileForm = useForm(["display_name", "bio"]);
 const emailForm = useForm({
     email: "",
@@ -36,10 +36,15 @@ defineProps({
     },
 });
 
-onMounted(() => fetchProfile(profile).then((_) => onProfileFetch()));
+onMounted(() => fetchProfile(profile).then(() => onProfileFetch()));
 
 async function saveProfile() {
     await fetchProfile(profile);
+
+    if (profile.value == undefined) {
+        error.pop("Bad response from server.");
+        return;
+    }
 
     let nameChanged =
         profileForm["display_name"] !== profile.value["display_name"];
@@ -55,6 +60,11 @@ async function saveProfile() {
 
 async function savePrivacy() {
     await fetchProfile(profile);
+
+    if (profile.value == undefined) {
+        error.pop("Bad response from server.");
+        return;
+    }
 
     let passwordChanged = passwordForm["new_password"];
     let emailChanged = emailForm["new_email"] !== profile.value["email"];
@@ -83,10 +93,10 @@ function saveNotification() {
 }
 
 function onProfileFetch() {
-    if (profile.value === null) {
+    if (profile.value == undefined) {
         router
             .push({ name: "login" })
-            .then((_) => error.pop("Session expired."));
+            .then(() => error.pop("Session expired."));
         return;
     }
 
@@ -94,6 +104,8 @@ function onProfileFetch() {
 }
 
 function reloadForm() {
+    if (profile.value == undefined) return;
+
     profileForm["display_name"] = profile.value["display_name"];
     profileForm["bio"] = profile.value["bio"];
     emailForm["email"] = profile.value["email"];
